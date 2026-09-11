@@ -12,6 +12,7 @@ class FinanceTransaction {
   final String merchant;
   final bool isRecurring;
   final DateTime createdAt;
+  final String source;
 
   FinanceTransaction({
     required this.id,
@@ -25,6 +26,7 @@ class FinanceTransaction {
     this.merchant = '',
     this.isRecurring = false,
     required this.createdAt,
+    this.source = 'Manual',
   });
 
   FinanceTransaction copyWith({
@@ -39,6 +41,7 @@ class FinanceTransaction {
     String? merchant,
     bool? isRecurring,
     DateTime? createdAt,
+    String? source,
   }) {
     return FinanceTransaction(
       id: id ?? this.id,
@@ -52,6 +55,7 @@ class FinanceTransaction {
       merchant: merchant ?? this.merchant,
       isRecurring: isRecurring ?? this.isRecurring,
       createdAt: createdAt ?? this.createdAt,
+      source: source ?? this.source,
     );
   }
 
@@ -68,6 +72,7 @@ class FinanceTransaction {
       'merchant': merchant,
       'isRecurring': isRecurring,
       'createdAt': createdAt.toIso8601String(),
+      'source': source,
     };
   }
 
@@ -84,6 +89,7 @@ class FinanceTransaction {
       merchant: json['merchant'] as String? ?? '',
       isRecurring: json['isRecurring'] as bool? ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
+      source: json['source'] as String? ?? 'Manual',
     );
   }
 }

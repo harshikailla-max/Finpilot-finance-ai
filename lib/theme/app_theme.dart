@@ -7,12 +7,12 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: AppColors.background,
+      scaffoldBackgroundColor: AppColors.obsidian,
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.primaryPurple,
-        secondary: AppColors.cyan,
+        primary: AppColors.auroraViolet,
+        secondary: AppColors.auroraCyan,
         surface: AppColors.cardBackground,
-        error: AppColors.dangerRed,
+        error: AppColors.danger,
         onPrimary: Colors.white,
         onSecondary: Colors.black,
         onSurface: AppColors.textPrimary,
@@ -28,6 +28,7 @@ class AppTheme {
         color: AppColors.cardBackground,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+          side: const BorderSide(color: AppColors.glassBorder, width: 1),
         ),
         elevation: 0,
       ),
@@ -36,19 +37,23 @@ class AppTheme {
         fillColor: AppColors.secondaryBackground,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.buttonRadius),
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(color: AppColors.glassBorder, width: 1),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppConstants.buttonRadius),
+          borderSide: const BorderSide(color: AppColors.glassBorder, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.buttonRadius),
-          borderSide: const BorderSide(color: AppColors.primaryPurple, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.auroraViolet, width: 1.5),
         ),
-        hintStyle: TextStyle(
+        hintStyle: const TextStyle(
           color: AppColors.textMuted,
           fontSize: 14,
         ),
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.background,
+        backgroundColor: AppColors.obsidian,
         elevation: 0,
         centerTitle: false,
         iconTheme: IconThemeData(color: AppColors.textPrimary),

@@ -1,19 +1,45 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const Color background = Color(0xFF081120);
-  static const Color secondaryBackground = Color(0xFF0D1626);
-  static const Color cardBackground = Color(0xFF10192B);
-  static const Color primaryPurple = Color(0xFF6C5CE7);
-  static const Color lightPurple = Color(0xFF9A8CFF);
-  static const Color cyan = Color(0xFF4CC9F0);
-  static const Color successGreen = Color(0xFF2DD4A8);
-  static const Color warningOrange = Color(0xFFFFB86B);
-  static const Color dangerRed = Color(0xFFFF6B81);
+  // FINPILOT AURA Luxury Futuristic Palette
+  static const Color obsidian = Color(0xFF05070D);
+  static const Color background = Color(0xFF080B14);
+  static const Color secondaryBackground = Color(0xFF0D1220);
+  static const Color cardBackground = Color(0xFF0E1424);
 
-  static const Color textPrimary = Colors.white;
-  static const Color textSecondary = Color(0xB3FFFFFF);
-  static const Color textMuted = Color(0x80FFFFFF);
+  // Glass Material System
+  static const Color glass = Color(0x0CFFFFFF); // rgba(255,255,255,0.045)
+  static const Color glassBorder = Color(0x14FFFFFF); // rgba(255,255,255,0.08)
+  static const Color glassHighlight = Color(0x24FFFFFF);
+
+  // Typography
+  static const Color textPrimary = Color(0xFFF5F7FF);
+  static const Color textSecondary = Color(0xFF9299AA);
+  static const Color textMuted = Color(0xFF5E6575);
+
+  // AURA Accents (Used with extreme restraint)
+  static const Color auroraViolet = Color(0xFF7C5CFF);
+  static const Color auroraCyan = Color(0xFF55D6FF);
+  static const Color softBlue = Color(0xFF7AA8FF);
+  static const Color luxuryChampagne = Color(0xFFD8B878);
+
+  // Status Indicators
+  static const Color success = Color(0xFF61D6A1);
+  static const Color warning = Color(0xFFF2B866);
+  static const Color danger = Color(0xFFFF7185);
+
+  // Backwards Compatibility Aliases
+  static const Color primaryPurple = Color(0xFF7C5CFF);
+  static const Color lightPurple = Color(0xFF9A8CFF);
+  static const Color cyan = Color(0xFF55D6FF);
+  static const Color successGreen = Color(0xFF61D6A1);
+  static const Color warningOrange = Color(0xFFF2B866);
+  static const Color warningAmber = Color(0xFFF2B866);
+  static const Color dangerRed = Color(0xFFFF7185);
+}
+
+class AppTypography {
+  static const String fontFamily = 'Plus Jakarta Sans';
 }
 
 class AppConstants {

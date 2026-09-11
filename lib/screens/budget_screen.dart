@@ -5,7 +5,6 @@ import '../providers/budget_provider.dart';
 import '../utils/constants.dart';
 import '../utils/currency_formatter.dart';
 import '../widgets/glass_card.dart';
-import '../widgets/gradient_button.dart';
 
 class BudgetScreen extends StatefulWidget {
   const BudgetScreen({super.key});

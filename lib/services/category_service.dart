@@ -8,23 +8,23 @@ class CategoryService {
     if (_matchesAny(cleanTitle, ['uber', 'ola', 'metro', 'fuel', 'petrol', 'cab', 'taxi', 'train', 'flight', 'auto', 'ride', 'diesel', 'toll'])) {
       return 'Transport';
     }
+    if (_matchesAny(cleanTitle, ['netflix', 'prime', 'movie', 'cinema', 'spotify', 'youtube premium', 'concert', 'game', 'entertainment', 'club', 'pub', 'theater'])) {
+      return 'Entertainment';
+    }
     if (_matchesAny(cleanTitle, ['amazon', 'flipkart', 'myntra', 'clothes', 'shoes', 'mall', 'store', 'purchase', 'shopping', 'fashion', 'zara'])) {
       return 'Shopping';
     }
     if (_matchesAny(cleanTitle, ['electricity', 'water', 'rent', 'recharge', 'wifi', 'broadband', 'mobile', 'gas', 'bill', 'subscription', 'insurance', 'phone'])) {
       return 'Bills';
     }
-    if (_matchesAny(cleanTitle, ['netflix', 'prime', 'movie', 'cinema', 'spotify', 'youtube premium', 'concert', 'game', 'entertainment', 'club', 'pub', 'theater'])) {
-      return 'Entertainment';
-    }
     if (_matchesAny(cleanTitle, ['pharmacy', 'doctor', 'hospital', 'medicine', 'health', 'dental', 'clinic', 'medical'])) {
       return 'Health';
     }
-    if (_matchesAny(cleanTitle, ['book', 'course', 'udemy', 'coursera', 'college', 'tuition', 'school', 'fees', 'class'])) {
-      return 'Education';
-    }
     if (_matchesAny(cleanTitle, ['hotel', 'airbnb', 'booking', 'travel', 'vacation', 'trip', 'flight', 'resort'])) {
       return 'Travel';
+    }
+    if (_matchesAny(cleanTitle, ['books', 'textbook', 'course', 'udemy', 'coursera', 'college', 'tuition', 'school', 'fees', 'class'])) {
+      return 'Education';
     }
 
     return 'Other';

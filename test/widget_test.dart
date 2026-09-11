@@ -59,5 +59,8 @@ void main() {
 
     expect(find.text('FINPILOT AI'), findsOneWidget);
     expect(find.text('Your Intelligent Finance Companion'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
   });
 }

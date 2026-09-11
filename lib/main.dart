@@ -68,15 +68,26 @@ void main() async {
             budgetProvider: context.read<BudgetProvider>(),
             goalProvider: context.read<GoalProvider>(),
             storageService: storageService,
+            investmentProvider: context.read<InvestmentProvider>(),
+            financialHealthProvider: context.read<FinancialHealthProvider>(),
           ),
-          update: (context, finance, budget, goal, previous) =>
-              previous ??
-              AIProvider(
-                financeProvider: finance,
-                budgetProvider: budget,
-                goalProvider: goal,
-                storageService: storageService,
-              ),
+          update: (context, finance, budget, goal, previous) {
+            if (previous != null) {
+              previous.updateProviders(
+                investment: context.read<InvestmentProvider>(),
+                health: context.read<FinancialHealthProvider>(),
+              );
+              return previous;
+            }
+            return AIProvider(
+              financeProvider: finance,
+              budgetProvider: budget,
+              goalProvider: goal,
+              storageService: storageService,
+              investmentProvider: context.read<InvestmentProvider>(),
+              financialHealthProvider: context.read<FinancialHealthProvider>(),
+            );
+          },
         ),
       ],
       child: const FinPilotApp(),

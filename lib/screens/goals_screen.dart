@@ -5,7 +5,6 @@ import '../models/goal_model.dart';
 import '../providers/goal_provider.dart';
 import '../utils/constants.dart';
 import '../utils/currency_formatter.dart';
-import '../utils/date_utils.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/gradient_button.dart';
@@ -34,32 +33,6 @@ class _GoalsScreenState extends State<GoalsScreen> {
     super.dispose();
   }
 
-  void _selectDeadline() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedGoalDeadline,
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2040),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppColors.primaryPurple,
-              onPrimary: Colors.white,
-              surface: AppColors.cardBackground,
-              onSurface: Colors.white,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null && picked != _selectedGoalDeadline) {
-      setState(() {
-        _selectedGoalDeadline = picked;
-      });
-    }
-  }
 
   void _showAddGoalDialog() {
     _goalTitleController.clear();
