@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import '../utils/constants.dart';
 
 class AppTheme {
@@ -18,12 +19,12 @@ class AppTheme {
         onSurface: AppColors.textPrimary,
         onError: Colors.white,
       ),
-      textTheme: GoogleFonts.plusJakartaSansTextTheme(
-        ThemeData.dark().textTheme,
-      ).apply(
-        bodyColor: AppColors.textPrimary,
-        displayColor: AppColors.textPrimary,
-      ),
+      textTheme:
+          GoogleFonts.plusJakartaSansTextTheme(ThemeData.dark().textTheme)
+              .apply(
+                bodyColor: AppColors.textPrimary,
+                displayColor: AppColors.textPrimary,
+              ),
       cardTheme: CardThemeData(
         color: AppColors.cardBackground,
         shape: RoundedRectangleBorder(
@@ -45,12 +46,12 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.buttonRadius),
-          borderSide: const BorderSide(color: AppColors.auroraViolet, width: 1.5),
+          borderSide: const BorderSide(
+            color: AppColors.auroraViolet,
+            width: 1.5,
+          ),
         ),
-        hintStyle: const TextStyle(
-          color: AppColors.textMuted,
-          fontSize: 14,
-        ),
+        hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 14),
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.obsidian,

@@ -25,13 +25,7 @@ enum AdvisorIntent {
   education,
 }
 
-enum DecisionVerdict {
-  safe,
-  good,
-  possible,
-  tight,
-  notRecommended,
-}
+enum DecisionVerdict { safe, good, possible, tight, notRecommended }
 
 enum AdvisorCardType {
   none,
@@ -64,24 +58,24 @@ class MoneyMove {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'category': category,
-        'reason': reason,
-        'impact': impact,
-        'actionLabel': actionLabel,
-        'actionRoute': actionRoute,
-      };
+    'id': id,
+    'title': title,
+    'category': category,
+    'reason': reason,
+    'impact': impact,
+    'actionLabel': actionLabel,
+    'actionRoute': actionRoute,
+  };
 
   factory MoneyMove.fromJson(Map<String, dynamic> json) => MoneyMove(
-        id: json['id'] as String,
-        title: json['title'] as String,
-        category: json['category'] as String,
-        reason: json['reason'] as String,
-        impact: json['impact'] as String,
-        actionLabel: json['actionLabel'] as String,
-        actionRoute: json['actionRoute'] as String?,
-      );
+    id: json['id'] as String,
+    title: json['title'] as String,
+    category: json['category'] as String,
+    reason: json['reason'] as String,
+    impact: json['impact'] as String,
+    actionLabel: json['actionLabel'] as String,
+    actionRoute: json['actionRoute'] as String?,
+  );
 }
 
 class XRayPillarScore {
@@ -100,14 +94,15 @@ class XRayPillarScore {
   });
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'score': score,
-        'status': status,
-        'description': description,
-        'calculationDetails': calculationDetails,
-      };
+    'name': name,
+    'score': score,
+    'status': status,
+    'description': description,
+    'calculationDetails': calculationDetails,
+  };
 
-  factory XRayPillarScore.fromJson(Map<String, dynamic> json) => XRayPillarScore(
+  factory XRayPillarScore.fromJson(Map<String, dynamic> json) =>
+      XRayPillarScore(
         name: json['name'] as String,
         score: (json['score'] as num).toDouble(),
         status: json['status'] as String,
@@ -134,13 +129,13 @@ class FinancialXRayReport {
   });
 
   Map<String, dynamic> toJson() => {
-        'overallScore': overallScore,
-        'rating': rating,
-        'summary': summary,
-        'pillars': pillars.map((p) => p.toJson()).toList(),
-        'topStrengths': topStrengths,
-        'priorityVulnerabilities': priorityVulnerabilities,
-      };
+    'overallScore': overallScore,
+    'rating': rating,
+    'summary': summary,
+    'pillars': pillars.map((p) => p.toJson()).toList(),
+    'topStrengths': topStrengths,
+    'priorityVulnerabilities': priorityVulnerabilities,
+  };
 
   factory FinancialXRayReport.fromJson(Map<String, dynamic> json) =>
       FinancialXRayReport(
@@ -151,8 +146,9 @@ class FinancialXRayReport {
             .map((p) => XRayPillarScore.fromJson(p as Map<String, dynamic>))
             .toList(),
         topStrengths: List<String>.from(json['topStrengths'] as List),
-        priorityVulnerabilities:
-            List<String>.from(json['priorityVulnerabilities'] as List),
+        priorityVulnerabilities: List<String>.from(
+          json['priorityVulnerabilities'] as List,
+        ),
       );
 }
 
@@ -186,19 +182,19 @@ class AffordabilityAnalysis {
   });
 
   Map<String, dynamic> toJson() => {
-        'product': product,
-        'price': price,
-        'verdict': verdict.name,
-        'affordabilityScore': affordabilityScore,
-        'monthlyImpact': monthlyImpact,
-        'budgetImpactPercentage': budgetImpactPercentage,
-        'emergencyFundImpactMonths': emergencyFundImpactMonths,
-        'remainingEmergencyMonths': remainingEmergencyMonths,
-        'goalImpact': goalImpact,
-        'reasoning': reasoning,
-        'alternative': alternative,
-        'recommendedAction': recommendedAction,
-      };
+    'product': product,
+    'price': price,
+    'verdict': verdict.name,
+    'affordabilityScore': affordabilityScore,
+    'monthlyImpact': monthlyImpact,
+    'budgetImpactPercentage': budgetImpactPercentage,
+    'emergencyFundImpactMonths': emergencyFundImpactMonths,
+    'remainingEmergencyMonths': remainingEmergencyMonths,
+    'goalImpact': goalImpact,
+    'reasoning': reasoning,
+    'alternative': alternative,
+    'recommendedAction': recommendedAction,
+  };
 
   factory AffordabilityAnalysis.fromJson(Map<String, dynamic> json) =>
       AffordabilityAnalysis(
@@ -207,12 +203,12 @@ class AffordabilityAnalysis {
         verdict: DecisionVerdict.values.byName(json['verdict'] as String),
         affordabilityScore: (json['affordabilityScore'] as num).toDouble(),
         monthlyImpact: (json['monthlyImpact'] as num).toDouble(),
-        budgetImpactPercentage:
-            (json['budgetImpactPercentage'] as num).toDouble(),
-        emergencyFundImpactMonths:
-            (json['emergencyFundImpactMonths'] as num).toDouble(),
-        remainingEmergencyMonths:
-            (json['remainingEmergencyMonths'] as num).toDouble(),
+        budgetImpactPercentage: (json['budgetImpactPercentage'] as num)
+            .toDouble(),
+        emergencyFundImpactMonths: (json['emergencyFundImpactMonths'] as num)
+            .toDouble(),
+        remainingEmergencyMonths: (json['remainingEmergencyMonths'] as num)
+            .toDouble(),
         goalImpact: json['goalImpact'] as String,
         reasoning: json['reasoning'] as String,
         alternative: json['alternative'] as String,
@@ -244,28 +240,28 @@ class GoalRankItem {
   });
 
   Map<String, dynamic> toJson() => {
-        'goalId': goalId,
-        'title': title,
-        'targetAmount': targetAmount,
-        'currentAmount': currentAmount,
-        'monthlyRequired': monthlyRequired,
-        'fundingGap': fundingGap,
-        'priorityRank': priorityRank,
-        'isConflict': isConflict,
-        'reason': reason,
-      };
+    'goalId': goalId,
+    'title': title,
+    'targetAmount': targetAmount,
+    'currentAmount': currentAmount,
+    'monthlyRequired': monthlyRequired,
+    'fundingGap': fundingGap,
+    'priorityRank': priorityRank,
+    'isConflict': isConflict,
+    'reason': reason,
+  };
 
   factory GoalRankItem.fromJson(Map<String, dynamic> json) => GoalRankItem(
-        goalId: json['goalId'] as String,
-        title: json['title'] as String,
-        targetAmount: (json['targetAmount'] as num).toDouble(),
-        currentAmount: (json['currentAmount'] as num).toDouble(),
-        monthlyRequired: (json['monthlyRequired'] as num).toDouble(),
-        fundingGap: (json['fundingGap'] as num).toDouble(),
-        priorityRank: json['priorityRank'] as int,
-        isConflict: json['isConflict'] as bool,
-        reason: json['reason'] as String,
-      );
+    goalId: json['goalId'] as String,
+    title: json['title'] as String,
+    targetAmount: (json['targetAmount'] as num).toDouble(),
+    currentAmount: (json['currentAmount'] as num).toDouble(),
+    monthlyRequired: (json['monthlyRequired'] as num).toDouble(),
+    fundingGap: (json['fundingGap'] as num).toDouble(),
+    priorityRank: json['priorityRank'] as int,
+    isConflict: json['isConflict'] as bool,
+    reason: json['reason'] as String,
+  );
 }
 
 class GoalOptimizationResult {
@@ -288,14 +284,14 @@ class GoalOptimizationResult {
   });
 
   Map<String, dynamic> toJson() => {
-        'rankedGoals': rankedGoals.map((g) => g.toJson()).toList(),
-        'bestNextGoalTitle': bestNextGoalTitle,
-        'bestNextGoalReason': bestNextGoalReason,
-        'totalMonthlyRequired': totalMonthlyRequired,
-        'availableMonthlySurplus': availableMonthlySurplus,
-        'monthlyDeficitOrSurplus': monthlyDeficitOrSurplus,
-        'strategicAdvice': strategicAdvice,
-      };
+    'rankedGoals': rankedGoals.map((g) => g.toJson()).toList(),
+    'bestNextGoalTitle': bestNextGoalTitle,
+    'bestNextGoalReason': bestNextGoalReason,
+    'totalMonthlyRequired': totalMonthlyRequired,
+    'availableMonthlySurplus': availableMonthlySurplus,
+    'monthlyDeficitOrSurplus': monthlyDeficitOrSurplus,
+    'strategicAdvice': strategicAdvice,
+  };
 
   factory GoalOptimizationResult.fromJson(Map<String, dynamic> json) =>
       GoalOptimizationResult(
@@ -305,10 +301,10 @@ class GoalOptimizationResult {
         bestNextGoalTitle: json['bestNextGoalTitle'] as String,
         bestNextGoalReason: json['bestNextGoalReason'] as String,
         totalMonthlyRequired: (json['totalMonthlyRequired'] as num).toDouble(),
-        availableMonthlySurplus:
-            (json['availableMonthlySurplus'] as num).toDouble(),
-        monthlyDeficitOrSurplus:
-            (json['monthlyDeficitOrSurplus'] as num).toDouble(),
+        availableMonthlySurplus: (json['availableMonthlySurplus'] as num)
+            .toDouble(),
+        monthlyDeficitOrSurplus: (json['monthlyDeficitOrSurplus'] as num)
+            .toDouble(),
         strategicAdvice: json['strategicAdvice'] as String,
       );
 }
@@ -337,24 +333,24 @@ class WhatIfScenarioResult {
   });
 
   Map<String, dynamic> toJson() => {
-        'scenarioTitle': scenarioTitle,
-        'baselineMonthlySavings': baselineMonthlySavings,
-        'projectedMonthlySavings': projectedMonthlySavings,
-        'monthlyDelta': monthlyDelta,
-        'baselineSavingsRate': baselineSavingsRate,
-        'projectedSavingsRate': projectedSavingsRate,
-        'goalImpactSummary': goalImpactSummary,
-        'safetyRunwaySummary': safetyRunwaySummary,
-        'strategicInsight': strategicInsight,
-      };
+    'scenarioTitle': scenarioTitle,
+    'baselineMonthlySavings': baselineMonthlySavings,
+    'projectedMonthlySavings': projectedMonthlySavings,
+    'monthlyDelta': monthlyDelta,
+    'baselineSavingsRate': baselineSavingsRate,
+    'projectedSavingsRate': projectedSavingsRate,
+    'goalImpactSummary': goalImpactSummary,
+    'safetyRunwaySummary': safetyRunwaySummary,
+    'strategicInsight': strategicInsight,
+  };
 
   factory WhatIfScenarioResult.fromJson(Map<String, dynamic> json) =>
       WhatIfScenarioResult(
         scenarioTitle: json['scenarioTitle'] as String,
-        baselineMonthlySavings:
-            (json['baselineMonthlySavings'] as num).toDouble(),
-        projectedMonthlySavings:
-            (json['projectedMonthlySavings'] as num).toDouble(),
+        baselineMonthlySavings: (json['baselineMonthlySavings'] as num)
+            .toDouble(),
+        projectedMonthlySavings: (json['projectedMonthlySavings'] as num)
+            .toDouble(),
         monthlyDelta: (json['monthlyDelta'] as num).toDouble(),
         baselineSavingsRate: (json['baselineSavingsRate'] as num).toDouble(),
         projectedSavingsRate: (json['projectedSavingsRate'] as num).toDouble(),
@@ -382,20 +378,20 @@ class FinancialDNAProfile {
   });
 
   Map<String, dynamic> toJson() => {
-        'archetype': archetype,
-        'secondaryArchetype': secondaryArchetype,
-        'financialDisciplineScore': financialDisciplineScore,
-        'evidencePoints': evidencePoints,
-        'coreTrait': coreTrait,
-        'growthOpportunity': growthOpportunity,
-      };
+    'archetype': archetype,
+    'secondaryArchetype': secondaryArchetype,
+    'financialDisciplineScore': financialDisciplineScore,
+    'evidencePoints': evidencePoints,
+    'coreTrait': coreTrait,
+    'growthOpportunity': growthOpportunity,
+  };
 
   factory FinancialDNAProfile.fromJson(Map<String, dynamic> json) =>
       FinancialDNAProfile(
         archetype: json['archetype'] as String,
         secondaryArchetype: json['secondaryArchetype'] as String,
-        financialDisciplineScore:
-            (json['financialDisciplineScore'] as num).toDouble(),
+        financialDisciplineScore: (json['financialDisciplineScore'] as num)
+            .toDouble(),
         evidencePoints: List<String>.from(json['evidencePoints'] as List),
         coreTrait: json['coreTrait'] as String,
         growthOpportunity: json['growthOpportunity'] as String,
@@ -438,22 +434,22 @@ class AdvisorResponse {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'userQuery': userQuery,
-        'intent': intent.name,
-        'verdict': verdict,
-        'currentPosition': currentPosition,
-        'calculation': calculation,
-        'reasoning': reasoning,
-        'risks': risks,
-        'recommendation': recommendation,
-        'alternatives': alternatives,
-        'nextAction': nextAction,
-        'actionRoute': actionRoute,
-        'cardType': cardType.name,
-        'cardPayload': cardPayload,
-        'timestamp': timestamp.toIso8601String(),
-      };
+    'id': id,
+    'userQuery': userQuery,
+    'intent': intent.name,
+    'verdict': verdict,
+    'currentPosition': currentPosition,
+    'calculation': calculation,
+    'reasoning': reasoning,
+    'risks': risks,
+    'recommendation': recommendation,
+    'alternatives': alternatives,
+    'nextAction': nextAction,
+    'actionRoute': actionRoute,
+    'cardType': cardType.name,
+    'cardPayload': cardPayload,
+    'timestamp': timestamp.toIso8601String(),
+  };
 
   factory AdvisorResponse.fromJson(Map<String, dynamic> json) =>
       AdvisorResponse(

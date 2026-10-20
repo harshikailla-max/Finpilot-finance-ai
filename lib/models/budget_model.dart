@@ -2,10 +2,7 @@ class BudgetModel {
   final double monthlyLimit;
   final Map<String, double> categoryLimits;
 
-  BudgetModel({
-    required this.monthlyLimit,
-    required this.categoryLimits,
-  });
+  BudgetModel({required this.monthlyLimit, required this.categoryLimits});
 
   BudgetModel copyWith({
     double? monthlyLimit,
@@ -18,10 +15,7 @@ class BudgetModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'monthlyLimit': monthlyLimit,
-      'categoryLimits': categoryLimits,
-    };
+    return {'monthlyLimit': monthlyLimit, 'categoryLimits': categoryLimits};
   }
 
   factory BudgetModel.fromJson(Map<String, dynamic> json) {

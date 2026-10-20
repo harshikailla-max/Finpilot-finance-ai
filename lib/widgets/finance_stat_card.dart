@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../utils/constants.dart';
 import 'glass_card.dart';
 
@@ -33,11 +34,7 @@ class FinanceStatCard extends StatelessWidget {
                 color: accentColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
-                icon,
-                color: accentColor,
-                size: 20,
-              ),
+              child: Icon(icon, color: accentColor, size: 20),
             ),
             const SizedBox(height: 12),
             Text(

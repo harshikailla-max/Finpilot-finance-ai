@@ -52,7 +52,12 @@ class FinancialHealthService {
     double expenseControlScore = 20.0;
     if (monthlyIncome > 0) {
       double discretionarySpend = 0.0;
-      final discretionaryCategories = ['Food', 'Shopping', 'Entertainment', 'Travel'];
+      final discretionaryCategories = [
+        'Food',
+        'Shopping',
+        'Entertainment',
+        'Travel',
+      ];
       for (var cat in discretionaryCategories) {
         discretionarySpend += categorySpent[cat] ?? 0.0;
       }

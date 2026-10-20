@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../utils/constants.dart';
 
 class LoadingIndicator extends StatefulWidget {
@@ -23,13 +24,15 @@ class _LoadingIndicatorState extends State<LoadingIndicator>
       duration: const Duration(milliseconds: 1200),
     )..repeat(reverse: true);
 
-    _scaleAnimation = Tween<double>(begin: 0.85, end: 1.15).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.85,
+      end: 1.15,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
-    _blurAnimation = Tween<double>(begin: 10.0, end: 25.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _blurAnimation = Tween<double>(
+      begin: 10.0,
+      end: 25.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -54,10 +57,7 @@ class _LoadingIndicatorState extends State<LoadingIndicator>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: const RadialGradient(
-                    colors: [
-                      AppColors.cyan,
-                      AppColors.primaryPurple,
-                    ],
+                    colors: [AppColors.cyan, AppColors.primaryPurple],
                   ),
                   boxShadow: [
                     BoxShadow(

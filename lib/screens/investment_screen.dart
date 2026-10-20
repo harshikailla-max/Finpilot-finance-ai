@@ -37,7 +37,14 @@ class _InvestmentScreenState extends State<InvestmentScreen>
 
   // Active risk profile state (persisted locally during session)
   RiskProfileType _userRiskProfile = RiskProfileType.moderate;
-  final Map<int, int> _riskAssessmentAnswers = {1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3};
+  final Map<int, int> _riskAssessmentAnswers = {
+    1: 3,
+    2: 3,
+    3: 3,
+    4: 3,
+    5: 3,
+    6: 3,
+  };
 
   // SIP Calculator State
   double _sipMonthly = 10000.0;
@@ -114,12 +121,20 @@ class _InvestmentScreenState extends State<InvestmentScreen>
     final goalProvider = context.watch<GoalProvider>();
     final investProvider = context.watch<InvestmentProvider>();
 
-    final monthlySurplus = (finance.monthlyIncome - finance.monthlyExpense).clamp(0.0, double.infinity);
-    final investmentCapacity = (monthlySurplus * 0.70).clamp(0.0, monthlySurplus);
+    final monthlySurplus = (finance.monthlyIncome - finance.monthlyExpense)
+        .clamp(0.0, double.infinity);
+    final investmentCapacity = (monthlySurplus * 0.70).clamp(
+      0.0,
+      monthlySurplus,
+    );
 
     final readiness = InvestmentEducationService.evaluateReadiness(
-      monthlyIncome: finance.monthlyIncome > 0 ? finance.monthlyIncome : 65000.0,
-      monthlyExpense: finance.monthlyExpense > 0 ? finance.monthlyExpense : 35000.0,
+      monthlyIncome: finance.monthlyIncome > 0
+          ? finance.monthlyIncome
+          : 65000.0,
+      monthlyExpense: finance.monthlyExpense > 0
+          ? finance.monthlyExpense
+          : 35000.0,
       emergencyBalance: finance.balance > 0 ? finance.balance : 120000.0,
       totalDebt: _debtOutstanding,
       activeGoalsCount: goalProvider.goals.length,
@@ -145,7 +160,13 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                 controller: _tabController,
                 children: [
                   // Tab 0: Overview & Goals Strategy
-                  _buildOverviewAndGoalsTab(finance, goalProvider, investProvider, readiness, investmentCapacity),
+                  _buildOverviewAndGoalsTab(
+                    finance,
+                    goalProvider,
+                    investProvider,
+                    readiness,
+                    investmentCapacity,
+                  ),
 
                   // Tab 1: Calculators & Simulators
                   _buildCalculatorsTab(investmentCapacity),
@@ -172,7 +193,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
         icon: const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
         label: const Text(
           'Ask FinPilot',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
         ),
         onPressed: () {
           Navigator.push(
@@ -188,7 +213,10 @@ class _InvestmentScreenState extends State<InvestmentScreen>
   // HEADER
   // ============================================================
 
-  Widget _buildCommandHeader(BuildContext context, InvestmentProvider investProvider) {
+  Widget _buildCommandHeader(
+    BuildContext context,
+    InvestmentProvider investProvider,
+  ) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
       child: Row(
@@ -202,11 +230,16 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: purpleNeon.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: purpleNeon.withValues(alpha: 0.4)),
+                        border: Border.all(
+                          color: purpleNeon.withValues(alpha: 0.4),
+                        ),
                       ),
                       child: const Text(
                         'AI WEALTH ENGINE',
@@ -223,16 +256,27 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                       onTap: _showRiskAssessmentDialog,
                       borderRadius: BorderRadius.circular(6),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: _userRiskProfile.color.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: _userRiskProfile.color.withValues(alpha: 0.4)),
+                          border: Border.all(
+                            color: _userRiskProfile.color.withValues(
+                              alpha: 0.4,
+                            ),
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.shield_outlined, color: _userRiskProfile.color, size: 12),
+                            Icon(
+                              Icons.shield_outlined,
+                              color: _userRiskProfile.color,
+                              size: 12,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               _userRiskProfile.label,
@@ -378,7 +422,12 @@ class _InvestmentScreenState extends State<InvestmentScreen>
           const SizedBox(height: 16),
 
           // 2. Hero AI Investment Intelligence Card
-          _buildHeroAiInvestmentCard(finance, readiness, investmentCapacity, activeGoal),
+          _buildHeroAiInvestmentCard(
+            finance,
+            readiness,
+            investmentCapacity,
+            activeGoal,
+          ),
 
           const SizedBox(height: 22),
 
@@ -415,7 +464,10 @@ class _InvestmentScreenState extends State<InvestmentScreen>
   // READINESS & HERO CARDS
   // ============================================================
 
-  Widget _buildInvestmentReadinessCard(InvestmentReadinessReport report, double capacity) {
+  Widget _buildInvestmentReadinessCard(
+    InvestmentReadinessReport report,
+    double capacity,
+  ) {
     return InkWell(
       onTap: () => _showReadinessChecklistSheet(report),
       borderRadius: BorderRadius.circular(20),
@@ -447,7 +499,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                         color: emeraldGreen.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.verified_outlined, color: emeraldGreen, size: 18),
+                      child: const Icon(
+                        Icons.verified_outlined,
+                        color: emeraldGreen,
+                        size: 18,
+                      ),
                     ),
                     const SizedBox(width: 10),
                     const Column(
@@ -471,21 +527,28 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: report.readinessScore >= 75
                         ? emeraldGreen.withValues(alpha: 0.2)
                         : goldAccent.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: report.readinessScore >= 75 ? emeraldGreen : goldAccent,
+                      color: report.readinessScore >= 75
+                          ? emeraldGreen
+                          : goldAccent,
                       width: 1,
                     ),
                   ),
                   child: Text(
                     '${report.readinessScore} / 100',
                     style: TextStyle(
-                      color: report.readinessScore >= 75 ? emeraldGreen : goldAccent,
+                      color: report.readinessScore >= 75
+                          ? emeraldGreen
+                          : goldAccent,
                       fontSize: 14,
                       fontWeight: FontWeight.w900,
                     ),
@@ -529,7 +592,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
               children: [
                 Text(
                   'View 9-Point Readiness Checklist',
-                  style: TextStyle(color: cyanNeon.withValues(alpha: 0.9), fontSize: 11, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: cyanNeon.withValues(alpha: 0.9),
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(width: 4),
                 const Icon(Icons.arrow_forward_ios, color: cyanNeon, size: 10),
@@ -555,7 +622,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
             title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
@@ -581,8 +652,7 @@ class _InvestmentScreenState extends State<InvestmentScreen>
   ) {
     String message;
     if (!readiness.isEmergencyFundHealthy) {
-      message =
-          'Based on your live cash flow and goals, your highest immediate priority is completing your 3-month emergency reserve before increasing high-volatility equity allocations.';
+      message = 'Based on your live cash flow and goals, your highest immediate priority is completing your 3-month emergency reserve before increasing high-volatility equity allocations.';
     } else if (readiness.monthlySurplus < 5000) {
       message =
           'Your emergency reserve is healthy, but current monthly surplus is tightly constrained. Prioritize budget trimming to unlock investment capacity for "${goal.title}".';
@@ -595,10 +665,7 @@ class _InvestmentScreenState extends State<InvestmentScreen>
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            purpleNeon.withValues(alpha: 0.25),
-            cardDark,
-          ],
+          colors: [purpleNeon.withValues(alpha: 0.25), cardDark],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -616,7 +683,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                   color: purpleNeon.withValues(alpha: 0.3),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.auto_awesome, color: cyanNeon, size: 16),
+                child: const Icon(
+                  Icons.auto_awesome,
+                  color: cyanNeon,
+                  size: 16,
+                ),
               ),
               const SizedBox(width: 8),
               const Text(
@@ -647,11 +718,19 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                 style: ElevatedButton.styleFrom(
                   backgroundColor: purpleNeon,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 icon: const Icon(Icons.timeline, size: 16),
-                label: const Text('View Strategy', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                label: const Text(
+                  'View Strategy',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
                 onPressed: () {
                   _tabController.animateTo(0);
                 },
@@ -661,13 +740,24 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                 style: OutlinedButton.styleFrom(
                   foregroundColor: cyanNeon,
                   side: BorderSide(color: cyanNeon.withValues(alpha: 0.6)),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 icon: const Icon(Icons.chat_bubble_outline, size: 16),
-                label: const Text('Ask AI Advisor', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                label: const Text(
+                  'Ask AI Advisor',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const AIChatScreen()));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AIChatScreen()),
+                  );
                 },
               ),
             ],
@@ -711,11 +801,15 @@ class _InvestmentScreenState extends State<InvestmentScreen>
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
-            itemCount: goals.isNotEmpty ? goals.length : GoalInvestmentService.presetGoals.length,
+            itemCount: goals.isNotEmpty
+                ? goals.length
+                : GoalInvestmentService.presetGoals.length,
             itemBuilder: (context, index) {
               if (goals.isNotEmpty) {
                 final g = goals[index];
-                final isSelected = (_selectedGoalId == null && index == 0) || (_selectedGoalId == g.id);
+                final isSelected =
+                    (_selectedGoalId == null && index == 0) ||
+                    (_selectedGoalId == g.id);
                 return _buildGoalCard(
                   id: g.id,
                   title: g.title,
@@ -747,7 +841,9 @@ class _InvestmentScreenState extends State<InvestmentScreen>
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    final double progress = target > 0 ? (current / target).clamp(0.0, 1.0) : 0.0;
+    final double progress = target > 0
+        ? (current / target).clamp(0.0, 1.0)
+        : 0.0;
 
     return InkWell(
       onTap: onTap,
@@ -772,14 +868,22 @@ class _InvestmentScreenState extends State<InvestmentScreen>
               title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   '${CurrencyFormatter.format(current)} / ${CurrencyFormatter.format(target)}',
-                  style: const TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 ClipRRect(
@@ -788,7 +892,9 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                     value: progress,
                     minHeight: 5,
                     backgroundColor: Colors.white12,
-                    valueColor: AlwaysStoppedAnimation<Color>(isSelected ? cyanNeon : purpleNeon),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      isSelected ? cyanNeon : purpleNeon,
+                    ),
                   ),
                 ),
               ],
@@ -817,11 +923,19 @@ class _InvestmentScreenState extends State<InvestmentScreen>
             preset.title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           Text(
             'Target: ${CurrencyFormatter.format(preset.defaultTarget)}',
-            style: const TextStyle(color: cyanNeon, fontSize: 10, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              color: cyanNeon,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           Text(
             '~${preset.defaultMonths} Months',
@@ -870,7 +984,10 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: report.feasibility.color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
@@ -878,7 +995,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.circle, color: report.feasibility.color, size: 8),
+                    Icon(
+                      Icons.circle,
+                      color: report.feasibility.color,
+                      size: 8,
+                    ),
                     const SizedBox(width: 5),
                     Text(
                       report.feasibility.label,
@@ -937,8 +1058,12 @@ class _InvestmentScreenState extends State<InvestmentScreen>
               Expanded(
                 child: _buildAnalyzerCell(
                   label: 'Required SIP',
-                  val: CurrencyFormatter.format(report.requiredMonthlyInvestment),
-                  highlightColor: report.feasibility == GoalFeasibility.good ? emeraldGreen : coralRed,
+                  val: CurrencyFormatter.format(
+                    report.requiredMonthlyInvestment,
+                  ),
+                  highlightColor: report.feasibility == GoalFeasibility.good
+                      ? emeraldGreen
+                      : coralRed,
                 ),
               ),
             ],
@@ -959,7 +1084,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                 Expanded(
                   child: Text(
                     report.detailedReasoning,
-                    style: const TextStyle(color: Colors.white70, fontSize: 11, height: 1.4),
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 11,
+                      height: 1.4,
+                    ),
                   ),
                 ),
               ],
@@ -980,7 +1109,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
       children: [
         Text(
           label,
-          style: const TextStyle(color: Colors.white54, fontSize: 9, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: Colors.white54,
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 3),
         Text(
@@ -1019,7 +1152,9 @@ class _InvestmentScreenState extends State<InvestmentScreen>
         ),
         const SizedBox(height: 12),
         Column(
-          children: report.strategies.map((strat) => _buildStrategyCard(strat)).toList(),
+          children: report.strategies
+              .map((strat) => _buildStrategyCard(strat))
+              .toList(),
         ),
       ],
     );
@@ -1052,20 +1187,31 @@ class _InvestmentScreenState extends State<InvestmentScreen>
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: headerColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       strat.name,
-                      style: TextStyle(color: headerColor, fontSize: 11, fontWeight: FontWeight.w900),
+                      style: TextStyle(
+                        color: headerColor,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '${strat.illustrativeReturnRate}% Illustrative Return',
-                    style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -1077,7 +1223,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                 ),
                 child: Text(
                   '${strat.goalMatchPercentage}% Fit',
-                  style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -1085,7 +1235,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
           const SizedBox(height: 10),
           Text(
             strat.whyItFits,
-            style: const TextStyle(color: Colors.white, fontSize: 12, height: 1.35),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              height: 1.35,
+            ),
           ),
           const SizedBox(height: 10),
           Wrap(
@@ -1100,7 +1254,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                 ),
                 child: Text(
                   '${e.key}: ${e.value.toStringAsFixed(0)}%',
-                  style: const TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               );
             }).toList(),
@@ -1108,7 +1266,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
           const SizedBox(height: 8),
           Text(
             'Trade-off: ${strat.whyItMayNotFit}',
-            style: const TextStyle(color: Colors.white38, fontSize: 10, fontStyle: FontStyle.italic),
+            style: const TextStyle(
+              color: Colors.white38,
+              fontSize: 10,
+              fontStyle: FontStyle.italic,
+            ),
           ),
         ],
       ),
@@ -1132,7 +1294,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
               color: goldAccent.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.shield_outlined, color: goldAccent, size: 20),
+            child: const Icon(
+              Icons.shield_outlined,
+              color: goldAccent,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1151,7 +1317,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                 const SizedBox(height: 4),
                 Text(
                   report.deRiskingGuidance,
-                  style: const TextStyle(color: Colors.white70, fontSize: 11, height: 1.4),
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 11,
+                    height: 1.4,
+                  ),
                 ),
               ],
             ),
@@ -1194,8 +1364,10 @@ class _InvestmentScreenState extends State<InvestmentScreen>
           ),
           _buildActionStep(
             number: '3',
-            title: 'Allocate ${CurrencyFormatter.format(capacity)} Monthly Capacity',
-            desc: 'Direct surplus into low-cost index and dynamic hybrid funds.',
+            title:
+                'Allocate ${CurrencyFormatter.format(capacity)} Monthly Capacity',
+            desc:
+                'Direct surplus into low-cost index and dynamic hybrid funds.',
           ),
           _buildActionStep(
             number: '4',
@@ -1233,7 +1405,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
             ),
             child: Text(
               number,
-              style: const TextStyle(color: cyanNeon, fontSize: 11, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: cyanNeon,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -1241,9 +1417,23 @@ class _InvestmentScreenState extends State<InvestmentScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(desc, style: const TextStyle(color: Colors.white54, fontSize: 10, height: 1.3)),
+                Text(
+                  desc,
+                  style: const TextStyle(
+                    color: Colors.white54,
+                    fontSize: 10,
+                    height: 1.3,
+                  ),
+                ),
               ],
             ),
           ),
@@ -1270,20 +1460,22 @@ class _InvestmentScreenState extends State<InvestmentScreen>
       annualReturnRate: _lumpAnnualReturn,
     );
 
-    final goalSipResult = InvestmentCalculationService.calculateGoalSipRequirement(
-      targetCorpus: _goalSipTarget,
-      currentCorpus: _goalSipCurrent,
-      durationYears: _goalSipYears,
-      annualReturnRate: _goalSipReturn,
-      availableMonthlyCapacity: investmentCapacity,
-    );
+    final goalSipResult =
+        InvestmentCalculationService.calculateGoalSipRequirement(
+          targetCorpus: _goalSipTarget,
+          currentCorpus: _goalSipCurrent,
+          durationYears: _goalSipYears,
+          annualReturnRate: _goalSipReturn,
+          availableMonthlyCapacity: investmentCapacity,
+        );
 
-    final whatIfScenarios = InvestmentWhatIfService.evaluateSensitivityScenarios(
-      baseMonthlySip: _sipMonthly,
-      baseYears: _sipDurationYears,
-      baseAnnualReturn: _sipAnnualReturn,
-      baseStartingCorpus: _sipStartingLump,
-    );
+    final whatIfScenarios =
+        InvestmentWhatIfService.evaluateSensitivityScenarios(
+          baseMonthlySip: _sipMonthly,
+          baseYears: _sipDurationYears,
+          baseAnnualReturn: _sipAnnualReturn,
+          baseStartingCorpus: _sipStartingLump,
+        );
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -1430,7 +1622,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
           const SizedBox(height: 8),
           const Text(
             '*Illustrative projection based on assumed return rates. Actual returns are subject to market volatility and not guaranteed.',
-            style: TextStyle(color: Colors.white24, fontSize: 9, fontStyle: FontStyle.italic),
+            style: TextStyle(
+              color: Colors.white24,
+              fontSize: 9,
+              fontStyle: FontStyle.italic,
+            ),
           ),
         ],
       ),
@@ -1498,7 +1694,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
           const SizedBox(height: 8),
           Text(
             'Investing ${CurrencyFormatter.format(_lumpInitial)} today yields the exact same eventual wealth as committing ${CurrencyFormatter.format(result.sipEquivalentMonthly)} every single month for $_lumpDurationYears years.',
-            style: const TextStyle(color: Colors.white54, fontSize: 10, height: 1.35),
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 10,
+              height: 1.35,
+            ),
           ),
         ],
       ),
@@ -1572,7 +1772,9 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                   : coralRed.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: result.isAchievable ? emeraldGreen.withValues(alpha: 0.4) : coralRed.withValues(alpha: 0.4),
+                color: result.isAchievable
+                    ? emeraldGreen.withValues(alpha: 0.4)
+                    : coralRed.withValues(alpha: 0.4),
               ),
             ),
             child: Column(
@@ -1589,10 +1791,18 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                   ),
                 ),
                 const SizedBox(height: 6),
-                ...result.strategicAlternatives.map((alt) => Padding(
-                      padding: const EdgeInsets.only(bottom: 3),
-                      child: Text('• $alt', style: const TextStyle(color: Colors.white70, fontSize: 10)),
-                    )),
+                ...result.strategicAlternatives.map(
+                  (alt) => Padding(
+                    padding: const EdgeInsets.only(bottom: 3),
+                    child: Text(
+                      '• $alt',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -1650,7 +1860,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
             s.title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           Text(
             '${isPositive ? '+' : ''}${CurrencyFormatter.format(s.corpusDifference)}',
@@ -1664,7 +1878,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
             s.strategicImpact,
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.white54, fontSize: 9, height: 1.3),
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 9,
+              height: 1.3,
+            ),
           ),
         ],
       ),
@@ -1685,8 +1903,18 @@ class _InvestmentScreenState extends State<InvestmentScreen>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: const TextStyle(color: Colors.white70, fontSize: 11)),
-            Text(val, style: const TextStyle(color: cyanNeon, fontSize: 11, fontWeight: FontWeight.bold)),
+            Text(
+              label,
+              style: const TextStyle(color: Colors.white70, fontSize: 11),
+            ),
+            Text(
+              val,
+              style: const TextStyle(
+                color: cyanNeon,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
         SliderTheme(
@@ -1713,11 +1941,18 @@ class _InvestmentScreenState extends State<InvestmentScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: Colors.white54, fontSize: 10)),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white54, fontSize: 10),
+        ),
         const SizedBox(height: 3),
         Text(
           value,
-          style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: color,
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );
@@ -1814,7 +2049,9 @@ class _InvestmentScreenState extends State<InvestmentScreen>
               Expanded(
                 child: _buildMetricBlock(
                   'Future Monthly Expense',
-                  CurrencyFormatter.format(report.projectedMonthlyExpenseAtRetirement),
+                  CurrencyFormatter.format(
+                    report.projectedMonthlyExpenseAtRetirement,
+                  ),
                   Colors.white70,
                 ),
               ),
@@ -1849,12 +2086,28 @@ class _InvestmentScreenState extends State<InvestmentScreen>
           const SizedBox(height: 16),
           const Divider(color: Colors.white12),
           const SizedBox(height: 10),
-          const Text('Strategic Milestones & Actions:', style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold)),
+          const Text(
+            'Strategic Milestones & Actions:',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 6),
-          ...report.milestoneActionPoints.map((pt) => Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text('• $pt', style: const TextStyle(color: Colors.white54, fontSize: 10, height: 1.35)),
-              )),
+          ...report.milestoneActionPoints.map(
+            (pt) => Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                '• $pt',
+                style: const TextStyle(
+                  color: Colors.white54,
+                  fontSize: 10,
+                  height: 1.35,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -1899,12 +2152,20 @@ class _InvestmentScreenState extends State<InvestmentScreen>
               children: [
                 Text(
                   'Recommendation: ${report.bestChoiceRecommendation}',
-                  style: const TextStyle(color: cyanNeon, fontSize: 12, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: cyanNeon,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   report.reasoningWhy,
-                  style: const TextStyle(color: Colors.white70, fontSize: 11, height: 1.35),
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 11,
+                    height: 1.35,
+                  ),
                 ),
               ],
             ),
@@ -1932,15 +2193,33 @@ class _InvestmentScreenState extends State<InvestmentScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(s.name, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+              Text(
+                s.name,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               Text(
                 'Benefit: ${CurrencyFormatter.format(s.netFinancialBenefit)}',
-                style: const TextStyle(color: emeraldGreen, fontSize: 11, fontWeight: FontWeight.w800),
+                style: const TextStyle(
+                  color: emeraldGreen,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 4),
-          Text(s.tradeOffNote, style: const TextStyle(color: Colors.white54, fontSize: 10, height: 1.3)),
+          Text(
+            s.tradeOffNote,
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 10,
+              height: 1.3,
+            ),
+          ),
         ],
       ),
     );
@@ -1987,12 +2266,18 @@ class _InvestmentScreenState extends State<InvestmentScreen>
           ),
           const SizedBox(height: 12),
 
-          ...taxReport.deductionBreakdown.map((cat) => _buildDeductionCard(cat)),
+          ...taxReport.deductionBreakdown.map(
+            (cat) => _buildDeductionCard(cat),
+          ),
 
           const SizedBox(height: 12),
           const Text(
             '*Tax regulations and slab structures are subject to official Finance Act amendments. Consult a certified chartered accountant or tax professional before filing returns.',
-            style: TextStyle(color: Colors.white24, fontSize: 9, fontStyle: FontStyle.italic),
+            style: TextStyle(
+              color: Colors.white24,
+              fontSize: 9,
+              fontStyle: FontStyle.italic,
+            ),
           ),
           const SizedBox(height: 60),
         ],
@@ -2030,8 +2315,14 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  report.recommendedRegime == TaxRegime.newRegime ? 'NEW REGIME SUITS' : 'OLD REGIME SUITS',
-                  style: const TextStyle(color: emeraldGreen, fontSize: 10, fontWeight: FontWeight.bold),
+                  report.recommendedRegime == TaxRegime.newRegime
+                      ? 'NEW REGIME SUITS'
+                      : 'OLD REGIME SUITS',
+                  style: const TextStyle(
+                    color: emeraldGreen,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -2043,14 +2334,18 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                 child: _buildMetricBlock(
                   'Old Regime Estimated Tax',
                   CurrencyFormatter.format(report.oldRegimeEstimatedTax),
-                  report.recommendedRegime == TaxRegime.oldRegime ? emeraldGreen : Colors.white70,
+                  report.recommendedRegime == TaxRegime.oldRegime
+                      ? emeraldGreen
+                      : Colors.white70,
                 ),
               ),
               Expanded(
                 child: _buildMetricBlock(
                   'New Regime Estimated Tax',
                   CurrencyFormatter.format(report.newRegimeEstimatedTax),
-                  report.recommendedRegime == TaxRegime.newRegime ? emeraldGreen : Colors.white70,
+                  report.recommendedRegime == TaxRegime.newRegime
+                      ? emeraldGreen
+                      : Colors.white70,
                 ),
               ),
             ],
@@ -2069,7 +2364,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                 Expanded(
                   child: Text(
                     report.summaryAdvice,
-                    style: const TextStyle(color: Colors.white70, fontSize: 11, height: 1.35),
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 11,
+                      height: 1.35,
+                    ),
                   ),
                 ),
               ],
@@ -2081,7 +2380,10 @@ class _InvestmentScreenState extends State<InvestmentScreen>
   }
 
   Widget _buildDeductionCard(TaxDeductionCategory cat) {
-    final double progress = (cat.currentUtilized / cat.maxAllowedLimit).clamp(0.0, 1.0);
+    final double progress = (cat.currentUtilized / cat.maxAllowedLimit).clamp(
+      0.0,
+      1.0,
+    );
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
@@ -2098,7 +2400,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
             children: [
               Text(
                 'Section ${cat.code}',
-                style: const TextStyle(color: cyanNeon, fontSize: 12, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: cyanNeon,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Text(
                 'Cap: ${CurrencyFormatter.format(cat.maxAllowedLimit)}',
@@ -2109,7 +2415,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
           const SizedBox(height: 4),
           Text(
             cat.title,
-            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 8),
           ClipRRect(
@@ -2118,7 +2428,9 @@ class _InvestmentScreenState extends State<InvestmentScreen>
               value: progress,
               minHeight: 5,
               backgroundColor: Colors.white10,
-              valueColor: AlwaysStoppedAnimation<Color>(progress >= 1.0 ? emeraldGreen : purpleNeon),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                progress >= 1.0 ? emeraldGreen : purpleNeon,
+              ),
             ),
           ),
           const SizedBox(height: 6),
@@ -2131,7 +2443,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
               ),
               Text(
                 'Remaining: ${CurrencyFormatter.format(cat.remainingPotential)}',
-                style: const TextStyle(color: goldAccent, fontSize: 10, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: goldAccent,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -2183,7 +2499,10 @@ class _InvestmentScreenState extends State<InvestmentScreen>
     );
   }
 
-  Widget _buildPortfolioScoreCard(InvestmentProvider investProvider, PortfolioHealthAudit audit) {
+  Widget _buildPortfolioScoreCard(
+    InvestmentProvider investProvider,
+    PortfolioHealthAudit audit,
+  ) {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -2202,21 +2521,37 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                 children: [
                   const Text(
                     'PORTFOLIO HEALTH AUDIT',
-                    style: TextStyle(color: cyanNeon, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.0),
+                    style: TextStyle(
+                      color: cyanNeon,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.0,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     'Total Value: ${CurrencyFormatter.format(investProvider.totalCurrentValue)}',
-                    style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: audit.overallScore >= 75 ? emeraldGreen.withValues(alpha: 0.2) : goldAccent.withValues(alpha: 0.2),
+                  color: audit.overallScore >= 75
+                      ? emeraldGreen.withValues(alpha: 0.2)
+                      : goldAccent.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: audit.overallScore >= 75 ? emeraldGreen : goldAccent),
+                  border: Border.all(
+                    color: audit.overallScore >= 75 ? emeraldGreen : goldAccent,
+                  ),
                 ),
                 child: Text(
                   '${audit.overallScore} / 100',
@@ -2246,13 +2581,37 @@ class _InvestmentScreenState extends State<InvestmentScreen>
           const SizedBox(height: 14),
           const Divider(color: Colors.white12),
           const SizedBox(height: 10),
-          const Text('Top Strengths:', style: TextStyle(color: emeraldGreen, fontSize: 11, fontWeight: FontWeight.bold)),
+          const Text(
+            'Top Strengths:',
+            style: TextStyle(
+              color: emeraldGreen,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 4),
-          ...audit.topStrengths.map((s) => Text('✓ $s', style: const TextStyle(color: Colors.white70, fontSize: 10))),
+          ...audit.topStrengths.map(
+            (s) => Text(
+              '✓ $s',
+              style: const TextStyle(color: Colors.white70, fontSize: 10),
+            ),
+          ),
           const SizedBox(height: 8),
-          const Text('Risk Alerts:', style: TextStyle(color: coralRed, fontSize: 11, fontWeight: FontWeight.bold)),
+          const Text(
+            'Risk Alerts:',
+            style: TextStyle(
+              color: coralRed,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 4),
-          ...audit.topRisks.map((r) => Text('⚠ $r', style: const TextStyle(color: Colors.white70, fontSize: 10))),
+          ...audit.topRisks.map(
+            (r) => Text(
+              '⚠ $r',
+              style: const TextStyle(color: Colors.white70, fontSize: 10),
+            ),
+          ),
         ],
       ),
     );
@@ -2311,11 +2670,20 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(key, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                      Text(
+                        key,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       Text(
                         'Current: ${curr.toStringAsFixed(0)}% | Target: ${target.toStringAsFixed(0)}% (Drift: ${drift > 0 ? '+' : ''}${drift.toStringAsFixed(0)}%)',
                         style: TextStyle(
-                          color: drift.abs() >= 10 ? goldAccent : Colors.white54,
+                          color: drift.abs() >= 10
+                              ? goldAccent
+                              : Colors.white54,
                           fontSize: 10,
                         ),
                       ),
@@ -2324,10 +2692,22 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                   const SizedBox(height: 6),
                   Stack(
                     children: [
-                      Container(height: 6, decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(3))),
+                      Container(
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: Colors.white10,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ),
                       FractionallySizedBox(
                         widthFactor: (curr / 100.0).clamp(0.0, 1.0),
-                        child: Container(height: 6, decoration: BoxDecoration(color: purpleNeon, borderRadius: BorderRadius.circular(3))),
+                        child: Container(
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: purpleNeon,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -2346,17 +2726,27 @@ class _InvestmentScreenState extends State<InvestmentScreen>
       decoration: BoxDecoration(
         color: cardDark,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: audit.needsRebalancing ? goldAccent.withValues(alpha: 0.4) : Colors.white12),
+        border: Border.all(
+          color: audit.needsRebalancing
+              ? goldAccent.withValues(alpha: 0.4)
+              : Colors.white12,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.balance, color: audit.needsRebalancing ? goldAccent : emeraldGreen, size: 18),
+              Icon(
+                Icons.balance,
+                color: audit.needsRebalancing ? goldAccent : emeraldGreen,
+                size: 18,
+              ),
               const SizedBox(width: 8),
               Text(
-                audit.needsRebalancing ? 'REBALANCING RECOMMENDED' : 'PORTFOLIO IN BALANCE',
+                audit.needsRebalancing
+                    ? 'REBALANCING RECOMMENDED'
+                    : 'PORTFOLIO IN BALANCE',
                 style: TextStyle(
                   color: audit.needsRebalancing ? goldAccent : emeraldGreen,
                   fontSize: 12,
@@ -2372,10 +2762,19 @@ class _InvestmentScreenState extends State<InvestmentScreen>
             style: TextStyle(color: Colors.white70, fontSize: 11, height: 1.4),
           ),
           const SizedBox(height: 10),
-          ...audit.topActions.map((act) => Padding(
-                padding: const EdgeInsets.only(bottom: 3),
-                child: Text('• $act', style: const TextStyle(color: cyanNeon, fontSize: 10, fontWeight: FontWeight.w600)),
-              )),
+          ...audit.topActions.map(
+            (act) => Padding(
+              padding: const EdgeInsets.only(bottom: 3),
+              child: Text(
+                '• $act',
+                style: const TextStyle(
+                  color: cyanNeon,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -2421,13 +2820,18 @@ class _InvestmentScreenState extends State<InvestmentScreen>
           )
         else
           Column(
-            children: holdings.map((asset) => _buildHoldingTile(asset, investProvider)).toList(),
+            children: holdings
+                .map((asset) => _buildHoldingTile(asset, investProvider))
+                .toList(),
           ),
       ],
     );
   }
 
-  Widget _buildHoldingTile(InvestmentModel asset, InvestmentProvider investProvider) {
+  Widget _buildHoldingTile(
+    InvestmentModel asset,
+    InvestmentProvider investProvider,
+  ) {
     final isGain = asset.totalReturns >= 0;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -2446,7 +2850,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
               children: [
                 Text(
                   asset.name,
-                  style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 3),
                 Text(
@@ -2461,7 +2869,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
             children: [
               Text(
                 CurrencyFormatter.format(asset.currentValue),
-                style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w900),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
               const SizedBox(height: 2),
               Text(
@@ -2475,7 +2887,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
             ],
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline, color: Colors.white30, size: 18),
+            icon: const Icon(
+              Icons.delete_outline,
+              color: Colors.white30,
+              size: 18,
+            ),
             onPressed: () => investProvider.deleteInvestment(asset.id),
           ),
         ],
@@ -2511,7 +2927,9 @@ class _InvestmentScreenState extends State<InvestmentScreen>
           ),
           const SizedBox(height: 12),
 
-          ...InvestmentEducationService.investmentCategories.map((cat) => _buildAssetOptionCard(cat)),
+          ...InvestmentEducationService.investmentCategories.map(
+            (cat) => _buildAssetOptionCard(cat),
+          ),
 
           const SizedBox(height: 24),
 
@@ -2527,7 +2945,9 @@ class _InvestmentScreenState extends State<InvestmentScreen>
           ),
           const SizedBox(height: 12),
 
-          ...InvestmentEducationService.marketAcademyTopics.map((top) => _buildAcademyTopicCard(top)),
+          ...InvestmentEducationService.marketAcademyTopics.map(
+            (top) => _buildAcademyTopicCard(top),
+          ),
 
           const SizedBox(height: 60),
         ],
@@ -2556,7 +2976,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                   const SizedBox(width: 8),
                   Text(
                     cat.name,
-                    style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -2565,28 +2989,50 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                 decoration: BoxDecoration(
                   color: cat.risk.color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: cat.risk.color.withValues(alpha: 0.5)),
+                  border: Border.all(
+                    color: cat.risk.color.withValues(alpha: 0.5),
+                  ),
                 ),
                 child: Text(
                   'Risk: ${cat.risk.label}',
-                  style: TextStyle(color: cat.risk.color, fontSize: 10, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: cat.risk.color,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Text(cat.purpose, style: const TextStyle(color: Colors.white70, fontSize: 11, height: 1.35)),
+          Text(
+            cat.purpose,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 11,
+              height: 1.35,
+            ),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 4,
             children: [
-              Text('Horizon: ${cat.suitableHorizon}', style: const TextStyle(color: Colors.white54, fontSize: 10)),
-              Text('• Liquidity: ${cat.liquidity}', style: const TextStyle(color: Colors.white54, fontSize: 10)),
+              Text(
+                'Horizon: ${cat.suitableHorizon}',
+                style: const TextStyle(color: Colors.white54, fontSize: 10),
+              ),
+              Text(
+                '• Liquidity: ${cat.liquidity}',
+                style: const TextStyle(color: Colors.white54, fontSize: 10),
+              ),
             ],
           ),
           const SizedBox(height: 6),
-          Text('Tax: ${cat.taxConsiderations}', style: const TextStyle(color: goldAccent, fontSize: 10)),
+          Text(
+            'Tax: ${cat.taxConsiderations}',
+            style: const TextStyle(color: goldAccent, fontSize: 10),
+          ),
         ],
       ),
     );
@@ -2610,12 +3056,23 @@ class _InvestmentScreenState extends State<InvestmentScreen>
               const SizedBox(width: 8),
               Text(
                 top.title,
-                style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Text(top.summary, style: const TextStyle(color: Colors.white70, fontSize: 11, height: 1.35)),
+          Text(
+            top.summary,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 11,
+              height: 1.35,
+            ),
+          ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(10),
@@ -2625,7 +3082,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
             ),
             child: Text(
               'Example: ${top.example}',
-              style: const TextStyle(color: cyanNeon, fontSize: 10, height: 1.35),
+              style: const TextStyle(
+                color: cyanNeon,
+                fontSize: 10,
+                height: 1.35,
+              ),
             ),
           ),
         ],
@@ -2662,11 +3123,19 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                         children: [
                           Text(
                             'RISK PROFILER ASSESSMENT',
-                            style: TextStyle(color: cyanNeon, fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.0),
+                            style: TextStyle(
+                              color: cyanNeon,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.0,
+                            ),
                           ),
                           Text(
                             '6 Institutional Profiling Dimensions',
-                            style: TextStyle(color: Colors.white54, fontSize: 10),
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontSize: 10,
+                            ),
                           ),
                         ],
                       ),
@@ -2683,7 +3152,8 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                       physics: const BouncingScrollPhysics(),
                       itemCount: RiskAssessmentService.standardQuestions.length,
                       itemBuilder: (context, index) {
-                        final q = RiskAssessmentService.standardQuestions[index];
+                        final q =
+                            RiskAssessmentService.standardQuestions[index];
                         final currentScore = _riskAssessmentAnswers[q.id] ?? 2;
 
                         return Padding(
@@ -2693,7 +3163,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                             children: [
                               Text(
                                 '${index + 1}. ${q.question}',
-                                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               const SizedBox(height: 8),
                               ...q.options.map((opt) {
@@ -2707,19 +3181,30 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                                   borderRadius: BorderRadius.circular(10),
                                   child: Container(
                                     margin: const EdgeInsets.only(bottom: 6),
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 10,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: isSelected ? purpleNeon.withValues(alpha: 0.2) : cardDark,
+                                      color: isSelected
+                                          ? purpleNeon.withValues(alpha: 0.2)
+                                          : cardDark,
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
-                                        color: isSelected ? cyanNeon : Colors.white10,
+                                        color: isSelected
+                                            ? cyanNeon
+                                            : Colors.white10,
                                       ),
                                     ),
                                     child: Row(
                                       children: [
                                         Icon(
-                                          isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-                                          color: isSelected ? cyanNeon : Colors.white30,
+                                          isSelected
+                                              ? Icons.radio_button_checked
+                                              : Icons.radio_button_off,
+                                          color: isSelected
+                                              ? cyanNeon
+                                              : Colors.white30,
                                           size: 16,
                                         ),
                                         const SizedBox(width: 8),
@@ -2727,7 +3212,9 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                                           child: Text(
                                             opt.text,
                                             style: TextStyle(
-                                              color: isSelected ? Colors.white : Colors.white70,
+                                              color: isSelected
+                                                  ? Colors.white
+                                                  : Colors.white70,
                                               fontSize: 11,
                                             ),
                                           ),
@@ -2750,16 +3237,25 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                       style: ElevatedButton.styleFrom(
                         backgroundColor: purpleNeon,
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
-                      child: const Text('Calculate & Calibrate Risk Profile', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        'Calculate & Calibrate Risk Profile',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       onPressed: () {
-                        final breakdown = RiskAssessmentService.evaluateAssessment(
-                          selectedOptions: _riskAssessmentAnswers,
-                          emergencyRunwayMonths: 4.0,
-                          savingsRate: 25.0,
-                          targetHorizonYears: 5.0,
-                        );
+                        final breakdown =
+                            RiskAssessmentService.evaluateAssessment(
+                              selectedOptions: _riskAssessmentAnswers,
+                              emergencyRunwayMonths: 4.0,
+                              savingsRate: 25.0,
+                              targetHorizonYears: 5.0,
+                            );
                         setState(() {
                           _userRiskProfile = breakdown.profileType;
                         });
@@ -2796,7 +3292,12 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                 children: [
                   const Text(
                     '9-POINT INVESTMENT READINESS CHECKLIST',
-                    style: TextStyle(color: cyanNeon, fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 0.8),
+                    style: TextStyle(
+                      color: cyanNeon,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.8,
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close, color: Colors.white70),
@@ -2817,13 +3318,19 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                       decoration: BoxDecoration(
                         color: cardDark,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: item.isPassed ? emeraldGreen.withValues(alpha: 0.3) : goldAccent.withValues(alpha: 0.3)),
+                        border: Border.all(
+                          color: item.isPassed
+                              ? emeraldGreen.withValues(alpha: 0.3)
+                              : goldAccent.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Icon(
-                            item.isPassed ? Icons.check_circle : Icons.warning_amber_rounded,
+                            item.isPassed
+                                ? Icons.check_circle
+                                : Icons.warning_amber_rounded,
                             color: item.isPassed ? emeraldGreen : goldAccent,
                             size: 18,
                           ),
@@ -2832,9 +3339,22 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(item.title, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                                Text(
+                                  item.title,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                                 const SizedBox(height: 3),
-                                Text(item.detail, style: const TextStyle(color: Colors.white70, fontSize: 10)),
+                                Text(
+                                  item.detail,
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 10,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -2864,39 +3384,81 @@ class _InvestmentScreenState extends State<InvestmentScreen>
           builder: (context, setDialogState) {
             return AlertDialog(
               backgroundColor: cardDark,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-              title: const Text('Log Investment Asset', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(22),
+              ),
+              title: const Text(
+                'Log Investment Asset',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Asset Name', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                    const Text(
+                      'Asset Name',
+                      style: TextStyle(color: Colors.white70, fontSize: 11),
+                    ),
                     const SizedBox(height: 4),
                     TextField(
                       controller: _assetNameController,
                       style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(hintText: 'e.g. Nifty 50 Index Fund, SGB Gold'),
+                      decoration: const InputDecoration(
+                        hintText: 'e.g. Nifty 50 Index Fund, SGB Gold',
+                      ),
                     ),
                     const SizedBox(height: 12),
-                    const Text('Category Type', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                    const Text(
+                      'Category Type',
+                      style: TextStyle(color: Colors.white70, fontSize: 11),
+                    ),
                     const SizedBox(height: 4),
                     DropdownButtonFormField<String>(
                       initialValue: _selectedAssetType,
                       dropdownColor: cardDark,
                       items: const [
-                        DropdownMenuItem(value: 'Index Fund', child: Text('Index Fund')),
-                        DropdownMenuItem(value: 'Mutual Fund', child: Text('Mutual Fund / Equity')),
-                        DropdownMenuItem(value: 'Gold', child: Text('Gold / SGB')),
-                        DropdownMenuItem(value: 'PPF', child: Text('PPF / EPF')),
-                        DropdownMenuItem(value: 'Fixed Deposit', child: Text('Fixed Deposit')),
-                        DropdownMenuItem(value: 'Direct Stock', child: Text('Direct Stock')),
-                        DropdownMenuItem(value: 'Liquid Fund', child: Text('Liquid Fund')),
+                        DropdownMenuItem(
+                          value: 'Index Fund',
+                          child: Text('Index Fund'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Mutual Fund',
+                          child: Text('Mutual Fund / Equity'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Gold',
+                          child: Text('Gold / SGB'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'PPF',
+                          child: Text('PPF / EPF'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Fixed Deposit',
+                          child: Text('Fixed Deposit'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Direct Stock',
+                          child: Text('Direct Stock'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Liquid Fund',
+                          child: Text('Liquid Fund'),
+                        ),
                       ],
-                      onChanged: (val) => setDialogState(() => _selectedAssetType = val!),
+                      onChanged: (val) =>
+                          setDialogState(() => _selectedAssetType = val!),
                     ),
                     const SizedBox(height: 12),
-                    const Text('Invested Amount', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                    const Text(
+                      'Invested Amount',
+                      style: TextStyle(color: Colors.white70, fontSize: 11),
+                    ),
                     const SizedBox(height: 4),
                     TextField(
                       controller: _investedController,
@@ -2905,7 +3467,10 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                       decoration: const InputDecoration(hintText: '₹0'),
                     ),
                     const SizedBox(height: 12),
-                    const Text('Current Value', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                    const Text(
+                      'Current Value',
+                      style: TextStyle(color: Colors.white70, fontSize: 11),
+                    ),
                     const SizedBox(height: 4),
                     TextField(
                       controller: _currentController,
@@ -2919,17 +3484,29 @@ class _InvestmentScreenState extends State<InvestmentScreen>
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(dialogCtx),
-                  child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.white54),
+                  ),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: purpleNeon),
-                  child: const Text('Save Asset', style: TextStyle(color: Colors.white)),
+                  child: const Text(
+                    'Save Asset',
+                    style: TextStyle(color: Colors.white),
+                  ),
                   onPressed: () async {
                     final name = _assetNameController.text.trim();
-                    final invested = double.tryParse(_investedController.text.trim());
-                    final current = double.tryParse(_currentController.text.trim());
+                    final invested = double.tryParse(
+                      _investedController.text.trim(),
+                    );
+                    final current = double.tryParse(
+                      _currentController.text.trim(),
+                    );
 
-                    if (name.isNotEmpty && invested != null && current != null) {
+                    if (name.isNotEmpty &&
+                        invested != null &&
+                        current != null) {
                       final nav = Navigator.of(dialogCtx);
                       final provider = context.read<InvestmentProvider>();
                       final asset = InvestmentModel(

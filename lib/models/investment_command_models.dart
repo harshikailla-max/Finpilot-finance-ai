@@ -148,7 +148,8 @@ class StrategyOption {
   final String liquidity;
   final double illustrativeReturnRate;
   final String volatilityDescription;
-  final Map<String, double> assetAllocation; // e.g., {'Equity': 60, 'Debt': 30, ...}
+  final Map<String, double>
+  assetAllocation; // e.g., {'Equity': 60, 'Debt': 30, ...}
   final String whyItFits;
   final String whyItMayNotFit;
 
@@ -167,11 +168,7 @@ class StrategyOption {
 }
 
 /// Goal Feasibility Rating
-enum GoalFeasibility {
-  good,
-  tight,
-  atRisk,
-}
+enum GoalFeasibility { good, tight, atRisk }
 
 extension GoalFeasibilityExt on GoalFeasibility {
   String get label {
@@ -296,7 +293,8 @@ class GoalSipRequirementResult {
   final double annualReturnRate;
   final double requiredMonthlyInvestment;
   final double availableMonthlyCapacity;
-  final double gap; // capacity - required (positive = surplus, negative = deficit)
+  final double
+  gap; // capacity - required (positive = surplus, negative = deficit)
   final bool isAchievable;
   final List<String> strategicAlternatives;
 
@@ -314,10 +312,7 @@ class GoalSipRequirementResult {
 }
 
 /// Tax Planning Models
-enum TaxRegime {
-  oldRegime,
-  newRegime,
-}
+enum TaxRegime { oldRegime, newRegime }
 
 class TaxDeductionCategory {
   final String code; // e.g., '80C', '80D', '80CCD(1B)'
@@ -381,7 +376,7 @@ class RetirementPlanReport {
   final double assumedPostRetirementReturn;
   final double existingInvestments;
   final double currentMonthlyInvestment;
-  
+
   final double projectedMonthlyExpenseAtRetirement;
   final double requiredRetirementCorpus;
   final double projectedExistingInvestmentsAtRetirement;

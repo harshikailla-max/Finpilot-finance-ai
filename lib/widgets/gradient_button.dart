@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../utils/constants.dart';
 
 class GradientButton extends StatelessWidget {
@@ -21,10 +22,7 @@ class GradientButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gradientColors = colors ?? [
-      AppColors.primaryPurple,
-      AppColors.cyan,
-    ];
+    final gradientColors = colors ?? [AppColors.primaryPurple, AppColors.cyan];
 
     return Container(
       width: width ?? double.infinity,

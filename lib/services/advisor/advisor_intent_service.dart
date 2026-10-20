@@ -183,27 +183,102 @@ class AdvisorIntentService {
     }
 
     // 11. Specific Big Purchases (Car, Home, Education, Travel)
-    if (_containsAny(lower, ['buy a car', 'car loan', 'purchase vehicle', 'electric car'])) {
+    if (_containsAny(lower, [
+      'buy a car',
+      'car loan',
+      'purchase vehicle',
+      'electric car',
+    ])) {
       return AdvisorIntent.car;
     }
-    if (_containsAny(lower, ['buy a house', 'buy a flat', 'home loan', 'down payment'])) {
+    if (_containsAny(lower, [
+      'buy a house',
+      'buy a flat',
+      'home loan',
+      'down payment',
+    ])) {
       return AdvisorIntent.home;
     }
-    if (_containsAny(lower, ['vacation', 'trip to', 'holiday', 'travel budget'])) {
+    if (_containsAny(lower, [
+      'vacation',
+      'trip to',
+      'holiday',
+      'travel budget',
+    ])) {
       return AdvisorIntent.travel;
     }
-    if (_containsAny(lower, ['mba', 'masters', 'education loan', 'college fees'])) {
+    if (_containsAny(lower, [
+      'mba',
+      'masters',
+      'education loan',
+      'college fees',
+    ])) {
       return AdvisorIntent.education;
     }
 
-    // 12. Tax planning
-    if (_containsAny(lower, ['tax saving', 'save tax', '80c', 'old vs new regime', 'tax bracket'])) {
+    // 12. Tax planning & Statutory Regimes
+    if (_containsAny(lower, [
+      'tax',
+      'taxes',
+      'income tax',
+      'regime',
+      'old regime',
+      'new regime',
+      'old vs new',
+      '80c',
+      '80d',
+      '87a',
+      'rebate',
+      'standard deduction',
+      'save tax',
+      'tax slab',
+      'tax bracket',
+      'tax planning',
+      'itr',
+      'capital gains',
+      'ltcg',
+      'stcg',
+      'tds',
+      'advance tax',
+      'tax saving',
+    ])) {
       return AdvisorIntent.tax;
     }
 
-    // 13. Retirement
-    if (_containsAny(lower, ['retirement', 'retire early', 'fire number', 'pension', 'nps'])) {
+    // 13. Retirement & FIRE
+    if (_containsAny(lower, [
+      'retirement',
+      'retire early',
+      'retire',
+      'fire number',
+      'fire',
+      'pension',
+      'nps',
+      'epf',
+      'ppf',
+      'corpus',
+      'how much to retire',
+      'retire at',
+    ])) {
       return AdvisorIntent.retirement;
+    }
+
+    // 14. Insurance & Risk Moat
+    if (_containsAny(lower, [
+      'insurance',
+      'term plan',
+      'term insurance',
+      'life insurance',
+      'health insurance',
+      'mediclaim',
+      'ulip',
+      'endowment',
+      'lic',
+      'policy',
+      'sum assured',
+      'critical illness',
+    ])) {
+      return AdvisorIntent.insurance;
     }
 
     // If context memory has a previous intent (e.g. user just said "Next year" or "₹10 lakh")
@@ -222,14 +297,20 @@ class AdvisorIntentService {
     double? amount;
 
     // Pattern: 50k / 50K
-    final kMatch = RegExp(r'(\d+(?:\.\d+)?)\s*k\b', caseSensitive: false).firstMatch(lower);
+    final kMatch = RegExp(
+      r'(\d+(?:\.\d+)?)\s*k\b',
+      caseSensitive: false,
+    ).firstMatch(lower);
     if (kMatch != null) {
       amount = (double.tryParse(kMatch.group(1)!) ?? 0) * 1000;
     }
 
     // Pattern: 10 lakh / 10 lakhs / 1.5 lac
     if (amount == null) {
-      final lakhMatch = RegExp(r'(\d+(?:\.\d+)?)\s*(?:lakh|lakhs|lac|lacs)\b', caseSensitive: false).firstMatch(lower);
+      final lakhMatch = RegExp(
+        r'(\d+(?:\.\d+)?)\s*(?:lakh|lakhs|lac|lacs)\b',
+        caseSensitive: false,
+      ).firstMatch(lower);
       if (lakhMatch != null) {
         amount = (double.tryParse(lakhMatch.group(1)!) ?? 0) * 100000;
       }
@@ -237,7 +318,10 @@ class AdvisorIntentService {
 
     // Pattern: 1 cr / 1.5 crore
     if (amount == null) {
-      final crMatch = RegExp(r'(\d+(?:\.\d+)?)\s*(?:cr|crore|crores)\b', caseSensitive: false).firstMatch(lower);
+      final crMatch = RegExp(
+        r'(\d+(?:\.\d+)?)\s*(?:cr|crore|crores)\b',
+        caseSensitive: false,
+      ).firstMatch(lower);
       if (crMatch != null) {
         amount = (double.tryParse(crMatch.group(1)!) ?? 0) * 10000000;
       }
@@ -245,7 +329,9 @@ class AdvisorIntentService {
 
     // Pattern: ₹50,000 or Rs 50000 or standard number > 100
     if (amount == null) {
-      final numMatch = RegExp(r'(?:₹|rs\.?|inr)?\s*([0-9]{1,3}(?:,[0-9]{3})+(?:\.[0-9]+)?|[0-9]{3,9}(?:\.[0-9]+)?)').firstMatch(lower);
+      final numMatch = RegExp(
+        r'(?:₹|rs\.?|inr)?\s*([0-9]{1,3}(?:,[0-9]{3})+(?:\.[0-9]+)?|[0-9]{3,9}(?:\.[0-9]+)?)',
+      ).firstMatch(lower);
       if (numMatch != null) {
         final cleanNum = numMatch.group(1)!.replaceAll(',', '');
         amount = double.tryParse(cleanNum);
@@ -255,28 +341,53 @@ class AdvisorIntentService {
     // 2. Product / Target extraction
     String? product;
     final productPatterns = [
-      RegExp(r'(?:buy|afford|get|purchase)\s+(?:a|an|the)?\s*([a-zA-Z0-9\s]{3,20}?)(?:\s+for|\s+at|\s+worth|\s+next|\s+in|\?|$)', caseSensitive: false),
-      RegExp(r'(?:iphone|macbook|laptop|car|bike|watch|headphone|phone|tv|house|apartment|flat|trip|course)', caseSensitive: false),
+      RegExp(
+        r'(?:buy|afford|get|purchase)\s+(?:a|an|the)?\s*([a-zA-Z0-9\s]{3,20}?)(?:\s+for|\s+at|\s+worth|\s+next|\s+in|\?|$)',
+        caseSensitive: false,
+      ),
+      RegExp(
+        r'(?:iphone|macbook|laptop|car|bike|watch|headphone|phone|tv|house|apartment|flat|trip|course)',
+        caseSensitive: false,
+      ),
     ];
 
     for (final pattern in productPatterns) {
       final match = pattern.firstMatch(lower);
       if (match != null) {
-        product = match.group(0)!.replaceAll(RegExp(r'\b(buy|afford|get|purchase|a|an|the|for|at|worth)\b', caseSensitive: false), '').trim();
+        product = match
+            .group(0)!
+            .replaceAll(
+              RegExp(
+                r'\b(buy|afford|get|purchase|a|an|the|for|at|worth)\b',
+                caseSensitive: false,
+              ),
+              '',
+            )
+            .trim();
         if (product.isNotEmpty) break;
       }
     }
 
     // 3. Timeframe extraction
     String? timeframe;
-    if (lower.contains('next year')) timeframe = 'in 1 year';
-    if (lower.contains('this year')) timeframe = 'this year';
-    if (lower.contains('next month')) timeframe = 'next month';
-    if (lower.contains('3 months') || lower.contains('6 months')) timeframe = 'in 6 months';
+    if (lower.contains('next year')) {
+      timeframe = 'in 1 year';
+    }
+    if (lower.contains('this year')) {
+      timeframe = 'this year';
+    }
+    if (lower.contains('next month')) {
+      timeframe = 'next month';
+    }
+    if (lower.contains('3 months') || lower.contains('6 months')) {
+      timeframe = 'in 6 months';
+    }
 
     // Update memory if values found, or fallback to memory if missing
     final resolvedAmount = amount ?? memory.lastAmount;
-    final resolvedProduct = (product != null && product.isNotEmpty) ? product : memory.lastProduct;
+    final resolvedProduct = (product != null && product.isNotEmpty)
+        ? product
+        : memory.lastProduct;
     final resolvedTimeframe = timeframe ?? memory.lastTimeframe;
 
     memory.update(

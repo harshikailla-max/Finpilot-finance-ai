@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
+
 import '../models/finance_transaction.dart';
 import '../providers/finance_provider.dart';
 import '../providers/budget_provider.dart';
@@ -140,12 +141,18 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             children: [
               const Icon(Icons.check_circle_rounded, color: Colors.white),
               const SizedBox(width: 8),
-              Text(widget.editTransaction != null ? 'Expense updated successfully!' : 'Expense saved successfully!'),
+              Text(
+                widget.editTransaction != null
+                    ? 'Expense updated successfully!'
+                    : 'Expense saved successfully!',
+              ),
             ],
           ),
           backgroundColor: AppColors.successGreen,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
 
@@ -160,17 +167,22 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
     // Dynamic calculations for Budget Impact
     final double enteredAmount = double.tryParse(_amountController.text) ?? 0.0;
-    final double categoryLimit = budgetProvider.categorySpentLimit(_selectedCategory);
-    final double currentSpent = financeProvider.monthlyCategorySpent[_selectedCategory] ?? 0.0;
+    final double categoryLimit = budgetProvider.categorySpentLimit(
+      _selectedCategory,
+    );
+    final double currentSpent =
+        financeProvider.monthlyCategorySpent[_selectedCategory] ?? 0.0;
     final double projectedSpent = currentSpent + enteredAmount;
-    final double remainingBudget = categoryLimit - currentSpent;
     final double remainingBudgetAfter = categoryLimit - projectedSpent;
 
-    final bool isBudgetExceeded = categoryLimit > 0 && projectedSpent > categoryLimit;
+    final bool isBudgetExceeded =
+        categoryLimit > 0 && projectedSpent > categoryLimit;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.editTransaction != null ? 'Edit Expense' : 'Add Expense'),
+        title: Text(
+          widget.editTransaction != null ? 'Edit Expense' : 'Add Expense',
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
@@ -217,7 +229,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           const SizedBox(height: 8),
                           TextFormField(
                             controller: _amountController,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             style: const TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
@@ -230,11 +244,17 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white.withValues(alpha: 0.3),
                               ),
-                              prefixIcon: const Icon(Icons.currency_rupee, size: 28, color: Colors.white),
+                              prefixIcon: const Icon(
+                                Icons.currency_rupee,
+                                size: 28,
+                                color: Colors.white,
+                              ),
                               fillColor: AppColors.secondaryBackground,
                             ),
                             onChanged: (val) {
-                              setState(() {}); // Rebuild to update budget impact
+                              setState(
+                                () {},
+                              ); // Rebuild to update budget impact
                             },
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
@@ -258,15 +278,21 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                   padding: const EdgeInsets.only(right: 8.0),
                                   child: ActionChip(
                                     label: Text('+₹${amt.toStringAsFixed(0)}'),
-                                    backgroundColor: AppColors.secondaryBackground,
-                                    
+                                    backgroundColor:
+                                        AppColors.secondaryBackground,
+
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     onPressed: () {
-                                      final current = double.tryParse(_amountController.text) ?? 0.0;
+                                      final current =
+                                          double.tryParse(
+                                            _amountController.text,
+                                          ) ??
+                                          0.0;
                                       setState(() {
-                                        _amountController.text = (current + amt).toStringAsFixed(0);
+                                        _amountController.text = (current + amt)
+                                            .toStringAsFixed(0);
                                       });
                                     },
                                   ),
@@ -291,7 +317,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             style: const TextStyle(color: Colors.white),
                             decoration: const InputDecoration(
                               hintText: 'e.g. Swiggy Lunch',
-                              prefixIcon: Icon(Icons.title_rounded, color: AppColors.textMuted),
+                              prefixIcon: Icon(
+                                Icons.title_rounded,
+                                color: AppColors.textMuted,
+                              ),
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
@@ -306,7 +335,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             const SizedBox(height: 6),
                             Row(
                               children: [
-                                const Icon(Icons.auto_awesome_rounded, color: AppColors.cyan, size: 14),
+                                const Icon(
+                                  Icons.auto_awesome_rounded,
+                                  color: AppColors.cyan,
+                                  size: 14,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   'AI auto-suggested category: $_selectedCategory',
@@ -341,15 +374,19 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                     DropdownButtonFormField<String>(
                                       value: _selectedCategory,
                                       decoration: const InputDecoration(
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                                        contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                        ),
                                       ),
                                       dropdownColor: AppColors.cardBackground,
-                                      items: AppConstants.expenseCategories.map((cat) {
-                                        return DropdownMenuItem(
-                                          value: cat,
-                                          child: Text(cat),
-                                        );
-                                      }).toList(),
+                                      items: AppConstants.expenseCategories.map(
+                                        (cat) {
+                                          return DropdownMenuItem(
+                                            value: cat,
+                                            child: Text(cat),
+                                          );
+                                        },
+                                      ).toList(),
                                       onChanged: (val) {
                                         setState(() {
                                           _selectedCategory = val!;
@@ -378,10 +415,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                     DropdownButtonFormField<String>(
                                       value: _selectedPaymentMethod,
                                       decoration: const InputDecoration(
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                                        contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                        ),
                                       ),
                                       dropdownColor: AppColors.cardBackground,
-                                      items: AppConstants.paymentMethods.map((pm) {
+                                      items: AppConstants.paymentMethods.map((
+                                        pm,
+                                      ) {
                                         return DropdownMenuItem(
                                           value: pm,
                                           child: Text(pm),
@@ -419,21 +460,35 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                     const SizedBox(height: 8),
                                     InkWell(
                                       onTap: _selectDate,
-                                      borderRadius: BorderRadius.circular(AppConstants.buttonRadius),
+                                      borderRadius: BorderRadius.circular(
+                                        AppConstants.buttonRadius,
+                                      ),
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 16,
+                                        ),
                                         decoration: BoxDecoration(
                                           color: AppColors.secondaryBackground,
-                                          borderRadius: BorderRadius.circular(AppConstants.buttonRadius),
+                                          borderRadius: BorderRadius.circular(
+                                            AppConstants.buttonRadius,
+                                          ),
                                         ),
                                         child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
                                               '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                                              style: const TextStyle(color: Colors.white),
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                              ),
                                             ),
-                                            const Icon(Icons.calendar_today_rounded, color: AppColors.textMuted, size: 18),
+                                            const Icon(
+                                              Icons.calendar_today_rounded,
+                                              color: AppColors.textMuted,
+                                              size: 18,
+                                            ),
                                           ],
                                         ),
                                       ),
@@ -457,18 +512,31 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                     ),
                                     const SizedBox(height: 8),
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: AppColors.secondaryBackground,
-                                        borderRadius: BorderRadius.circular(AppConstants.buttonRadius),
+                                        borderRadius: BorderRadius.circular(
+                                          AppConstants.buttonRadius,
+                                        ),
                                       ),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
-                                          const Text('Monthly', style: TextStyle(color: Colors.white, fontSize: 13)),
+                                          const Text(
+                                            'Monthly',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 13,
+                                            ),
+                                          ),
                                           Switch(
                                             value: _isRecurring,
-                                            activeColor: AppColors.primaryPurple,
+                                            activeColor:
+                                                AppColors.primaryPurple,
                                             onChanged: (val) {
                                               setState(() {
                                                 _isRecurring = val;
@@ -500,7 +568,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             style: const TextStyle(color: Colors.white),
                             decoration: const InputDecoration(
                               hintText: 'e.g. Swiggy, Netflix, Amazon',
-                              prefixIcon: Icon(Icons.store_rounded, color: AppColors.textMuted),
+                              prefixIcon: Icon(
+                                Icons.store_rounded,
+                                color: AppColors.textMuted,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -521,7 +592,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             style: const TextStyle(color: Colors.white),
                             decoration: const InputDecoration(
                               hintText: 'Add additional details...',
-                              prefixIcon: Icon(Icons.notes_rounded, color: AppColors.textMuted),
+                              prefixIcon: Icon(
+                                Icons.notes_rounded,
+                                color: AppColors.textMuted,
+                              ),
                             ),
                           ),
                         ],
@@ -558,11 +632,17 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               children: [
                                 Text(
                                   '$_selectedCategory Limit:',
-                                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                                  style: const TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 13,
+                                  ),
                                 ),
                                 Text(
                                   CurrencyFormatter.format(categoryLimit),
-                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ],
                             ),
@@ -572,7 +652,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               children: [
                                 const Text(
                                   'Current Spent:',
-                                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 13,
+                                  ),
                                 ),
                                 Text(
                                   CurrencyFormatter.format(currentSpent),
@@ -586,12 +669,17 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               children: [
                                 const Text(
                                   'After Expense:',
-                                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 13,
+                                  ),
                                 ),
                                 Text(
                                   CurrencyFormatter.format(projectedSpent),
                                   style: TextStyle(
-                                    color: isBudgetExceeded ? AppColors.dangerRed : Colors.white,
+                                    color: isBudgetExceeded
+                                        ? AppColors.dangerRed
+                                        : Colors.white,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -603,12 +691,21 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               children: [
                                 const Text(
                                   'Remaining Budget:',
-                                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 13,
+                                  ),
                                 ),
                                 Text(
-                                  CurrencyFormatter.format(remainingBudgetAfter > 0 ? remainingBudgetAfter : 0.0),
+                                  CurrencyFormatter.format(
+                                    remainingBudgetAfter > 0
+                                        ? remainingBudgetAfter
+                                        : 0.0,
+                                  ),
                                   style: TextStyle(
-                                    color: remainingBudgetAfter <= 0 ? AppColors.dangerRed : AppColors.successGreen,
+                                    color: remainingBudgetAfter <= 0
+                                        ? AppColors.dangerRed
+                                        : AppColors.successGreen,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -620,12 +717,18 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: AppColors.dangerRed.withValues(alpha: 0.12),
+                                  color: AppColors.dangerRed.withValues(
+                                    alpha: 0.12,
+                                  ),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Row(
                                   children: [
-                                    const Icon(Icons.warning_amber_rounded, color: AppColors.dangerRed, size: 20),
+                                    const Icon(
+                                      Icons.warning_amber_rounded,
+                                      color: AppColors.dangerRed,
+                                      size: 20,
+                                    ),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
@@ -648,9 +751,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     ],
 
                     GradientButton(
-                      text: widget.editTransaction != null ? 'Update Expense' : 'Save Expense',
+                      text: widget.editTransaction != null
+                          ? 'Update Expense'
+                          : 'Save Expense',
                       onTap: _saveExpense,
-                      colors: isBudgetExceeded ? [AppColors.dangerRed, AppColors.primaryPurple] : null,
+                      colors: isBudgetExceeded
+                          ? [AppColors.dangerRed, AppColors.primaryPurple]
+                          : null,
                     ),
                     const SizedBox(height: 40),
                   ],

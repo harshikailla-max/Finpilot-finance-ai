@@ -1,9 +1,9 @@
 class FinancialHealthModel {
-  final double savingsScore;       // max 25
-  final double budgetScore;        // max 25
+  final double savingsScore; // max 25
+  final double budgetScore; // max 25
   final double expenseControlScore; // max 20
-  final double cashFlowScore;      // max 15
-  final double goalScore;          // max 15
+  final double cashFlowScore; // max 15
+  final double goalScore; // max 15
 
   FinancialHealthModel({
     required this.savingsScore,
@@ -14,7 +14,11 @@ class FinancialHealthModel {
   });
 
   double get totalScore {
-    return (savingsScore + budgetScore + expenseControlScore + cashFlowScore + goalScore)
+    return (savingsScore +
+            budgetScore +
+            expenseControlScore +
+            cashFlowScore +
+            goalScore)
         .clamp(0.0, 100.0);
   }
 

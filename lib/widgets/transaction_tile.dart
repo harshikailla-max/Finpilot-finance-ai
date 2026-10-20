@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/finance_transaction.dart';
 import '../utils/constants.dart';
 import '../utils/currency_formatter.dart';
@@ -105,7 +106,10 @@ class TransactionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final iconData = _getCategoryIcon(transaction.category, transaction.type);
-    final themeColor = _getCategoryColor(transaction.category, transaction.type);
+    final themeColor = _getCategoryColor(
+      transaction.category,
+      transaction.type,
+    );
     final isIncome = transaction.type == TransactionType.income;
 
     Widget tile = Container(
@@ -129,11 +133,7 @@ class TransactionTile extends StatelessWidget {
             color: themeColor.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Icon(
-            iconData,
-            color: themeColor,
-            size: 24,
-          ),
+          child: Icon(iconData, color: themeColor, size: 24),
         ),
         title: Text(
           transaction.title,
@@ -153,20 +153,20 @@ class TransactionTile extends StatelessWidget {
               fontSize: 12,
             ),
             child: Row(
-            children: [
-              Text(transaction.category),
-              const SizedBox(width: 6),
-              const Icon(Icons.circle, size: 4, color: AppColors.textMuted),
-              const SizedBox(width: 6),
-              Text(transaction.paymentMethod),
-              const SizedBox(width: 6),
-              const Icon(Icons.circle, size: 4, color: AppColors.textMuted),
-              const SizedBox(width: 6),
-              Text(AppDateUtils.formatFriendly(transaction.date)),
-            ],
+              children: [
+                Text(transaction.category),
+                const SizedBox(width: 6),
+                const Icon(Icons.circle, size: 4, color: AppColors.textMuted),
+                const SizedBox(width: 6),
+                Text(transaction.paymentMethod),
+                const SizedBox(width: 6),
+                const Icon(Icons.circle, size: 4, color: AppColors.textMuted),
+                const SizedBox(width: 6),
+                Text(AppDateUtils.formatFriendly(transaction.date)),
+              ],
+            ),
           ),
         ),
-      ),
         trailing: Text(
           '${isIncome ? '+' : '-'}${CurrencyFormatter.format(transaction.amount)}',
           style: TextStyle(

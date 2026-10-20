@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../models/finance_transaction.dart';
 import '../providers/finance_provider.dart';
 import '../utils/constants.dart';
@@ -23,7 +24,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
   // Filter States
   String _selectedType = 'All'; // All, Income, Expense
-  String _selectedDateRange = 'All Time'; // All Time, Today, This Week, This Month
+  String _selectedDateRange =
+      'All Time'; // All Time, Today, This Week, This Month
   String _selectedCategory = 'All'; // All, or specific category name
   String _selectedSort = 'Newest'; // Newest, Oldest, Highest, Lowest
 
@@ -43,20 +45,28 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     super.dispose();
   }
 
-  List<FinanceTransaction> _getFilteredTransactions(List<FinanceTransaction> allTransactions) {
+  List<FinanceTransaction> _getFilteredTransactions(
+    List<FinanceTransaction> allTransactions,
+  ) {
     List<FinanceTransaction> list = List.from(allTransactions);
 
     // 1. Search Query
     if (_searchQuery.isNotEmpty) {
-      list = list.where((t) =>
-          t.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          t.note.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          t.merchant.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+      list = list
+          .where(
+            (t) =>
+                t.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                t.note.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                t.merchant.toLowerCase().contains(_searchQuery.toLowerCase()),
+          )
+          .toList();
     }
 
     // 2. Type Filter
     if (_selectedType != 'All') {
-      final targetType = _selectedType == 'Income' ? TransactionType.income : TransactionType.expense;
+      final targetType = _selectedType == 'Income'
+          ? TransactionType.income
+          : TransactionType.expense;
       list = list.where((t) => t.type == targetType).toList();
     }
 
@@ -71,9 +81,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       if (_selectedDateRange == 'Today') {
         list = list.where((t) => AppDateUtils.isSameDay(t.date, now)).toList();
       } else if (_selectedDateRange == 'This Week') {
-        list = list.where((t) => AppDateUtils.isWithinThisWeek(t.date)).toList();
+        list = list
+            .where((t) => AppDateUtils.isWithinThisWeek(t.date))
+            .toList();
       } else if (_selectedDateRange == 'This Month') {
-        list = list.where((t) => AppDateUtils.isWithinThisMonth(t.date)).toList();
+        list = list
+            .where((t) => AppDateUtils.isWithinThisMonth(t.date))
+            .toList();
       }
     }
 
@@ -109,7 +123,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     final filteredTx = _getFilteredTransactions(allTx);
 
     // Dynamic list of unique categories available based on current selection
-    final categoriesList = ['All', ...AppConstants.expenseCategories, ...AppConstants.incomeCategories].toSet().toList();
+    final categoriesList = {
+      'All',
+      ...AppConstants.expenseCategories,
+      ...AppConstants.incomeCategories,
+    }.toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -134,16 +152,25 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           children: [
             // Search Bar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
               child: TextFormField(
                 controller: _searchController,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: 'Search merchant, note, or title...',
-                  prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textMuted),
+                  prefixIcon: const Icon(
+                    Icons.search_rounded,
+                    color: AppColors.textMuted,
+                  ),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear_rounded, color: AppColors.textMuted),
+                          icon: const Icon(
+                            Icons.clear_rounded,
+                            color: AppColors.textMuted,
+                          ),
                           onPressed: () => _searchController.clear(),
                         )
                       : null,
@@ -154,7 +181,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             // Horizontal filters row (Type, Date Range, Category, Sort)
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
               child: Row(
                 children: [
                   // Type dropdown
@@ -196,7 +226,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   // Sort dropdown
                   _buildFilterDropdown(
                     label: 'Sort: $_selectedSort',
-                    items: ['Newest', 'Oldest', 'Highest Amount', 'Lowest Amount'],
+                    items: [
+                      'Newest',
+                      'Oldest',
+                      'Highest Amount',
+                      'Lowest Amount',
+                    ],
                     onChanged: (val) {
                       setState(() {
                         _selectedSort = val;
@@ -220,12 +255,17 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                       onButtonTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const AddExpenseScreen()),
+                          MaterialPageRoute(
+                            builder: (context) => const AddExpenseScreen(),
+                          ),
                         );
                       },
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 8.0,
+                      ),
                       itemCount: filteredTx.length,
                       itemBuilder: (context, index) {
                         final tx = filteredTx[index];
@@ -235,7 +275,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => TransactionDetailsScreen(transaction: tx),
+                                builder: (context) =>
+                                    TransactionDetailsScreen(transaction: tx),
                               ),
                             );
                           },
@@ -280,25 +321,32 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.04),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: AppColors.cyan),
-          style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 16,
+            color: AppColors.cyan,
+          ),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
           dropdownColor: AppColors.cardBackground,
           hint: Text(
             label,
-            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           items: items.map((item) {
-            return DropdownMenuItem<String>(
-              value: item,
-              child: Text(item),
-            );
+            return DropdownMenuItem<String>(value: item, child: Text(item));
           }).toList(),
           onChanged: (val) {
             if (val != null) onChanged(val);

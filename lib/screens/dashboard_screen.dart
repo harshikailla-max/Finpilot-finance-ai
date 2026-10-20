@@ -72,10 +72,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
             // Main View Area
             Expanded(
-              child: IndexedStack(
-                index: _currentIndex,
-                children: _tabs,
-              ),
+              child: IndexedStack(index: _currentIndex, children: _tabs),
             ),
           ],
         ),
@@ -84,10 +81,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.obsidian,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _tabs,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _tabs),
       bottomNavigationBar: _buildLuxuryBottomNav(),
     );
   }
@@ -101,10 +95,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       decoration: BoxDecoration(
         color: AppColors.background.withValues(alpha: 0.95),
         border: const Border(
-          right: BorderSide(
-            color: AppColors.glassBorder,
-            width: 1,
-          ),
+          right: BorderSide(color: AppColors.glassBorder, width: 1),
         ),
       ),
       child: Column(
@@ -159,7 +150,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 _desktopNavItem(0, Icons.dashboard_rounded, 'Command Center'),
                 _desktopNavItem(1, Icons.receipt_long_rounded, 'Transactions'),
                 _desktopNavItem(2, Icons.auto_awesome, 'AI Financial Advisor'),
-                _desktopNavItem(3, Icons.account_balance_rounded, 'Investments'),
+                _desktopNavItem(
+                  3,
+                  Icons.account_balance_rounded,
+                  'Investments',
+                ),
                 _desktopNavItem(4, Icons.person_rounded, 'Private Profile'),
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 16),
@@ -170,7 +165,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   'Future Simulator',
                   () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const FutureSimulatorScreen()),
+                    MaterialPageRoute(
+                      builder: (_) => const FutureSimulatorScreen(),
+                    ),
                   ),
                 ),
                 _desktopActionItem(
@@ -178,7 +175,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   'Financial Health',
                   () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const FinancialHealthScreen()),
+                    MaterialPageRoute(
+                      builder: (_) => const FinancialHealthScreen(),
+                    ),
                   ),
                 ),
                 _desktopActionItem(
@@ -271,14 +270,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               Icon(
                 icon,
-                color: isSelected ? AppColors.auroraViolet : AppColors.textSecondary,
+                color: isSelected
+                    ? AppColors.auroraViolet
+                    : AppColors.textSecondary,
                 size: 20,
               ),
               const SizedBox(width: 12),
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+                  color: isSelected
+                      ? AppColors.textPrimary
+                      : AppColors.textSecondary,
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 ),
@@ -325,10 +328,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       decoration: BoxDecoration(
         color: AppColors.background.withValues(alpha: 0.92),
         border: const Border(
-          top: BorderSide(
-            color: AppColors.glassBorder,
-            width: 1,
-          ),
+          top: BorderSide(color: AppColors.glassBorder, width: 1),
         ),
       ),
       child: SafeArea(
@@ -361,7 +361,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.auroraViolet.withValues(alpha: 0.35),
+                            color: AppColors.auroraViolet.withValues(
+                              alpha: 0.35,
+                            ),
                             blurRadius: 16,
                             spreadRadius: 2,
                           ),
@@ -450,140 +452,152 @@ class DashboardHomeView extends StatelessWidget {
   const DashboardHomeView({super.key});
 
   void _openPage(BuildContext context, Widget page) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => page),
-    );
+    Navigator.push(context, MaterialPageRoute(builder: (_) => page));
   }
 
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width >= 1024;
 
-    return Consumer5<FinanceProvider, GoalProvider, InvestmentProvider,
-        FinancialHealthProvider, BudgetProvider>(
-      builder: (context, finance, goalProvider, investmentProvider, healthProvider,
-          budgetProvider, _) {
-        final balance = finance.balance;
-        final income = finance.monthlyIncome;
-        final expense = finance.monthlyExpense;
-        final savings = finance.monthlySavings;
-        final portfolioValue = investmentProvider.totalCurrentValue;
-        final healthScore = healthProvider.healthData.totalScore.round();
+    return Consumer5<
+      FinanceProvider,
+      GoalProvider,
+      InvestmentProvider,
+      FinancialHealthProvider,
+      BudgetProvider
+    >(
+      builder:
+          (
+            context,
+            finance,
+            goalProvider,
+            investmentProvider,
+            healthProvider,
+            budgetProvider,
+            _,
+          ) {
+            final balance = finance.balance;
+            final income = finance.monthlyIncome;
+            final expense = finance.monthlyExpense;
+            final savings = finance.monthlySavings;
+            final portfolioValue = investmentProvider.totalCurrentValue;
+            final healthScore = healthProvider.healthData.totalScore.round();
 
-        return Scaffold(
-          backgroundColor: AppColors.obsidian,
-          body: Stack(
-            children: [
-              // Atmospheric Multi-Layer Aurora Canvas
-              const AuraBackground(),
+            return Scaffold(
+              backgroundColor: AppColors.obsidian,
+              body: Stack(
+                children: [
+                  // Atmospheric Multi-Layer Aurora Canvas
+                  const AuraBackground(),
 
-              SafeArea(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Center Main Scrollable Feed
-                    Expanded(
-                      flex: 3,
-                      child: RefreshIndicator(
-                        color: AppColors.auroraCyan,
-                        backgroundColor: AppColors.secondaryBackground,
-                        onRefresh: () async {
-                          await Future.delayed(const Duration(milliseconds: 400));
-                        },
-                        child: CustomScrollView(
-                          physics: const BouncingScrollPhysics(
-                            parent: AlwaysScrollableScrollPhysics(),
+                  SafeArea(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Center Main Scrollable Feed
+                        Expanded(
+                          flex: 3,
+                          child: RefreshIndicator(
+                            color: AppColors.auroraCyan,
+                            backgroundColor: AppColors.secondaryBackground,
+                            onRefresh: () async {
+                              await Future.delayed(
+                                const Duration(milliseconds: 400),
+                              );
+                            },
+                            child: CustomScrollView(
+                              physics: const BouncingScrollPhysics(
+                                parent: AlwaysScrollableScrollPhysics(),
+                              ),
+                              slivers: [
+                                // 1. Sleek Brand Header
+                                SliverToBoxAdapter(
+                                  child: _buildHeader(context),
+                                ),
+
+                                // 2. Wealth Hero (Your Financial Universe)
+                                SliverToBoxAdapter(
+                                  child: _buildWealthHero(
+                                    context,
+                                    balance: balance,
+                                    income: income,
+                                    expense: expense,
+                                    savings: savings,
+                                    portfolioValue: portfolioValue,
+                                  ),
+                                ),
+
+                                // 3. AI Financial Briefing
+                                SliverToBoxAdapter(
+                                  child: _buildAIBriefing(
+                                    context,
+                                    income: income,
+                                    expense: expense,
+                                    savings: savings,
+                                    healthScore: healthScore,
+                                  ),
+                                ),
+
+                                // 4. Your Next Best Move
+                                SliverToBoxAdapter(
+                                  child: _buildNextBestMove(context),
+                                ),
+
+                                // 5. Financial Command Center
+                                SliverToBoxAdapter(
+                                  child: _buildCommandCenter(context),
+                                ),
+
+                                // 6. Spending DNA
+                                SliverToBoxAdapter(
+                                  child: _buildSpendingDNA(
+                                    context,
+                                    finance: finance,
+                                  ),
+                                ),
+
+                                // 7. Financial Destinations (Goals)
+                                SliverToBoxAdapter(
+                                  child: _buildFinancialDestinations(
+                                    context,
+                                    goals: goalProvider.goals,
+                                  ),
+                                ),
+
+                                // 8. Financial Timeline (Recent Transactions)
+                                SliverToBoxAdapter(
+                                  child: _buildFinancialTimeline(
+                                    context,
+                                    transactions: finance.transactions,
+                                  ),
+                                ),
+
+                                const SliverToBoxAdapter(
+                                  child: SizedBox(height: 40),
+                                ),
+                              ],
+                            ),
                           ),
-                          slivers: [
-                            // 1. Sleek Brand Header
-                            SliverToBoxAdapter(
-                              child: _buildHeader(context),
-                            ),
-
-                            // 2. Wealth Hero (Your Financial Universe)
-                            SliverToBoxAdapter(
-                              child: _buildWealthHero(
-                                context,
-                                balance: balance,
-                                income: income,
-                                expense: expense,
-                                savings: savings,
-                                portfolioValue: portfolioValue,
-                              ),
-                            ),
-
-                            // 3. AI Financial Briefing
-                            SliverToBoxAdapter(
-                              child: _buildAIBriefing(
-                                context,
-                                income: income,
-                                expense: expense,
-                                savings: savings,
-                                healthScore: healthScore,
-                              ),
-                            ),
-
-                            // 4. Your Next Best Move
-                            SliverToBoxAdapter(
-                              child: _buildNextBestMove(context),
-                            ),
-
-                            // 5. Financial Command Center
-                            SliverToBoxAdapter(
-                              child: _buildCommandCenter(context),
-                            ),
-
-                            // 6. Spending DNA
-                            SliverToBoxAdapter(
-                              child: _buildSpendingDNA(
-                                context,
-                                finance: finance,
-                              ),
-                            ),
-
-                            // 7. Financial Destinations (Goals)
-                            SliverToBoxAdapter(
-                              child: _buildFinancialDestinations(
-                                context,
-                                goals: goalProvider.goals,
-                              ),
-                            ),
-
-                            // 8. Financial Timeline (Recent Transactions)
-                            SliverToBoxAdapter(
-                              child: _buildFinancialTimeline(
-                                context,
-                                transactions: finance.transactions,
-                              ),
-                            ),
-
-                            const SliverToBoxAdapter(
-                              child: SizedBox(height: 40),
-                            ),
-                          ],
                         ),
-                      ),
+
+                        // Right Intelligence Rail (Desktop Only)
+                        if (isDesktop)
+                          Expanded(
+                            flex: 1,
+                            child: _buildDesktopRightRail(
+                              context,
+                              healthScore: healthScore,
+                              goals: goalProvider.goals,
+                              monthlySavings: savings,
+                            ),
+                          ),
+                      ],
                     ),
-
-                    // Right Intelligence Rail (Desktop Only)
-                    if (isDesktop)
-                      Expanded(
-                        flex: 1,
-                        child: _buildDesktopRightRail(
-                          context,
-                          healthScore: healthScore,
-                          goals: goalProvider.goals,
-                          monthlySavings: savings,
-                        ),
-                      ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        );
-      },
+            );
+          },
     );
   }
 
@@ -684,7 +698,10 @@ class DashboardHomeView extends StatelessWidget {
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.successGreen.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
@@ -804,7 +821,8 @@ class DashboardHomeView extends StatelessWidget {
                     icon: Icons.document_scanner_outlined,
                     label: 'Receipt',
                     color: AppColors.auroraCyan,
-                    onTap: () => _openPage(context, const ReceiptScannerScreen()),
+                    onTap: () =>
+                        _openPage(context, const ReceiptScannerScreen()),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -813,7 +831,8 @@ class DashboardHomeView extends StatelessWidget {
                     icon: Icons.account_balance_outlined,
                     label: 'Bank PDF',
                     color: AppColors.auroraViolet,
-                    onTap: () => _openPage(context, const BankStatementScreen()),
+                    onTap: () =>
+                        _openPage(context, const BankStatementScreen()),
                   ),
                 ),
               ],
@@ -961,7 +980,10 @@ class DashboardHomeView extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.auroraViolet.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
@@ -1009,8 +1031,11 @@ class DashboardHomeView extends StatelessWidget {
                     ),
                     child: const Row(
                       children: [
-                        Icon(Icons.check_circle_outline,
-                            size: 14, color: AppColors.successGreen),
+                        Icon(
+                          Icons.check_circle_outline,
+                          size: 14,
+                          color: AppColors.successGreen,
+                        ),
                         SizedBox(width: 6),
                         Expanded(
                           child: Text(
@@ -1039,8 +1064,11 @@ class DashboardHomeView extends StatelessWidget {
                     ),
                     child: const Row(
                       children: [
-                        Icon(Icons.bolt_outlined,
-                            size: 14, color: AppColors.warningAmber),
+                        Icon(
+                          Icons.bolt_outlined,
+                          size: 14,
+                          color: AppColors.warningAmber,
+                        ),
                         SizedBox(width: 6),
                         Expanded(
                           child: Text(
@@ -1097,7 +1125,8 @@ class DashboardHomeView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
-                        onPressed: () => _openPage(context, const AIChatScreen()),
+                        onPressed: () =>
+                            _openPage(context, const AIChatScreen()),
                         child: const Text(
                           'Ask FinPilot',
                           style: TextStyle(
@@ -1113,7 +1142,9 @@ class DashboardHomeView extends StatelessWidget {
                           backgroundColor: AppColors.auroraViolet,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 8),
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -1211,7 +1242,10 @@ class DashboardHomeView extends StatelessWidget {
               children: [
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 10,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.03),
                       borderRadius: BorderRadius.circular(10),
@@ -1219,45 +1253,67 @@ class DashboardHomeView extends StatelessWidget {
                     child: const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Current 10Y Path',
-                            style: TextStyle(
-                                color: AppColors.textMuted, fontSize: 9)),
+                        Text(
+                          'Current 10Y Path',
+                          style: TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 9,
+                          ),
+                        ),
                         SizedBox(height: 2),
-                        Text('₹23.6 Lakhs',
-                            style: TextStyle(
-                                color: AppColors.textPrimary,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700)),
+                        Text(
+                          '₹23.6 Lakhs',
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.arrow_forward_rounded,
-                    size: 14, color: AppColors.luxuryChampagne),
+                const Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 14,
+                  color: AppColors.luxuryChampagne,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 10,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.luxuryChampagne.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: AppColors.luxuryChampagne.withValues(alpha: 0.25),
+                        color: AppColors.luxuryChampagne.withValues(
+                          alpha: 0.25,
+                        ),
                       ),
                     ),
                     child: const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Optimized 10Y Path',
-                            style: TextStyle(
-                                color: AppColors.luxuryChampagne, fontSize: 9)),
+                        Text(
+                          'Optimized 10Y Path',
+                          style: TextStyle(
+                            color: AppColors.luxuryChampagne,
+                            fontSize: 9,
+                          ),
+                        ),
                         SizedBox(height: 2),
-                        Text('₹38.4 Lakhs',
-                            style: TextStyle(
-                                color: AppColors.luxuryChampagne,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800)),
+                        Text(
+                          '₹38.4 Lakhs',
+                          style: TextStyle(
+                            color: AppColors.luxuryChampagne,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -1281,10 +1337,7 @@ class DashboardHomeView extends StatelessWidget {
                     _openPage(context, const FutureSimulatorScreen()),
                 child: const Text(
                   'Simulate & Optimize Trajectory',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
                 ),
               ),
             ),
@@ -1303,7 +1356,10 @@ class DashboardHomeView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionHeader('FINANCIAL COMMAND CENTER', 'Execute intelligent actions across your wealth stack'),
+          _sectionHeader(
+            'FINANCIAL COMMAND CENTER',
+            'Execute intelligent actions across your wealth stack',
+          ),
           const SizedBox(height: 14),
 
           GridView.count(
@@ -1404,10 +1460,12 @@ class DashboardHomeView extends StatelessWidget {
     final sortedEntries = categoryData.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
-    final topCategory =
-        sortedEntries.isNotEmpty ? sortedEntries.first.key : 'None';
-    final topAmount =
-        sortedEntries.isNotEmpty ? sortedEntries.first.value : 0.0;
+    final topCategory = sortedEntries.isNotEmpty
+        ? sortedEntries.first.key
+        : 'None';
+    final topAmount = sortedEntries.isNotEmpty
+        ? sortedEntries.first.value
+        : 0.0;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
@@ -1419,10 +1477,16 @@ class DashboardHomeView extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.bubble_chart_outlined,
-                    color: AppColors.auroraCyan, size: 18),
+                const Icon(
+                  Icons.bubble_chart_outlined,
+                  color: AppColors.auroraCyan,
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
-                _sectionHeader('SPENDING DNA', 'Behavioral outflow decomposition'),
+                _sectionHeader(
+                  'SPENDING DNA',
+                  'Behavioral outflow decomposition',
+                ),
                 const Spacer(),
                 TextButton(
                   onPressed: () => _openPage(context, const AnalyticsScreen()),
@@ -1466,26 +1530,34 @@ class DashboardHomeView extends StatelessWidget {
                         color: AppColors.dangerRed.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.pie_chart_rounded,
-                          size: 16, color: AppColors.dangerRed),
+                      child: const Icon(
+                        Icons.pie_chart_rounded,
+                        size: 16,
+                        color: AppColors.dangerRed,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Primary Capital Outflow: $topCategory',
-                              style: const TextStyle(
-                                  color: AppColors.textPrimary,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700)),
+                          Text(
+                            'Primary Capital Outflow: $topCategory',
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                           const SizedBox(height: 2),
                           Text(
                             totalSpent > 0
                                 ? '${(topAmount / totalSpent * 100).toStringAsFixed(1)}% of total monthly spending'
                                 : '0%',
                             style: const TextStyle(
-                                color: AppColors.textSecondary, fontSize: 10),
+                              color: AppColors.textSecondary,
+                              fontSize: 10,
+                            ),
                           ),
                         ],
                       ),
@@ -1506,8 +1578,9 @@ class DashboardHomeView extends StatelessWidget {
 
               // Category Bars
               ...sortedEntries.take(4).map((entry) {
-                final ratio =
-                    totalSpent > 0 ? (entry.value / totalSpent).clamp(0.0, 1.0) : 0.0;
+                final ratio = totalSpent > 0
+                    ? (entry.value / totalSpent).clamp(0.0, 1.0)
+                    : 0.0;
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Column(
@@ -1586,11 +1659,16 @@ class DashboardHomeView extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.flag_outlined,
-                    color: AppColors.luxuryChampagne, size: 18),
+                const Icon(
+                  Icons.flag_outlined,
+                  color: AppColors.luxuryChampagne,
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 _sectionHeader(
-                    'FINANCIAL DESTINATIONS', 'Milestone achievement vectors'),
+                  'FINANCIAL DESTINATIONS',
+                  'Milestone achievement vectors',
+                ),
                 const Spacer(),
                 TextButton(
                   onPressed: () => _openPage(context, const GoalsScreen()),
@@ -1615,11 +1693,15 @@ class DashboardHomeView extends StatelessWidget {
                     children: [
                       const Text(
                         'No wealth targets established yet.',
-                        style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+                        style: TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 12,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       TextButton(
-                        onPressed: () => _openPage(context, const GoalsScreen()),
+                        onPressed: () =>
+                            _openPage(context, const GoalsScreen()),
                         child: const Text(
                           '+ Establish First Goal',
                           style: TextStyle(
@@ -1665,11 +1747,17 @@ class DashboardHomeView extends StatelessWidget {
                             ),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3),
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
                                 color: progress >= 0.8
-                                    ? AppColors.successGreen.withValues(alpha: 0.12)
-                                    : AppColors.auroraCyan.withValues(alpha: 0.12),
+                                    ? AppColors.successGreen.withValues(
+                                        alpha: 0.12,
+                                      )
+                                    : AppColors.auroraCyan.withValues(
+                                        alpha: 0.12,
+                                      ),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -1712,7 +1800,9 @@ class DashboardHomeView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                           child: LinearProgressIndicator(
                             value: progress,
-                            backgroundColor: Colors.white.withValues(alpha: 0.06),
+                            backgroundColor: Colors.white.withValues(
+                              alpha: 0.06,
+                            ),
                             valueColor: const AlwaysStoppedAnimation<Color>(
                               AppColors.luxuryChampagne,
                             ),
@@ -1749,11 +1839,16 @@ class DashboardHomeView extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.history_rounded,
-                    color: AppColors.softBlue, size: 18),
+                const Icon(
+                  Icons.history_rounded,
+                  color: AppColors.softBlue,
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 _sectionHeader(
-                    'FINANCIAL TIMELINE', 'Verified capital transfers'),
+                  'FINANCIAL TIMELINE',
+                  'Verified capital transfers',
+                ),
                 const Spacer(),
                 TextButton(
                   onPressed: () =>
@@ -1894,10 +1989,7 @@ class DashboardHomeView extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.background.withValues(alpha: 0.75),
         border: const Border(
-          left: BorderSide(
-            color: AppColors.glassBorder,
-            width: 1,
-          ),
+          left: BorderSide(color: AppColors.glassBorder, width: 1),
         ),
       ),
       child: ListView(
@@ -1923,8 +2015,11 @@ class DashboardHomeView extends StatelessWidget {
               children: [
                 const Row(
                   children: [
-                    Icon(Icons.shield_rounded,
-                        size: 16, color: AppColors.auroraCyan),
+                    Icon(
+                      Icons.shield_rounded,
+                      size: 16,
+                      color: AppColors.auroraCyan,
+                    ),
                     SizedBox(width: 8),
                     Text(
                       'Financial Vitality',
@@ -1947,7 +2042,8 @@ class DashboardHomeView extends StatelessWidget {
                         value: healthScore / 100,
                         backgroundColor: Colors.white.withValues(alpha: 0.05),
                         valueColor: const AlwaysStoppedAnimation<Color>(
-                            AppColors.auroraCyan),
+                          AppColors.auroraCyan,
+                        ),
                         strokeWidth: 8,
                       ),
                     ),

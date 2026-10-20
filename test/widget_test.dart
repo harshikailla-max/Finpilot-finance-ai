@@ -44,7 +44,9 @@ class MockStorageService implements StorageService {
 }
 
 void main() {
-  testWidgets('SplashScreen smoke test displays title and subtitle', (WidgetTester tester) async {
+  testWidgets('SplashScreen smoke test displays title and subtitle', (
+    WidgetTester tester,
+  ) async {
     final mockStorage = MockStorageService();
 
     await tester.pumpWidget(

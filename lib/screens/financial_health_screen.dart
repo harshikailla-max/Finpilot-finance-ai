@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/financial_health_provider.dart';
 import '../providers/ai_provider.dart';
 import '../utils/constants.dart';
@@ -24,7 +25,10 @@ class _FinancialHealthScreenState extends State<FinancialHealthScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    );
     _controller.forward();
   }
 
@@ -50,7 +54,9 @@ class _FinancialHealthScreenState extends State<FinancialHealthScreen>
 
     final aiProvider = context.watch<AIProvider>();
     // Filter recommendations specifically for advice
-    final recommendations = aiProvider.insights.where((i) => i.type == 'tip' || i.type == 'warning').toList();
+    final recommendations = aiProvider.insights
+        .where((i) => i.type == 'tip' || i.type == 'warning')
+        .toList();
 
     final scoreColor = _getScoreColor(totalScore);
 
@@ -119,7 +125,9 @@ class _FinancialHealthScreenState extends State<FinancialHealthScreen>
                                 value: scoreVal / 100,
                                 strokeWidth: 14,
                                 backgroundColor: AppColors.secondaryBackground,
-                                valueColor: AlwaysStoppedAnimation<Color>(scoreColor),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  scoreColor,
+                                ),
                               ),
                             ),
                             Column(
@@ -249,8 +257,12 @@ class _FinancialHealthScreenState extends State<FinancialHealthScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Icon(
-                                isWarning ? Icons.warning_amber_rounded : Icons.auto_awesome_rounded,
-                                color: isWarning ? AppColors.dangerRed : AppColors.cyan,
+                                isWarning
+                                    ? Icons.warning_amber_rounded
+                                    : Icons.auto_awesome_rounded,
+                                color: isWarning
+                                    ? AppColors.dangerRed
+                                    : AppColors.cyan,
                                 size: 20,
                               ),
                               const SizedBox(width: 12),
@@ -260,13 +272,18 @@ class _FinancialHealthScreenState extends State<FinancialHealthScreen>
                                   children: [
                                     Text(
                                       item.title,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       item.message,
                                       style: TextStyle(
-                                        color: AppColors.textSecondary.withValues(alpha: 0.8),
+                                        color: AppColors.textSecondary
+                                            .withValues(alpha: 0.8),
                                         fontSize: 12,
                                         height: 1.4,
                                       ),
@@ -309,11 +326,19 @@ class _FinancialHealthScreenState extends State<FinancialHealthScreen>
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: Colors.white,
+                    ),
                   ),
                   Text(
                     '${score.toStringAsFixed(0)} / $max',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
               ),
@@ -328,8 +353,8 @@ class _FinancialHealthScreenState extends State<FinancialHealthScreen>
                     pct >= 0.80
                         ? AppColors.successGreen
                         : pct >= 0.50
-                            ? AppColors.warningOrange
-                            : AppColors.dangerRed,
+                        ? AppColors.warningOrange
+                        : AppColors.dangerRed,
                   ),
                 ),
               ),

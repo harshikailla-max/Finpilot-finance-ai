@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/finance_provider.dart';
 import '../providers/financial_health_provider.dart';
 import '../providers/goal_provider.dart';
@@ -13,14 +14,21 @@ import 'login_screen.dart';
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  void _showPersonalInfoDialog(BuildContext context, String currentName, String currentEmail) {
+  void _showPersonalInfoDialog(
+    BuildContext context,
+    String currentName,
+    String currentEmail,
+  ) {
     final nameController = TextEditingController(text: currentName);
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppColors.secondaryBackground,
-          title: const Text('Personal Information', style: TextStyle(color: Colors.white)),
+          title: const Text(
+            'Personal Information',
+            style: TextStyle(color: Colors.white),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -47,7 +55,10 @@ class ProfileScreen extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
             TextButton(
               onPressed: () async {
@@ -58,7 +69,10 @@ class ProfileScreen extends StatelessWidget {
                   if (context.mounted) Navigator.pop(context);
                 }
               },
-              child: const Text('Save', style: TextStyle(color: AppColors.cyan)),
+              child: const Text(
+                'Save',
+                style: TextStyle(color: AppColors.cyan),
+              ),
             ),
           ],
         );
@@ -77,7 +91,10 @@ class ProfileScreen extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Close', style: TextStyle(color: AppColors.cyan)),
+              child: const Text(
+                'Close',
+                style: TextStyle(color: AppColors.cyan),
+              ),
             ),
           ],
         );
@@ -148,7 +165,9 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primaryPurple.withValues(alpha: 0.4),
+                            color: AppColors.primaryPurple.withValues(
+                              alpha: 0.4,
+                            ),
                             blurRadius: 20,
                             spreadRadius: 2,
                           ),
@@ -261,7 +280,8 @@ class ProfileScreen extends StatelessWidget {
                       icon: Icons.person_outline_rounded,
                       title: 'Personal Information',
                       subtitle: 'Edit name and profile details',
-                      onTap: () => _showPersonalInfoDialog(context, userName, userEmail),
+                      onTap: () =>
+                          _showPersonalInfoDialog(context, userName, userEmail),
                     ),
                     const Divider(height: 1, color: Colors.white10),
                     _buildOptionTile(
@@ -304,7 +324,9 @@ class ProfileScreen extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                          MaterialPageRoute(
+                            builder: (context) => const SettingsScreen(),
+                          ),
                         );
                       },
                     ),
@@ -317,7 +339,10 @@ class ProfileScreen extends StatelessWidget {
               // Log Out Button
               TextButton.icon(
                 onPressed: () => _logout(context),
-                icon: const Icon(Icons.logout_rounded, color: AppColors.dangerRed),
+                icon: const Icon(
+                  Icons.logout_rounded,
+                  color: AppColors.dangerRed,
+                ),
                 label: const Text(
                   'Log Out',
                   style: TextStyle(
@@ -406,13 +431,21 @@ class ProfileScreen extends StatelessWidget {
       ),
       title: Text(
         title,
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
+        ),
       ),
       subtitle: Text(
         subtitle,
         style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
       ),
-      trailing: const Icon(Icons.arrow_forward_ios_rounded, color: AppColors.textMuted, size: 14),
+      trailing: const Icon(
+        Icons.arrow_forward_ios_rounded,
+        color: AppColors.textMuted,
+        size: 14,
+      ),
       onTap: onTap,
     );
   }

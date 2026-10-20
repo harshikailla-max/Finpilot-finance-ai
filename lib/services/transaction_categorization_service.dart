@@ -307,14 +307,17 @@ class TransactionCategorizationService {
     }
 
     // Bank transaction patterns
-    if (lower.contains('atm') && lower.contains('wdl')) return 'ATM Cash Withdrawal';
+    if (lower.contains('atm') && lower.contains('wdl')) {
+      return 'ATM Cash Withdrawal';
+    }
     if (lower.contains('salary')) return 'Salary Credit';
     if (lower.contains('interest credit')) return 'Bank Interest Credit';
     if (lower.contains('dividend')) return 'Dividend Payout';
     if (lower.contains('rent')) return 'House Rent';
 
     // UPI pattern extraction: e.g. "UPI/423523/MERCHANT NAME/..." or "UPI-MERCHANT"
-    final upiMatch = RegExp(r'UPI[-/](?:[A-Z0-9]+[-/])?([A-Za-z0-9 ]{3,25})').firstMatch(text);
+    final upiMatch = RegExp(r'UPI[-/](?:[A-Z0-9]+[-/])?([A-Za-z0-9 ]{3,25})')
+        .firstMatch(text);
     if (upiMatch != null) {
       final name = upiMatch.group(1)!.trim();
       if (name.isNotEmpty && !name.toLowerCase().contains('ref')) {
@@ -323,7 +326,8 @@ class TransactionCategorizationService {
     }
 
     // POS card swipe pattern: e.g. "POS 4012 STORE NAME"
-    final posMatch = RegExp(r'POS\s+(?:[0-9]+\s+)?([A-Za-z0-9 ]{3,25})').firstMatch(text);
+    final posMatch = RegExp(r'POS\s+(?:[0-9]+\s+)?([A-Za-z0-9 ]{3,25})')
+        .firstMatch(text);
     if (posMatch != null) {
       return _capitalize(posMatch.group(1)!.trim());
     }
@@ -342,7 +346,11 @@ class TransactionCategorizationService {
   }
 
   /// Detects transaction type from narration or column indicators.
-  static TransactionType detectType(String text, {bool? isCreditColumn, bool? isDebitColumn}) {
+  static TransactionType detectType(
+    String text, {
+    bool? isCreditColumn,
+    bool? isDebitColumn,
+  }) {
     if (isCreditColumn == true) return TransactionType.income;
     if (isDebitColumn == true) return TransactionType.expense;
 
@@ -378,9 +386,23 @@ class TransactionCategorizationService {
 
     if (lower.contains('upi')) return 'UPI';
     if (lower.contains('atm') || lower.contains('cash')) return 'Cash';
-    if (lower.contains('pos') || lower.contains('card') || lower.contains('debit')) return 'Debit Card';
-    if (lower.contains('credit card') || lower.contains('cc payment')) return 'Credit Card';
-    if (_containsAny(lower, ['neft', 'rtgs', 'imps', 'transfer', 'ach', 'ecs', 'wire'])) {
+    if (lower.contains('pos') ||
+        lower.contains('card') ||
+        lower.contains('debit')) {
+      return 'Debit Card';
+    }
+    if (lower.contains('credit card') || lower.contains('cc payment')) {
+      return 'Credit Card';
+    }
+    if (_containsAny(lower, [
+      'neft',
+      'rtgs',
+      'imps',
+      'transfer',
+      'ach',
+      'ecs',
+      'wire',
+    ])) {
       return 'Bank Transfer';
     }
 
@@ -396,9 +418,12 @@ class TransactionCategorizationService {
 
   static String _capitalize(String s) {
     if (s.isEmpty) return s;
-    return s.split(' ').map((word) {
-      if (word.isEmpty) return '';
-      return '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}';
-    }).join(' ');
+    return s
+        .split(' ')
+        .map((word) {
+          if (word.isEmpty) return '';
+          return '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}';
+        })
+        .join(' ');
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/finance_provider.dart';
 import '../providers/budget_provider.dart';
 import '../providers/financial_health_provider.dart';
@@ -17,12 +18,20 @@ class ReportsScreen extends StatelessWidget {
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppColors.secondaryBackground,
-          title: const Text('Exporting PDF...', style: TextStyle(color: Colors.white)),
+          title: const Text(
+            'Exporting PDF...',
+            style: TextStyle(color: Colors.white),
+          ),
           content: const Row(
             children: [
-              CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppColors.cyan)),
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.cyan),
+              ),
               SizedBox(width: 16),
-              Text('Formatting PDF report...', style: TextStyle(color: Colors.white70)),
+              Text(
+                'Formatting PDF report...',
+                style: TextStyle(color: Colors.white70),
+              ),
             ],
           ),
           actions: [
@@ -31,14 +40,21 @@ class ReportsScreen extends StatelessWidget {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: const Text('Report exported to Downloads successfully!'),
+                    content: const Text(
+                      'Report exported to Downloads successfully!',
+                    ),
                     backgroundColor: AppColors.successGreen,
                     behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 );
               },
-              child: const Text('Simulate Finish', style: TextStyle(color: AppColors.cyan)),
+              child: const Text(
+                'Simulate Finish',
+                style: TextStyle(color: AppColors.cyan),
+              ),
             ),
           ],
         );
@@ -55,7 +71,9 @@ class ReportsScreen extends StatelessWidget {
     final monthlyIncome = finance.monthlyIncome;
     final monthlyExpense = finance.monthlyExpense;
     final monthlySavings = finance.monthlySavings;
-    final savingsRate = monthlyIncome > 0 ? (monthlySavings / monthlyIncome) * 100 : 0.0;
+    final savingsRate = monthlyIncome > 0
+        ? (monthlySavings / monthlyIncome) * 100
+        : 0.0;
 
     final healthScore = health.healthScore;
     final budgetLimit = budget.monthlyBudget;
@@ -65,10 +83,13 @@ class ReportsScreen extends StatelessWidget {
     final sortedCategories = categorySpentMap.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
-    final highestSpendingCategory = sortedCategories.isNotEmpty ? sortedCategories.first.key : 'None';
+    final highestSpendingCategory = sortedCategories.isNotEmpty
+        ? sortedCategories.first.key
+        : 'None';
 
     // Summary Text
-    final summaryText = "This month you earned ${CurrencyFormatter.format(monthlyIncome)} and spent ${CurrencyFormatter.format(monthlyExpense)}. "
+    final summaryText =
+        "This month you earned ${CurrencyFormatter.format(monthlyIncome)} and spent ${CurrencyFormatter.format(monthlyExpense)}. "
         "Your savings were ${CurrencyFormatter.format(monthlySavings)}, representing a ${savingsRate.toStringAsFixed(0)}% savings rate. "
         "Your highest spending category was $highestSpendingCategory, and your overall budget status is marked as $budgetStatus. "
         "Your Financial Health Score is evaluated at ${healthScore.toStringAsFixed(0)}/100.";
@@ -105,7 +126,12 @@ class ReportsScreen extends StatelessWidget {
                   // Summary Card
                   const Text(
                     'MONTH IN REVIEW',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.0),
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.0,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   GlassCard(
@@ -114,15 +140,30 @@ class ReportsScreen extends StatelessWidget {
                       children: [
                         const Row(
                           children: [
-                            Icon(Icons.description_rounded, color: AppColors.cyan, size: 20),
+                            Icon(
+                              Icons.description_rounded,
+                              color: AppColors.cyan,
+                              size: 20,
+                            ),
                             SizedBox(width: 8),
-                            Text('Executive Summary', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white)),
+                            Text(
+                              'Executive Summary',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                color: Colors.white,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 16),
                         Text(
                           summaryText,
-                          style: const TextStyle(color: Colors.white70, fontSize: 14, height: 1.6),
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                            height: 1.6,
+                          ),
                         ),
                       ],
                     ),
@@ -133,25 +174,58 @@ class ReportsScreen extends StatelessWidget {
                   // Core Metrics Card
                   const Text(
                     'FINANCIAL METRICS',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.0),
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.0,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   GlassCard(
                     child: Column(
                       children: [
-                        _buildMetricRow('Total Income logged', CurrencyFormatter.format(monthlyIncome), AppColors.successGreen),
+                        _buildMetricRow(
+                          'Total Income logged',
+                          CurrencyFormatter.format(monthlyIncome),
+                          AppColors.successGreen,
+                        ),
                         const Divider(height: 24, color: Colors.white10),
-                        _buildMetricRow('Total Expenses logged', CurrencyFormatter.format(monthlyExpense), AppColors.dangerRed),
+                        _buildMetricRow(
+                          'Total Expenses logged',
+                          CurrencyFormatter.format(monthlyExpense),
+                          AppColors.dangerRed,
+                        ),
                         const Divider(height: 24, color: Colors.white10),
-                        _buildMetricRow('Net Savings (Mo.)', CurrencyFormatter.format(monthlySavings), AppColors.cyan),
+                        _buildMetricRow(
+                          'Net Savings (Mo.)',
+                          CurrencyFormatter.format(monthlySavings),
+                          AppColors.cyan,
+                        ),
                         const Divider(height: 24, color: Colors.white10),
-                        _buildMetricRow('Savings Rate %', '${savingsRate.toStringAsFixed(0)}%', Colors.white),
+                        _buildMetricRow(
+                          'Savings Rate %',
+                          '${savingsRate.toStringAsFixed(0)}%',
+                          Colors.white,
+                        ),
                         const Divider(height: 24, color: Colors.white10),
-                        _buildMetricRow('Budget Limit configured', CurrencyFormatter.format(budgetLimit), Colors.white),
+                        _buildMetricRow(
+                          'Budget Limit configured',
+                          CurrencyFormatter.format(budgetLimit),
+                          Colors.white,
+                        ),
                         const Divider(height: 24, color: Colors.white10),
-                        _buildMetricRow('Budget Usage level', budgetStatus, _getStatusColor(budgetStatus)),
+                        _buildMetricRow(
+                          'Budget Usage level',
+                          budgetStatus,
+                          _getStatusColor(budgetStatus),
+                        ),
                         const Divider(height: 24, color: Colors.white10),
-                        _buildMetricRow('Financial Health Index', '${healthScore.toStringAsFixed(0)} / 100', AppColors.primaryPurple),
+                        _buildMetricRow(
+                          'Financial Health Index',
+                          '${healthScore.toStringAsFixed(0)} / 100',
+                          AppColors.primaryPurple,
+                        ),
                       ],
                     ),
                   ),
@@ -162,7 +236,12 @@ class ReportsScreen extends StatelessWidget {
                   if (sortedCategories.isNotEmpty) ...[
                     const Text(
                       'SPENDING BREAKDOWN',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.0),
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.0,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     GlassCard(
@@ -178,18 +257,30 @@ class ReportsScreen extends StatelessWidget {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(category, style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white)),
+                                Text(
+                                  category,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text(
                                       CurrencyFormatter.format(spent),
-                                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                     if (limit > 0)
                                       Text(
                                         '${(pct * 100).toStringAsFixed(0)}% of category budget limit',
-                                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 10),
+                                        style: const TextStyle(
+                                          color: AppColors.textSecondary,
+                                          fontSize: 10,
+                                        ),
                                       ),
                                   ],
                                 ),
@@ -221,10 +312,21 @@ class ReportsScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w500)),
+        Text(
+          label,
+          style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         Text(
           value,
-          style: TextStyle(color: valueColor, fontWeight: FontWeight.bold, fontSize: 14),
+          style: TextStyle(
+            color: valueColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
         ),
       ],
     );

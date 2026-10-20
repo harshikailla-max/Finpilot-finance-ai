@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/ai_provider.dart';
 import '../services/ai_finance_service.dart';
 import '../utils/constants.dart';
@@ -21,7 +22,9 @@ class _AIInsightsScreenState extends State<AIInsightsScreen> {
       return allInsights.where((i) => i.type == 'warning').toList();
     }
     if (_activeTypeFilter == 'Opportunities') {
-      return allInsights.where((i) => i.type == 'opportunity' || i.type == 'positive').toList();
+      return allInsights
+          .where((i) => i.type == 'opportunity' || i.type == 'positive')
+          .toList();
     }
     return allInsights.where((i) => i.type == 'tip').toList();
   }
@@ -60,7 +63,10 @@ class _AIInsightsScreenState extends State<AIInsightsScreen> {
               children: [
                 // Filter Tags
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -87,7 +93,10 @@ class _AIInsightsScreenState extends State<AIInsightsScreen> {
                           ),
                         )
                       : ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20.0,
+                            vertical: 8.0,
+                          ),
                           itemCount: filteredInsights.length,
                           itemBuilder: (context, index) {
                             final item = filteredInsights[index];
@@ -110,16 +119,13 @@ class _AIInsightsScreenState extends State<AIInsightsScreen> {
                                         color: color.withValues(alpha: 0.1),
                                         shape: BoxShape.circle,
                                       ),
-                                      child: Icon(
-                                        icon,
-                                        color: color,
-                                        size: 24,
-                                      ),
+                                      child: Icon(icon, color: color, size: 24),
                                     ),
                                     const SizedBox(width: 16),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             item.title,
@@ -133,7 +139,8 @@ class _AIInsightsScreenState extends State<AIInsightsScreen> {
                                           Text(
                                             item.message,
                                             style: TextStyle(
-                                              color: AppColors.textSecondary.withValues(alpha: 0.85),
+                                              color: AppColors.textSecondary
+                                                  .withValues(alpha: 0.85),
                                               fontSize: 13,
                                               height: 1.5,
                                             ),

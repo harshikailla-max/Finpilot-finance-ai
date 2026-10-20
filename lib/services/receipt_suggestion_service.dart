@@ -229,16 +229,60 @@ class ReceiptSuggestionService {
     final clean = text.trim().toLowerCase();
     if (clean.isEmpty) return 'UPI';
 
+    if (_containsAny(clean, [
+      'credit card',
+      'credit',
+      'mastercard',
+      'visa',
+      'amex',
+    ])) {
+      return 'Credit Card';
+    }
+    if (_containsAny(clean, ['debit card', 'debit'])) {
+      return 'Debit Card';
+    }
     if (_containsAny(clean, ['cash', 'counter', 'petty'])) {
       return 'Cash';
     }
-    if (_containsAny(clean, ['neft', 'rtgs', 'imps', 'transfer', 'rent', 'electricity', 'society', 'wire'])) {
+    if (_containsAny(clean, [
+      'neft',
+      'rtgs',
+      'imps',
+      'transfer',
+      'rent',
+      'electricity',
+      'society',
+      'wire',
+      'bank',
+    ])) {
       return 'Bank Transfer';
     }
-    if (_containsAny(clean, ['amazon', 'netflix', 'flight', 'hotel', 'zara', 'apple', 'croma'])) {
+    if (_containsAny(clean, [
+      'amazon',
+      'netflix',
+      'flight',
+      'hotel',
+      'zara',
+      'apple',
+      'croma',
+    ])) {
       return 'Credit Card';
     }
-    if (_containsAny(clean, ['swiggy', 'zomato', 'uber', 'ola', 'zepto', 'blinkit', 'tea', 'cafe', 'upiqr'])) {
+    if (_containsAny(clean, [
+      'swiggy',
+      'zomato',
+      'uber',
+      'ola',
+      'zepto',
+      'blinkit',
+      'tea',
+      'cafe',
+      'upiqr',
+      'upi',
+      'gpay',
+      'phonepe',
+      'paytm',
+    ])) {
       return 'UPI';
     }
 
@@ -253,7 +297,9 @@ class ReceiptSuggestionService {
     // Current monthly expense baseline
     final currentMonthlyExpense = finance.monthlyExpense;
     // Use monthly income or a fallback base budget if income is 0
-    final double monthlyTarget = finance.monthlyIncome > 0 ? finance.monthlyIncome : 25000.0;
+    final double monthlyTarget = finance.monthlyIncome > 0
+        ? finance.monthlyIncome
+        : 25000.0;
     final double newTotal = currentMonthlyExpense + amount;
     final double percentage = (newTotal / monthlyTarget).clamp(0.0, 1.5) * 100;
 
@@ -278,46 +324,61 @@ class ReceiptSuggestionService {
 
     // Current month transactions in this category (including or plus this one)
     final currentMonthCategorySpend = transactions
-        .where((t) =>
-            t.type == TransactionType.expense &&
-            t.date.year == now.year &&
-            t.date.month == now.month &&
-            _isCategoryMatch(t.category, category))
+        .where(
+          (t) =>
+              t.type == TransactionType.expense &&
+              t.date.year == now.year &&
+              t.date.month == now.month &&
+              _isCategoryMatch(t.category, category),
+        )
         .fold(0.0, (sum, t) => sum + t.amount);
 
     // Prior month transactions in this category
     final lastMonth = DateTime(now.year, now.month - 1, 1);
     final lastMonthCategorySpend = transactions
-        .where((t) =>
-            t.type == TransactionType.expense &&
-            t.date.year == lastMonth.year &&
-            t.date.month == lastMonth.month &&
-            _isCategoryMatch(t.category, category))
+        .where(
+          (t) =>
+              t.type == TransactionType.expense &&
+              t.date.year == lastMonth.year &&
+              t.date.month == lastMonth.month &&
+              _isCategoryMatch(t.category, category),
+        )
         .fold(0.0, (sum, t) => sum + t.amount);
 
     // Calculate trend percentage
     double trendPercentage = 0.0;
     if (lastMonthCategorySpend > 0) {
-      trendPercentage = ((currentMonthCategorySpend - lastMonthCategorySpend) / lastMonthCategorySpend) * 100;
+      trendPercentage =
+          ((currentMonthCategorySpend - lastMonthCategorySpend) /
+              lastMonthCategorySpend) *
+          100;
     } else if (currentMonthCategorySpend > 0) {
       trendPercentage = 12.0; // Realistic default if no prior month record
     }
 
-    final budgetImpact = calculateBudgetImpact(amount: amount, finance: finance);
+    final budgetImpact = calculateBudgetImpact(
+      amount: amount,
+      finance: finance,
+    );
 
     String headline;
     String recommendation;
 
     if (budgetImpact.isExceeding) {
-      headline = 'This purchase puts your monthly spending above your planned target.';
-      recommendation = 'Consider limiting discretionary $category purchases for the remainder of the month.';
+      headline =
+          'This purchase puts your monthly spending above your planned target.';
+      recommendation =
+          'Consider limiting discretionary $category purchases for the remainder of the month.';
     } else if (trendPercentage > 15) {
-      headline = 'This purchase is within your monthly limit, but $category expenses are trending upward.';
+      headline =
+          'This purchase is within your monthly limit, but $category expenses are trending upward.';
       final suggestedWeeklyCap = (amount * 0.7).clamp(200.0, 5000.0).round();
-      recommendation = 'Consider limiting $category purchases to \u20B9$suggestedWeeklyCap per week to stay comfortably within your target.';
+      recommendation =
+          'Consider limiting $category purchases to \u20B9$suggestedWeeklyCap per week to stay comfortably within your target.';
     } else {
       headline = 'Expense successfully logged. Your cash flow and monthly spending remain well balanced.';
-      recommendation = 'Great job maintaining steady financial discipline this month.';
+      recommendation =
+          'Great job maintaining steady financial discipline this month.';
     }
 
     return ReceiptInsight(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../utils/constants.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/gradient_button.dart';
@@ -85,7 +86,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           // Main Column
           SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 16.0,
+              ),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -130,13 +134,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             style: const TextStyle(color: Colors.white),
                             decoration: const InputDecoration(
                               hintText: 'name@example.com',
-                              prefixIcon: Icon(Icons.email_outlined, color: AppColors.textMuted),
+                              prefixIcon: Icon(
+                                Icons.email_outlined,
+                                color: AppColors.textMuted,
+                              ),
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Please enter your email';
                               }
-                              final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                              final emailRegex = RegExp(
+                                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                              );
                               if (!emailRegex.hasMatch(value)) {
                                 return 'Please enter a valid email address';
                               }

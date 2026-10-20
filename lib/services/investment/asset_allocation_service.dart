@@ -34,15 +34,21 @@ class AssetAllocationService {
     final List<String> rationalePoints = [];
 
     // Short-term: < 2 years
-    if (timeHorizonYears < 2.0 || requiresImmediateLiquidity || goalCategory.toLowerCase().contains('emergency')) {
+    if (timeHorizonYears < 2.0 ||
+        requiresImmediateLiquidity ||
+        goalCategory.toLowerCase().contains('emergency')) {
       horizonCategory = 'Short-Term (< 2 Years)';
       equity = 0.0;
       debt = 55.0;
       liquid = 40.0;
       gold = 5.0;
       other = 0.0;
-      rationalePoints.add('For horizons under 24 months, zero equity is recommended to avoid capital drawdown risk right before withdrawal.');
-      rationalePoints.add('High allocation to liquid funds and ultra-short term debt ensures capital preservation and immediate access.');
+      rationalePoints.add(
+        'For horizons under 24 months, zero equity is recommended to avoid capital drawdown risk right before withdrawal.',
+      );
+      rationalePoints.add(
+        'High allocation to liquid funds and ultra-short term debt ensures capital preservation and immediate access.',
+      );
     }
     // Medium-term: 2 to 5 years
     else if (timeHorizonYears <= 5.0) {
@@ -69,7 +75,9 @@ class AssetAllocationService {
           gold = 5.0;
           break;
       }
-      rationalePoints.add('Medium-term horizon balances equity growth compounding with debt ballast to dampen market swings.');
+      rationalePoints.add(
+        'Medium-term horizon balances equity growth compounding with debt ballast to dampen market swings.',
+      );
     }
     // Long-term: > 5 years (Retirement, Wealth Creation, Children Education, Home)
     else {
@@ -106,7 +114,9 @@ class AssetAllocationService {
           gold = 5.0;
           break;
       }
-      rationalePoints.add('Extended horizon (>5 years) provides sufficient recovery time to ride out business cycles and benefit from compounding.');
+      rationalePoints.add(
+        'Extended horizon (>5 years) provides sufficient recovery time to ride out business cycles and benefit from compounding.',
+      );
     }
 
     // Adjustments for Emergency Reserve weakness
@@ -115,12 +125,16 @@ class AssetAllocationService {
       liquid = 20.0;
       equity = (equity - (delta * 0.7)).clamp(0.0, 100.0);
       debt = (debt - (delta * 0.3)).clamp(0.0, 100.0);
-      rationalePoints.add('Emergency reserve is incomplete; increased liquid buffer by ${delta.toStringAsFixed(0)}% to defend against unplanned shocks.');
+      rationalePoints.add(
+        'Emergency reserve is incomplete; increased liquid buffer by ${delta.toStringAsFixed(0)}% to defend against unplanned shocks.',
+      );
     }
 
     // Adjustments for high-interest debt
     if (hasHighCostDebt) {
-      rationalePoints.add('Notice: High-cost credit card/personal loan debt should take priority over non-tax-advantaged market investments.');
+      rationalePoints.add(
+        'Notice: High-cost credit card/personal loan debt should take priority over non-tax-advantaged market investments.',
+      );
     }
 
     // Normalize map to 100%

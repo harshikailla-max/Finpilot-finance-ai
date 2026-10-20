@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../utils/constants.dart';
 
 class LuxuryMetric extends StatelessWidget {
@@ -60,12 +61,16 @@ class LuxuryMetric extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: (isTrendPositive ? AppColors.success : AppColors.warning)
-                      .withValues(alpha: 0.12),
+                  color:
+                      (isTrendPositive ? AppColors.success : AppColors.warning)
+                          .withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
-                    color: (isTrendPositive ? AppColors.success : AppColors.warning)
-                        .withValues(alpha: 0.3),
+                    color:
+                        (isTrendPositive
+                                ? AppColors.success
+                                : AppColors.warning)
+                            .withValues(alpha: 0.3),
                     width: 0.8,
                   ),
                 ),
@@ -76,14 +81,18 @@ class LuxuryMetric extends StatelessWidget {
                       isTrendPositive
                           ? Icons.trending_up_rounded
                           : Icons.trending_down_rounded,
-                      color: isTrendPositive ? AppColors.success : AppColors.warning,
+                      color: isTrendPositive
+                          ? AppColors.success
+                          : AppColors.warning,
                       size: 13,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       trendText!,
                       style: TextStyle(
-                        color: isTrendPositive ? AppColors.success : AppColors.warning,
+                        color: isTrendPositive
+                            ? AppColors.success
+                            : AppColors.warning,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),

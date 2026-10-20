@@ -1,17 +1,18 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/advisor_models.dart';
 import '../models/ai_message_model.dart';
 import '../models/budget_model.dart';
-import '../services/advisor/advisor_engine.dart';
 import '../services/advisor/affordability_service.dart';
 import '../services/advisor/financial_dna_service.dart';
 import '../services/advisor/financial_xray_service.dart';
 import '../services/advisor/goal_optimizer_service.dart';
 import '../services/advisor/proactive_money_moves_service.dart';
 import '../services/advisor/what_if_service.dart';
+import '../services/ai_backend_service.dart';
 import '../services/ai_finance_service.dart';
 import '../services/storage_service.dart';
 import 'budget_provider.dart';
@@ -28,11 +29,13 @@ class AIProvider extends ChangeNotifier {
   InvestmentProvider? investmentProvider;
   FinancialHealthProvider? financialHealthProvider;
 
-  final AdvisorEngine _advisorEngine = AdvisorEngine();
+  late final AIBackendService _backendService;
 
   List<AIMessageModel> _chatMessages = [];
   List<AdvisorResponse> _advisorResponses = [];
   bool _isTyping = false;
+  String? _lastError;
+  String? _lastUserQuery;
 
   AIProvider({
     required this.financeProvider,
@@ -42,6 +45,7 @@ class AIProvider extends ChangeNotifier {
     this.investmentProvider,
     this.financialHealthProvider,
   }) {
+    _backendService = AIBackendService(storageService: storageService);
     financeProvider.addListener(_onDependencyChanged);
     budgetProvider.addListener(_onDependencyChanged);
     goalProvider.addListener(_onDependencyChanged);
@@ -67,6 +71,10 @@ class AIProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void refreshBackendConfig() {
+    notifyListeners();
+  }
+
   void _onDependencyChanged() {
     notifyListeners();
   }
@@ -84,11 +92,16 @@ class AIProvider extends ChangeNotifier {
   List<AIMessageModel> get chatMessages => _chatMessages;
   List<AdvisorResponse> get advisorResponses => _advisorResponses;
   bool get isTyping => _isTyping;
+  bool get isBackendConfigured => _backendService.isBackendConfigured;
+  String? get lastError => _lastError;
+  AIBackendService get backendService => _backendService;
+
+  Future<Map<String, dynamic>> checkHealth() => _backendService.checkHealth();
 
   InvestmentProvider get _resolvedInvestments =>
       investmentProvider ?? InvestmentProvider(storageService);
 
-  FinancialHealthProvider get _resolvedHealth =>
+  FinancialHealthProvider get resolvedHealth =>
       financialHealthProvider ??
       FinancialHealthProvider(
         financeProvider: financeProvider,
@@ -130,15 +143,14 @@ class AIProvider extends ChangeNotifier {
     required String product,
     required double price,
     String? timeframe,
-  }) =>
-      AffordabilityService.evaluatePurchase(
-        product: product,
-        price: price,
-        timeframe: timeframe,
-        finance: financeProvider,
-        budget: budgetProvider,
-        goals: goalProvider,
-      );
+  }) => AffordabilityService.evaluatePurchase(
+    product: product,
+    price: price,
+    timeframe: timeframe,
+    finance: financeProvider,
+    budget: budgetProvider,
+    goals: goalProvider,
+  );
 
   WhatIfScenarioResult simulateScenario({
     double incomeDelta = 0.0,
@@ -146,15 +158,14 @@ class AIProvider extends ChangeNotifier {
     double newRecurringEmi = 0.0,
     double oneTimeCost = 0.0,
     String? scenarioDescription,
-  }) =>
-      WhatIfService.simulateScenario(
-        finance: financeProvider,
-        incomeDelta: incomeDelta,
-        expenseDelta: expenseDelta,
-        newRecurringEmi: newRecurringEmi,
-        oneTimeCost: oneTimeCost,
-        scenarioDescription: scenarioDescription,
-      );
+  }) => WhatIfService.simulateScenario(
+    finance: financeProvider,
+    incomeDelta: incomeDelta,
+    expenseDelta: expenseDelta,
+    newRecurringEmi: newRecurringEmi,
+    oneTimeCost: oneTimeCost,
+    scenarioDescription: scenarioDescription,
+  );
 
   List<AIInsight> get insights {
     return AIFinanceService.generateInsights(
@@ -168,58 +179,119 @@ class AIProvider extends ChangeNotifier {
   }
 
   Future<void> sendMessage(String text) async {
-    if (text.trim().isEmpty) return;
+    final clean = text.trim();
+    if (clean.isEmpty) return;
+    if (_isTyping) return; // Prevent duplicate submissions
+
+    _lastUserQuery = clean;
+    _lastError = null;
 
     final uuid = const Uuid();
     final userMessage = AIMessageModel(
       id: uuid.v4(),
-      message: text,
+      message: clean,
       isUser: true,
       timestamp: DateTime.now(),
     );
 
+    // Snapshot prior history so the query is not duplicated in turns
+    final priorHistory = List<AIMessageModel>.from(_chatMessages);
     _chatMessages.add(userMessage);
+    _isTyping = true;
     notifyListeners();
     await _saveChatToStorage();
 
+    try {
+      final aiResult = await _backendService.generateAdvice(
+        query: clean,
+        finance: financeProvider,
+        budget: budgetProvider,
+        goals: goalProvider,
+        investments: _resolvedInvestments,
+        chatHistory: priorHistory,
+      );
+
+      if (aiResult.advisorResponse != null) {
+        _advisorResponses.add(aiResult.advisorResponse!);
+      }
+
+      if (aiResult.isSuccess) {
+        final aiMessage = AIMessageModel(
+          id: uuid.v4(),
+          message: aiResult.text,
+          isUser: false,
+          timestamp: DateTime.now(),
+        );
+        _chatMessages.add(aiMessage);
+        _lastError = null;
+      } else {
+        _lastError =
+            aiResult.errorMessage ?? 'Unable to process query. Please retry.';
+      }
+    } catch (e) {
+      _lastError = 'An error occurred while analyzing: $e';
+    } finally {
+      _isTyping = false;
+      notifyListeners();
+      await _saveChatToStorage();
+    }
+  }
+
+  Future<void> retryLastMessage() async {
+    if (_isTyping) return; // Prevent duplicate retry calls
+    if (_lastUserQuery == null || _lastUserQuery!.isEmpty) return;
+    final query = _lastUserQuery!;
+    _lastError = null;
     _isTyping = true;
     notifyListeners();
 
-    // Subtle AI reasoning delay
-    await Future.delayed(const Duration(milliseconds: 600));
+    // Prior history is all messages prior to the last user query
+    final priorHistory = _chatMessages.isNotEmpty && _chatMessages.last.isUser
+        ? _chatMessages.sublist(0, _chatMessages.length - 1)
+        : List<AIMessageModel>.from(_chatMessages);
 
-    // Execute the 16-stage Financial Advisor Brain pipeline
-    final advisorResponse = _advisorEngine.evaluate(
-      query: text,
-      finance: financeProvider,
-      budget: budgetProvider,
-      goals: goalProvider,
-      investments: _resolvedInvestments,
-      health: _resolvedHealth,
-    );
+    try {
+      final aiResult = await _backendService.generateAdvice(
+        query: query,
+        finance: financeProvider,
+        budget: budgetProvider,
+        goals: goalProvider,
+        investments: _resolvedInvestments,
+        chatHistory: priorHistory,
+      );
 
-    _advisorResponses.add(advisorResponse);
+      if (aiResult.advisorResponse != null) {
+        _advisorResponses.add(aiResult.advisorResponse!);
+      }
 
-    // Also populate standard conversational fallback for chat view
-    final summaryText =
-        '**${advisorResponse.verdict}**\n\n${advisorResponse.reasoning}\n\n*Action:* ${advisorResponse.nextAction}';
-
-    final aiMessage = AIMessageModel(
-      id: advisorResponse.id,
-      message: summaryText,
-      isUser: false,
-      timestamp: DateTime.now(),
-    );
-
-    _chatMessages.add(aiMessage);
-    _isTyping = false;
-    notifyListeners();
-    await _saveChatToStorage();
+      if (aiResult.isSuccess) {
+        final aiMessage = AIMessageModel(
+          id: const Uuid().v4(),
+          message: aiResult.text,
+          isUser: false,
+          timestamp: DateTime.now(),
+        );
+        _chatMessages.add(aiMessage);
+        _lastError = null;
+      } else {
+        _lastError =
+            aiResult.errorMessage ??
+            'Failed to complete request. Please retry.';
+      }
+    } catch (e) {
+      _lastError = 'Retry failed: $e';
+    } finally {
+      _isTyping = false;
+      notifyListeners();
+      await _saveChatToStorage();
+    }
   }
 
   Future<void> clearChat() async {
     _chatMessages.clear();
     _advisorResponses.clear();
+    _lastError = null;
+    _lastUserQuery = null;
     _seedWelcome();
     notifyListeners();
     await _saveChatToStorage();
@@ -231,7 +303,9 @@ class AIProvider extends ChangeNotifier {
       AIMessageModel(
         id: uuid.v4(),
         message:
-            "Greetings. I am FinPilot AI, your Private Financial Intelligence Advisor. I monitor your live cash flow, active goals, asset allocation, and emergency reserves.\n\nAsk me about purchases, goal acceleration, debt repayment, or request a complete Financial X-Ray.",
+            "Greetings! I am FinPilot AI Coach, your personal financial assistant. I have continuous visibility into your live cash flow, active budgets, savings goals, and portfolio allocation.\n\n"
+            "You can ask me open-ended questions across personal finance, wealth creation, tax concepts, technology, business, or general knowledge.\n\n"
+            "How can I assist you today?",
         isUser: false,
         timestamp: DateTime.now(),
       ),
@@ -246,7 +320,9 @@ class AIProvider extends ChangeNotifier {
       try {
         final List<dynamic> decodedList = jsonDecode(chatString);
         _chatMessages = decodedList
-            .map((item) => AIMessageModel.fromJson(item as Map<String, dynamic>))
+            .map(
+              (item) => AIMessageModel.fromJson(item as Map<String, dynamic>),
+            )
             .toList();
       } catch (_) {
         _chatMessages = [];
@@ -257,7 +333,9 @@ class AIProvider extends ChangeNotifier {
       try {
         final List<dynamic> decodedList = jsonDecode(responsesString);
         _advisorResponses = decodedList
-            .map((item) => AdvisorResponse.fromJson(item as Map<String, dynamic>))
+            .map(
+              (item) => AdvisorResponse.fromJson(item as Map<String, dynamic>),
+            )
             .toList();
       } catch (_) {
         _advisorResponses = [];

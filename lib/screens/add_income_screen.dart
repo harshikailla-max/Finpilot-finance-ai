@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
+
 import '../models/finance_transaction.dart';
 import '../providers/finance_provider.dart';
 import '../services/category_service.dart';
@@ -132,12 +133,18 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
             children: [
               const Icon(Icons.check_circle_rounded, color: Colors.white),
               const SizedBox(width: 8),
-              Text(widget.editTransaction != null ? 'Income updated successfully!' : 'Income logged successfully!'),
+              Text(
+                widget.editTransaction != null
+                    ? 'Income updated successfully!'
+                    : 'Income logged successfully!',
+              ),
             ],
           ),
           backgroundColor: AppColors.successGreen,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
 
@@ -149,7 +156,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.editTransaction != null ? 'Edit Income' : 'Add Income'),
+        title: Text(
+          widget.editTransaction != null ? 'Edit Income' : 'Add Income',
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
@@ -195,7 +204,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                           const SizedBox(height: 8),
                           TextFormField(
                             controller: _amountController,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             style: const TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
@@ -208,7 +219,11 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white.withValues(alpha: 0.3),
                               ),
-                              prefixIcon: const Icon(Icons.currency_rupee, size: 28, color: Colors.white),
+                              prefixIcon: const Icon(
+                                Icons.currency_rupee,
+                                size: 28,
+                                color: Colors.white,
+                              ),
                               fillColor: AppColors.secondaryBackground,
                             ),
                             validator: (value) {
@@ -233,15 +248,21 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                   padding: const EdgeInsets.only(right: 8.0),
                                   child: ActionChip(
                                     label: Text('+₹${amt.toStringAsFixed(0)}'),
-                                    backgroundColor: AppColors.secondaryBackground,
-                                   
+                                    backgroundColor:
+                                        AppColors.secondaryBackground,
+
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     onPressed: () {
-                                      final current = double.tryParse(_amountController.text) ?? 0.0;
+                                      final current =
+                                          double.tryParse(
+                                            _amountController.text,
+                                          ) ??
+                                          0.0;
                                       setState(() {
-                                        _amountController.text = (current + amt).toStringAsFixed(0);
+                                        _amountController.text = (current + amt)
+                                            .toStringAsFixed(0);
                                       });
                                     },
                                   ),
@@ -265,8 +286,12 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                             controller: _sourceController,
                             style: const TextStyle(color: Colors.white),
                             decoration: const InputDecoration(
-                              hintText: 'e.g. Monthly Salary, Freelance Web Design',
-                              prefixIcon: Icon(Icons.title_rounded, color: AppColors.textMuted),
+                              hintText:
+                                  'e.g. Monthly Salary, Freelance Web Design',
+                              prefixIcon: Icon(
+                                Icons.title_rounded,
+                                color: AppColors.textMuted,
+                              ),
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
@@ -280,7 +305,11 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                             const SizedBox(height: 6),
                             Row(
                               children: [
-                                const Icon(Icons.auto_awesome_rounded, color: AppColors.cyan, size: 14),
+                                const Icon(
+                                  Icons.auto_awesome_rounded,
+                                  color: AppColors.cyan,
+                                  size: 14,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   'AI auto-suggested category: $_selectedCategory',
@@ -315,10 +344,14 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                     DropdownButtonFormField<String>(
                                       value: _selectedCategory,
                                       decoration: const InputDecoration(
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                                        contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                        ),
                                       ),
                                       dropdownColor: AppColors.cardBackground,
-                                      items: AppConstants.incomeCategories.map((cat) {
+                                      items: AppConstants.incomeCategories.map((
+                                        cat,
+                                      ) {
                                         return DropdownMenuItem(
                                           value: cat,
                                           child: Text(cat),
@@ -352,15 +385,19 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                     DropdownButtonFormField<String>(
                                       value: _selectedReceivedThrough,
                                       decoration: const InputDecoration(
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                                        contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                        ),
                                       ),
                                       dropdownColor: AppColors.cardBackground,
-                                      items: AppConstants.incomeReceivedThrough.map((pm) {
-                                        return DropdownMenuItem(
-                                          value: pm,
-                                          child: Text(pm),
-                                        );
-                                      }).toList(),
+                                      items: AppConstants.incomeReceivedThrough
+                                          .map((pm) {
+                                            return DropdownMenuItem(
+                                              value: pm,
+                                              child: Text(pm),
+                                            );
+                                          })
+                                          .toList(),
                                       onChanged: (val) {
                                         setState(() {
                                           _selectedReceivedThrough = val!;
@@ -393,21 +430,35 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                     const SizedBox(height: 8),
                                     InkWell(
                                       onTap: _selectDate,
-                                      borderRadius: BorderRadius.circular(AppConstants.buttonRadius),
+                                      borderRadius: BorderRadius.circular(
+                                        AppConstants.buttonRadius,
+                                      ),
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 16,
+                                        ),
                                         decoration: BoxDecoration(
                                           color: AppColors.secondaryBackground,
-                                          borderRadius: BorderRadius.circular(AppConstants.buttonRadius),
+                                          borderRadius: BorderRadius.circular(
+                                            AppConstants.buttonRadius,
+                                          ),
                                         ),
                                         child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
                                               '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                                              style: const TextStyle(color: Colors.white),
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                              ),
                                             ),
-                                            const Icon(Icons.calendar_today_rounded, color: AppColors.textMuted, size: 18),
+                                            const Icon(
+                                              Icons.calendar_today_rounded,
+                                              color: AppColors.textMuted,
+                                              size: 18,
+                                            ),
                                           ],
                                         ),
                                       ),
@@ -431,18 +482,31 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                     ),
                                     const SizedBox(height: 8),
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: AppColors.secondaryBackground,
-                                        borderRadius: BorderRadius.circular(AppConstants.buttonRadius),
+                                        borderRadius: BorderRadius.circular(
+                                          AppConstants.buttonRadius,
+                                        ),
                                       ),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
-                                          const Text('Recurring', style: TextStyle(color: Colors.white, fontSize: 13)),
+                                          const Text(
+                                            'Recurring',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 13,
+                                            ),
+                                          ),
                                           Switch(
                                             value: _isRecurring,
-                                            activeColor: AppColors.primaryPurple,
+                                            activeColor:
+                                                AppColors.primaryPurple,
                                             onChanged: (val) {
                                               setState(() {
                                                 _isRecurring = val;
@@ -475,7 +539,10 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                             style: const TextStyle(color: Colors.white),
                             decoration: const InputDecoration(
                               hintText: 'Add additional details...',
-                              prefixIcon: Icon(Icons.notes_rounded, color: AppColors.textMuted),
+                              prefixIcon: Icon(
+                                Icons.notes_rounded,
+                                color: AppColors.textMuted,
+                              ),
                             ),
                           ),
                         ],
@@ -484,7 +551,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                     const SizedBox(height: 32),
 
                     GradientButton(
-                      text: widget.editTransaction != null ? 'Update Income' : 'Save Income',
+                      text: widget.editTransaction != null
+                          ? 'Update Income'
+                          : 'Save Income',
                       onTap: _saveIncome,
                       colors: const [AppColors.successGreen, AppColors.cyan],
                     ),

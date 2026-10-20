@@ -76,7 +76,11 @@ class TaxRulesService {
         TaxSlab(minIncome: 0, maxIncome: 250000, taxRatePercent: 0),
         TaxSlab(minIncome: 250000, maxIncome: 500000, taxRatePercent: 5),
         TaxSlab(minIncome: 500000, maxIncome: 1000000, taxRatePercent: 20),
-        TaxSlab(minIncome: 1000000, maxIncome: double.infinity, taxRatePercent: 30),
+        TaxSlab(
+          minIncome: 1000000,
+          maxIncome: double.infinity,
+          taxRatePercent: 30,
+        ),
       ],
       newRegimeSlabs: [
         TaxSlab(minIncome: 0, maxIncome: 300000, taxRatePercent: 0),
@@ -84,14 +88,24 @@ class TaxRulesService {
         TaxSlab(minIncome: 700000, maxIncome: 1000000, taxRatePercent: 10),
         TaxSlab(minIncome: 1000000, maxIncome: 1200000, taxRatePercent: 15),
         TaxSlab(minIncome: 1200000, maxIncome: 1500000, taxRatePercent: 20),
-        TaxSlab(minIncome: 1500000, maxIncome: double.infinity, taxRatePercent: 30),
+        TaxSlab(
+          minIncome: 1500000,
+          maxIncome: double.infinity,
+          taxRatePercent: 30,
+        ),
       ],
       deductionRules: [
         TaxDeductionRule(
           section: '80C',
           title: 'Life Insurance, ELSS & Provident Funds',
           maxLimit: 150000.0,
-          eligibleInstruments: ['ELSS Mutual Funds', 'PPF', 'EPF', 'Sukanya Samriddhi', 'Term Insurance'],
+          eligibleInstruments: [
+            'ELSS Mutual Funds',
+            'PPF',
+            'EPF',
+            'Sukanya Samriddhi',
+            'Term Insurance',
+          ],
           lockInPeriod: '3 Years (ELSS) to 15 Years (PPF)',
           riskLevel: RiskometerLevel.moderatelyHigh,
           taxTreatment: 'EEE for PPF; LTCG > 1.25L taxed at 12.5% for ELSS',
@@ -101,11 +115,17 @@ class TaxRulesService {
           section: '80D',
           title: 'Health Insurance Premium (Self & Family)',
           maxLimit: 50000.0,
-          eligibleInstruments: ['Individual Health Cover', 'Family Floater', 'Senior Citizen Parents Top-up'],
+          eligibleInstruments: [
+            'Individual Health Cover',
+            'Family Floater',
+            'Senior Citizen Parents Top-up',
+          ],
           lockInPeriod: 'Annual Premium (No lock-in)',
           riskLevel: RiskometerLevel.low,
-          taxTreatment: 'Direct deduction against taxable income under Old Regime',
-          eligibilityNotes: 'Up to ₹25k for self/family, additional ₹25k/₹50k for parents.',
+          taxTreatment:
+              'Direct deduction against taxable income under Old Regime',
+          eligibilityNotes:
+              'Up to ₹25k for self/family, additional ₹25k/₹50k for parents.',
         ),
         TaxDeductionRule(
           section: '80CCD(1B)',
@@ -114,7 +134,8 @@ class TaxRulesService {
           eligibleInstruments: ['NPS Tier 1 Account'],
           lockInPeriod: 'Until Age 60',
           riskLevel: RiskometerLevel.moderate,
-          taxTreatment: '60% tax-free lump sum at age 60; 40% mandatory annuity',
+          taxTreatment:
+              '60% tax-free lump sum at age 60; 40% mandatory annuity',
           eligibilityNotes: 'Over and above the ₹1.5L limit of Section 80C.',
         ),
         TaxDeductionRule(
@@ -145,7 +166,11 @@ class TaxRulesService {
         TaxSlab(minIncome: 0, maxIncome: 250000, taxRatePercent: 0),
         TaxSlab(minIncome: 250000, maxIncome: 500000, taxRatePercent: 5),
         TaxSlab(minIncome: 500000, maxIncome: 1000000, taxRatePercent: 20),
-        TaxSlab(minIncome: 1000000, maxIncome: double.infinity, taxRatePercent: 30),
+        TaxSlab(
+          minIncome: 1000000,
+          maxIncome: double.infinity,
+          taxRatePercent: 30,
+        ),
       ],
       newRegimeSlabs: [
         TaxSlab(minIncome: 0, maxIncome: 300000, taxRatePercent: 0),
@@ -153,14 +178,24 @@ class TaxRulesService {
         TaxSlab(minIncome: 700000, maxIncome: 1000000, taxRatePercent: 10),
         TaxSlab(minIncome: 1000000, maxIncome: 1200000, taxRatePercent: 15),
         TaxSlab(minIncome: 1200000, maxIncome: 1500000, taxRatePercent: 20),
-        TaxSlab(minIncome: 1500000, maxIncome: double.infinity, taxRatePercent: 30),
+        TaxSlab(
+          minIncome: 1500000,
+          maxIncome: double.infinity,
+          taxRatePercent: 30,
+        ),
       ],
       deductionRules: [
         TaxDeductionRule(
           section: '80C',
           title: 'Life Insurance, ELSS & Provident Funds',
           maxLimit: 150000.0,
-          eligibleInstruments: ['ELSS Mutual Funds', 'PPF', 'EPF', 'Sukanya Samriddhi', 'Term Insurance'],
+          eligibleInstruments: [
+            'ELSS Mutual Funds',
+            'PPF',
+            'EPF',
+            'Sukanya Samriddhi',
+            'Term Insurance',
+          ],
           lockInPeriod: '3 Years (ELSS) to 15 Years (PPF)',
           riskLevel: RiskometerLevel.moderatelyHigh,
           taxTreatment: 'EEE for PPF; LTCG > 1.25L taxed at 12.5% for ELSS',
@@ -170,11 +205,17 @@ class TaxRulesService {
           section: '80D',
           title: 'Health Insurance Premium (Self & Family)',
           maxLimit: 50000.0,
-          eligibleInstruments: ['Individual Health Cover', 'Family Floater', 'Senior Citizen Parents Top-up'],
+          eligibleInstruments: [
+            'Individual Health Cover',
+            'Family Floater',
+            'Senior Citizen Parents Top-up',
+          ],
           lockInPeriod: 'Annual Premium (No lock-in)',
           riskLevel: RiskometerLevel.low,
-          taxTreatment: 'Direct deduction against taxable income under Old Regime',
-          eligibilityNotes: 'Up to ₹25k for self/family, additional ₹25k/₹50k for parents.',
+          taxTreatment:
+              'Direct deduction against taxable income under Old Regime',
+          eligibilityNotes:
+              'Up to ₹25k for self/family, additional ₹25k/₹50k for parents.',
         ),
         TaxDeductionRule(
           section: '80CCD(1B)',
@@ -183,7 +224,8 @@ class TaxRulesService {
           eligibleInstruments: ['NPS Tier 1 Account'],
           lockInPeriod: 'Until Age 60',
           riskLevel: RiskometerLevel.moderate,
-          taxTreatment: '60% tax-free lump sum at age 60; 40% mandatory annuity',
+          taxTreatment:
+              '60% tax-free lump sum at age 60; 40% mandatory annuity',
           eligibilityNotes: 'Over and above the ₹1.5L limit of Section 80C.',
         ),
         TaxDeductionRule(

@@ -1,5 +1,7 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+
 import '../../utils/constants.dart';
 
 class AuraBackground extends StatefulWidget {
@@ -68,8 +70,12 @@ class _AuraBackgroundState extends State<AuraBackground>
 
             return CustomPaint(
               painter: _AuraCosmicPainter(
-                primaryColor: widget.primaryGlow.withValues(alpha: (0.07 * widget.intensity).clamp(0.01, 0.2)),
-                secondaryColor: widget.secondaryGlow.withValues(alpha: (0.05 * widget.intensity).clamp(0.01, 0.2)),
+                primaryColor: widget.primaryGlow.withValues(
+                  alpha: (0.07 * widget.intensity).clamp(0.01, 0.2),
+                ),
+                secondaryColor: widget.secondaryGlow.withValues(
+                  alpha: (0.05 * widget.intensity).clamp(0.01, 0.2),
+                ),
                 animationValue: val,
                 shiftX: shiftX,
                 shiftY: shiftY,
@@ -103,30 +109,36 @@ class _AuraCosmicPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width * 0.5 + shiftX, size.height * 0.2 + shiftY);
-    final secondCenter = Offset(size.width * 0.85 - shiftX, size.height * 0.65 - shiftY);
+    final center = Offset(
+      size.width * 0.5 + shiftX,
+      size.height * 0.2 + shiftY,
+    );
+    final secondCenter = Offset(
+      size.width * 0.85 - shiftX,
+      size.height * 0.65 - shiftY,
+    );
 
     // Primary gentle Aurora cloud (Top center)
     final primaryPaint = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          primaryColor,
-          primaryColor.withValues(alpha: 0.0),
-        ],
-        stops: const [0.0, 1.0],
-      ).createShader(Rect.fromCircle(center: center, radius: size.width * 0.75));
+      ..shader =
+          RadialGradient(
+            colors: [primaryColor, primaryColor.withValues(alpha: 0.0)],
+            stops: const [0.0, 1.0],
+          ).createShader(
+            Rect.fromCircle(center: center, radius: size.width * 0.75),
+          );
 
     canvas.drawCircle(center, size.width * 0.75, primaryPaint);
 
     // Secondary soft Cyan cloud (Mid-right)
     final secondaryPaint = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          secondaryColor,
-          secondaryColor.withValues(alpha: 0.0),
-        ],
-        stops: const [0.0, 1.0],
-      ).createShader(Rect.fromCircle(center: secondCenter, radius: size.width * 0.65));
+      ..shader =
+          RadialGradient(
+            colors: [secondaryColor, secondaryColor.withValues(alpha: 0.0)],
+            stops: const [0.0, 1.0],
+          ).createShader(
+            Rect.fromCircle(center: secondCenter, radius: size.width * 0.65),
+          );
 
     canvas.drawCircle(secondCenter, size.width * 0.65, secondaryPaint);
 
@@ -137,8 +149,11 @@ class _AuraCosmicPainter extends CustomPainter {
       final double x = random.nextDouble() * size.width;
       final double y = random.nextDouble() * size.height;
       final double r = (random.nextDouble() * 0.8) + 0.3;
-      final double twinkle = math.sin((animationValue * 2 * math.pi) + i) * 0.15;
-      starPaint.color = Colors.white.withValues(alpha: (0.15 + twinkle).clamp(0.05, 0.4));
+      final double twinkle =
+          math.sin((animationValue * 2 * math.pi) + i) * 0.15;
+      starPaint.color = Colors.white.withValues(
+        alpha: (0.15 + twinkle).clamp(0.05, 0.4),
+      );
       canvas.drawCircle(Offset(x, y), r, starPaint);
     }
   }

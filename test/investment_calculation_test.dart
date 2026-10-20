@@ -9,23 +9,26 @@ import 'package:finpilot_ai/services/investment/retirement_planning_service.dart
 
 void main() {
   group('InvestmentCalculationService Tests', () {
-    test('calculateSip projects compound interest and milestones accurately', () {
-      final result = InvestmentCalculationService.calculateSip(
-        monthlySip: 10000.0,
-        durationYears: 5,
-        annualReturnRate: 12.0,
-      );
+    test(
+      'calculateSip projects compound interest and milestones accurately',
+      () {
+        final result = InvestmentCalculationService.calculateSip(
+          monthlySip: 10000.0,
+          durationYears: 5,
+          annualReturnRate: 12.0,
+        );
 
-      // Total invested = 10,000 * 60 = 6,00,000
-      expect(result.totalInvested, equals(600000.0));
-      // With 12% annual compounding, 5 yr SIP reaches ~8.24 Lakhs
-      expect(result.estimatedCorpus, greaterThan(800000.0));
-      expect(result.estimatedCorpus, lessThan(850000.0));
-      expect(result.estimatedGain, greaterThan(200000.0));
-      expect(result.milestones.length, equals(5));
-      expect(result.conservativeCorpus, lessThan(result.estimatedCorpus));
-      expect(result.optimisticCorpus, greaterThan(result.estimatedCorpus));
-    });
+        // Total invested = 10,000 * 60 = 6,00,000
+        expect(result.totalInvested, equals(600000.0));
+        // With 12% annual compounding, 5 yr SIP reaches ~8.24 Lakhs
+        expect(result.estimatedCorpus, greaterThan(800000.0));
+        expect(result.estimatedCorpus, lessThan(850000.0));
+        expect(result.estimatedGain, greaterThan(200000.0));
+        expect(result.milestones.length, equals(5));
+        expect(result.conservativeCorpus, lessThan(result.estimatedCorpus));
+        expect(result.optimisticCorpus, greaterThan(result.estimatedCorpus));
+      },
+    );
 
     test('calculateLumpSum computes FV and SIP equivalent', () {
       final result = InvestmentCalculationService.calculateLumpSum(
@@ -41,22 +44,25 @@ void main() {
       expect(result.sipEquivalentMonthly, greaterThan(1300.0));
     });
 
-    test('calculateGoalSipRequirement determines required monthly investment', () {
-      final result = InvestmentCalculationService.calculateGoalSipRequirement(
-        targetCorpus: 1000000.0, // 10 Lakhs
-        currentCorpus: 200000.0,  // 2 Lakhs
-        durationYears: 3,
-        annualReturnRate: 10.0,
-        availableMonthlyCapacity: 25000.0,
-      );
+    test(
+      'calculateGoalSipRequirement determines required monthly investment',
+      () {
+        final result = InvestmentCalculationService.calculateGoalSipRequirement(
+          targetCorpus: 1000000.0, // 10 Lakhs
+          currentCorpus: 200000.0, // 2 Lakhs
+          durationYears: 3,
+          annualReturnRate: 10.0,
+          availableMonthlyCapacity: 25000.0,
+        );
 
-      // Remaining after current corpus grows is ~7.3 Lakhs
-      // Required monthly SIP over 36 months at 10% is ~17.5k-18k
-      expect(result.requiredMonthlyInvestment, greaterThan(16000.0));
-      expect(result.requiredMonthlyInvestment, lessThan(20000.0));
-      expect(result.isAchievable, isTrue);
-      expect(result.gap, greaterThan(0.0));
-    });
+        // Remaining after current corpus grows is ~7.3 Lakhs
+        // Required monthly SIP over 36 months at 10% is ~17.5k-18k
+        expect(result.requiredMonthlyInvestment, greaterThan(16000.0));
+        expect(result.requiredMonthlyInvestment, lessThan(20000.0));
+        expect(result.isAchievable, isTrue);
+        expect(result.gap, greaterThan(0.0));
+      },
+    );
   });
 
   group('AssetAllocationService Tests', () {
@@ -70,7 +76,11 @@ void main() {
       );
 
       expect(result.allocationPercentages['Equity'], equals(0.0));
-      expect(result.allocationPercentages['Debt']! + result.allocationPercentages['Liquid']!, greaterThanOrEqualTo(90.0));
+      expect(
+        result.allocationPercentages['Debt']! +
+            result.allocationPercentages['Liquid']!,
+        greaterThanOrEqualTo(90.0),
+      );
     });
 
     test('Long-term aggressive goals have high equity exposure', () {
@@ -82,7 +92,10 @@ void main() {
         hasHighCostDebt: false,
       );
 
-      expect(result.allocationPercentages['Equity'], greaterThanOrEqualTo(75.0));
+      expect(
+        result.allocationPercentages['Equity'],
+        greaterThanOrEqualTo(75.0),
+      );
     });
   });
 
@@ -136,7 +149,10 @@ void main() {
         expectedInvestmentReturn: 12.0,
       );
 
-      expect(report.bestChoiceRecommendation, contains('Aggressive Debt Repayment'));
+      expect(
+        report.bestChoiceRecommendation,
+        contains('Aggressive Debt Repayment'),
+      );
     });
   });
 
@@ -153,7 +169,10 @@ void main() {
       );
 
       expect(report.projectedMonthlyExpenseAtRetirement, greaterThan(200000.0));
-      expect(report.requiredRetirementCorpus, greaterThan(30000000.0)); // > 3 Crore
+      expect(
+        report.requiredRetirementCorpus,
+        greaterThan(30000000.0),
+      ); // > 3 Crore
       expect(report.milestoneActionPoints.isNotEmpty, isTrue);
     });
   });

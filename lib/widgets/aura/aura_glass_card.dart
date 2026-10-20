@@ -1,5 +1,7 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
+
 import '../../utils/constants.dart';
 
 enum AuraGlassLevel {
@@ -144,7 +146,9 @@ class AuraGlassCard extends StatelessWidget {
         return BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              (customGlowColor ?? AppColors.auroraViolet).withValues(alpha: 0.18),
+              (customGlowColor ?? AppColors.auroraViolet).withValues(
+                alpha: 0.18,
+              ),
               AppColors.cardBackground.withValues(alpha: 0.90),
             ],
             begin: Alignment.topLeft,
@@ -152,12 +156,18 @@ class AuraGlassCard extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(radius),
           border: Border.all(
-            color: customBorderColor ?? (customGlowColor ?? AppColors.auroraCyan).withValues(alpha: 0.35),
+            color:
+                customBorderColor ??
+                (customGlowColor ?? AppColors.auroraCyan).withValues(
+                  alpha: 0.35,
+                ),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: (customGlowColor ?? AppColors.auroraViolet).withValues(alpha: 0.20),
+              color: (customGlowColor ?? AppColors.auroraViolet).withValues(
+                alpha: 0.20,
+              ),
               blurRadius: 36,
               spreadRadius: 2,
               offset: const Offset(0, 12),

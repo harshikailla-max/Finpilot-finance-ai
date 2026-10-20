@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
+
 import '../providers/finance_provider.dart';
 import '../providers/investment_provider.dart';
 import '../services/future_prediction_service.dart';
@@ -18,8 +19,12 @@ class FutureSimulatorScreen extends StatefulWidget {
 class _FutureSimulatorScreenState extends State<FutureSimulatorScreen> {
   final _incomeController = TextEditingController();
   final _expenseController = TextEditingController();
-  final _incomeGrowthController = TextEditingController(text: '8'); // 8% expected annual growth
-  final _expenseGrowthController = TextEditingController(text: '5'); // 5% expected inflation/growth
+  final _incomeGrowthController = TextEditingController(
+    text: '8',
+  ); // 8% expected annual growth
+  final _expenseGrowthController = TextEditingController(
+    text: '5',
+  ); // 5% expected inflation/growth
 
   int _selectedDurationMonths = 12; // 6, 12 (1 Yr), 36 (3 Yrs), 60 (5 Yrs)
   String _selectedScenario = 'Balanced'; // Conservative, Balanced, Aggressive
@@ -47,13 +52,16 @@ class _FutureSimulatorScreenState extends State<FutureSimulatorScreen> {
     final financeProvider = context.watch<FinanceProvider>();
     final investmentProvider = context.watch<InvestmentProvider>();
 
-    final double currentSavings = financeProvider.balance + investmentProvider.totalCurrentValue;
+    final double currentSavings =
+        financeProvider.balance + investmentProvider.totalCurrentValue;
 
     // Get input numbers
     final double inputIncome = double.tryParse(_incomeController.text) ?? 0.0;
     final double inputExpense = double.tryParse(_expenseController.text) ?? 0.0;
-    final double inputIncomeGrowth = double.tryParse(_incomeGrowthController.text) ?? 0.0;
-    final double inputExpenseGrowth = double.tryParse(_expenseGrowthController.text) ?? 0.0;
+    final double inputIncomeGrowth =
+        double.tryParse(_incomeGrowthController.text) ?? 0.0;
+    final double inputExpenseGrowth =
+        double.tryParse(_expenseGrowthController.text) ?? 0.0;
 
     // Run simulation points
     final simulationPoints = FuturePredictionService.runSimulation(
@@ -68,7 +76,9 @@ class _FutureSimulatorScreenState extends State<FutureSimulatorScreen> {
 
     final finalProjectedSavings = simulationPoints.last.balance;
     final double totalGrowthAmt = finalProjectedSavings - currentSavings;
-    final double totalGrowthPct = currentSavings > 0 ? (totalGrowthAmt / currentSavings) * 100 : 0.0;
+    final double totalGrowthPct = currentSavings > 0
+        ? (totalGrowthAmt / currentSavings) * 100
+        : 0.0;
 
     // AI Prediction sentence
     final aiPrediction = FuturePredictionService.generateAIPrediction(
@@ -157,13 +167,21 @@ class _FutureSimulatorScreenState extends State<FutureSimulatorScreen> {
                       children: [
                         const Text(
                           'SIMULATION TIMELINE',
-                          style: TextStyle(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         DropdownButtonFormField<int>(
-                          value: _selectedDurationMonths,
+                          initialValue: _selectedDurationMonths,
                           dropdownColor: AppColors.cardBackground,
-                          decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 12)),
+                          decoration: const InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                            ),
+                          ),
                           items: const [
                             DropdownMenuItem(value: 6, child: Text('6 Months')),
                             DropdownMenuItem(value: 12, child: Text('1 Year')),
@@ -187,17 +205,34 @@ class _FutureSimulatorScreenState extends State<FutureSimulatorScreen> {
                       children: [
                         const Text(
                           'SCENARIO MODE',
-                          style: TextStyle(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         DropdownButtonFormField<String>(
-                          value: _selectedScenario,
+                          initialValue: _selectedScenario,
                           dropdownColor: AppColors.cardBackground,
-                          decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 12)),
+                          decoration: const InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                            ),
+                          ),
                           items: const [
-                            DropdownMenuItem(value: 'Conservative', child: Text('Conservative')),
-                            DropdownMenuItem(value: 'Balanced', child: Text('Balanced')),
-                            DropdownMenuItem(value: 'Aggressive', child: Text('Aggressive')),
+                            DropdownMenuItem(
+                              value: 'Conservative',
+                              child: Text('Conservative'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Balanced',
+                              child: Text('Balanced'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Aggressive',
+                              child: Text('Aggressive'),
+                            ),
                           ],
                           onChanged: (val) {
                             setState(() {
@@ -224,12 +259,20 @@ class _FutureSimulatorScreenState extends State<FutureSimulatorScreen> {
                         children: [
                           const Text(
                             'CURRENT NET WORTH',
-                            style: TextStyle(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           Text(
                             CurrencyFormatter.format(currentSavings),
-                            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -253,12 +296,20 @@ class _FutureSimulatorScreenState extends State<FutureSimulatorScreen> {
                           const SizedBox(height: 6),
                           Text(
                             CurrencyFormatter.format(finalProjectedSavings),
-                            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             '+${totalGrowthPct.toStringAsFixed(0)}% Growth',
-                            style: const TextStyle(color: AppColors.successGreen, fontSize: 10, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              color: AppColors.successGreen,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -282,7 +333,12 @@ class _FutureSimulatorScreenState extends State<FutureSimulatorScreen> {
               const SizedBox(height: 12),
               GlassCard(
                 height: 220,
-                padding: const EdgeInsets.only(top: 24, bottom: 8, right: 16, left: 16),
+                padding: const EdgeInsets.only(
+                  top: 24,
+                  bottom: 8,
+                  right: 16,
+                  left: 16,
+                ),
                 child: LineChart(
                   LineChartData(
                     lineBarsData: [
@@ -294,7 +350,8 @@ class _FutureSimulatorScreenState extends State<FutureSimulatorScreen> {
                         dotData: const FlDotData(show: false),
                         belowBarData: BarAreaData(
                           show: true,
-                          color: _getScenarioColor(_selectedScenario).withValues(alpha: 0.15),
+                          color: _getScenarioColor(_selectedScenario)
+                              .withValues(alpha: 0.15),
                         ),
                       ),
                     ],
@@ -302,17 +359,27 @@ class _FutureSimulatorScreenState extends State<FutureSimulatorScreen> {
                     borderData: FlBorderData(show: false),
                     titlesData: FlTitlesData(
                       show: true,
-                      leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      leftTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      rightTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
                           getTitlesWidget: (value, meta) {
-                            if (value.toInt() == 0 || value.toInt() == _selectedDurationMonths) {
+                            if (value.toInt() == 0 ||
+                                value.toInt() == _selectedDurationMonths) {
                               return Text(
                                 'Month ${value.toInt()}',
-                                style: const TextStyle(color: Colors.white70, fontSize: 9),
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 9,
+                                ),
                               );
                             }
                             return const Text('');
@@ -332,14 +399,20 @@ class _FutureSimulatorScreenState extends State<FutureSimulatorScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.primaryPurple.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.primaryPurple.withValues(alpha: 0.2)),
+                  border: Border.all(
+                    color: AppColors.primaryPurple.withValues(alpha: 0.2),
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Row(
                       children: [
-                        Icon(Icons.auto_awesome_rounded, color: AppColors.cyan, size: 18),
+                        Icon(
+                          Icons.auto_awesome_rounded,
+                          color: AppColors.cyan,
+                          size: 18,
+                        ),
                         SizedBox(width: 8),
                         Text(
                           'FINPILOT SIMULATOR PREDICTION',
@@ -355,7 +428,11 @@ class _FutureSimulatorScreenState extends State<FutureSimulatorScreen> {
                     const SizedBox(height: 12),
                     Text(
                       aiPrediction,
-                      style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                        height: 1.4,
+                      ),
                     ),
                   ],
                 ),
@@ -378,7 +455,11 @@ class _FutureSimulatorScreenState extends State<FutureSimulatorScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600),
+          style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: 6),
         TextFormField(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../models/finance_transaction.dart';
 import '../providers/finance_provider.dart';
 import '../utils/constants.dart';
@@ -123,7 +124,10 @@ class TransactionDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeColor = _getCategoryColor(transaction.category, transaction.type);
+    final themeColor = _getCategoryColor(
+      transaction.category,
+      transaction.type,
+    );
     final iconData = _getCategoryIcon(transaction.category, transaction.type);
     final isIncome = transaction.type == TransactionType.income;
 
@@ -140,7 +144,10 @@ class TransactionDetailsScreen extends StatelessWidget {
             onPressed: () => _edit(context),
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline_rounded, color: AppColors.dangerRed),
+            icon: const Icon(
+              Icons.delete_outline_rounded,
+              color: AppColors.dangerRed,
+            ),
             onPressed: () => _delete(context),
           ),
         ],
@@ -180,11 +187,7 @@ class TransactionDetailsScreen extends StatelessWidget {
                         width: 1.5,
                       ),
                     ),
-                    child: Icon(
-                      iconData,
-                      color: themeColor,
-                      size: 36,
-                    ),
+                    child: Icon(iconData, color: themeColor, size: 36),
                   ),
                   const SizedBox(height: 16),
 
@@ -192,7 +195,9 @@ class TransactionDetailsScreen extends StatelessWidget {
                   Text(
                     '${isIncome ? '+' : '-'}${CurrencyFormatter.format(transaction.amount)}',
                     style: TextStyle(
-                      color: isIncome ? AppColors.successGreen : AppColors.dangerRed,
+                      color: isIncome
+                          ? AppColors.successGreen
+                          : AppColors.dangerRed,
                       fontSize: 36,
                       fontWeight: FontWeight.bold,
                     ),
@@ -244,7 +249,9 @@ class TransactionDetailsScreen extends StatelessWidget {
                         _buildDetailRow(
                           icon: Icons.repeat_one_rounded,
                           label: 'Is Recurring',
-                          value: transaction.isRecurring ? 'Yes, Monthly' : 'No, One-time',
+                          value: transaction.isRecurring
+                              ? 'Yes, Monthly'
+                              : 'No, One-time',
                         ),
                         if (transaction.note.isNotEmpty) ...[
                           const Divider(height: 24, color: Colors.white10),
@@ -253,18 +260,30 @@ class TransactionDetailsScreen extends StatelessWidget {
                             children: [
                               const Row(
                                 children: [
-                                  Icon(Icons.notes_rounded, size: 16, color: AppColors.textMuted),
+                                  Icon(
+                                    Icons.notes_rounded,
+                                    size: 16,
+                                    color: AppColors.textMuted,
+                                  ),
                                   SizedBox(width: 8),
                                   Text(
                                     'Notes',
-                                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.bold),
+                                    style: TextStyle(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ],
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 transaction.note,
-                                style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, height: 1.4),
+                                style: const TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 14,
+                                  height: 1.4,
+                                ),
                               ),
                             ],
                           ),

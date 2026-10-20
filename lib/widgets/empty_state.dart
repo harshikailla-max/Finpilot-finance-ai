@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../utils/constants.dart';
 import 'gradient_button.dart';
 
@@ -37,11 +38,7 @@ class EmptyState extends StatelessWidget {
                   width: 1.5,
                 ),
               ),
-              child: Icon(
-                icon,
-                color: AppColors.primaryPurple,
-                size: 48,
-              ),
+              child: Icon(icon, color: AppColors.primaryPurple, size: 48),
             ),
             const SizedBox(height: 24),
             Text(

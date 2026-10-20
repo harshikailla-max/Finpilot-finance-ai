@@ -9,20 +9,50 @@ void main() {
   group('CategoryService Tests', () {
     test('Detects expense categories accurately', () {
       expect(CategoryService.detectExpenseCategory('Swiggy Order'), 'Food');
-      expect(CategoryService.detectExpenseCategory('Uber Ride to Office'), 'Transport');
-      expect(CategoryService.detectExpenseCategory('Amazon Prime Video'), 'Entertainment');
-      expect(CategoryService.detectExpenseCategory('Amazon Shopping T-Shirt'), 'Shopping');
-      expect(CategoryService.detectExpenseCategory('Electricity Bill for August'), 'Bills');
-      expect(CategoryService.detectExpenseCategory('Pharmacy Medicines'), 'Health');
-      expect(CategoryService.detectExpenseCategory('Udemy Python Course'), 'Education');
-      expect(CategoryService.detectExpenseCategory('Hotel Booking in Goa'), 'Travel');
+      expect(
+        CategoryService.detectExpenseCategory('Uber Ride to Office'),
+        'Transport',
+      );
+      expect(
+        CategoryService.detectExpenseCategory('Amazon Prime Video'),
+        'Entertainment',
+      );
+      expect(
+        CategoryService.detectExpenseCategory('Amazon Shopping T-Shirt'),
+        'Shopping',
+      );
+      expect(
+        CategoryService.detectExpenseCategory('Electricity Bill for August'),
+        'Bills',
+      );
+      expect(
+        CategoryService.detectExpenseCategory('Pharmacy Medicines'),
+        'Health',
+      );
+      expect(
+        CategoryService.detectExpenseCategory('Udemy Python Course'),
+        'Education',
+      );
+      expect(
+        CategoryService.detectExpenseCategory('Hotel Booking in Goa'),
+        'Travel',
+      );
     });
 
     test('Detects income categories accurately', () {
       expect(CategoryService.detectIncomeCategory('Monthly Salary'), 'Salary');
-      expect(CategoryService.detectIncomeCategory('Freelance Web Design'), 'Freelance');
-      expect(CategoryService.detectIncomeCategory('Stock Dividend Payout'), 'Investment');
-      expect(CategoryService.detectIncomeCategory('Annual Performance Bonus'), 'Bonus');
+      expect(
+        CategoryService.detectIncomeCategory('Freelance Web Design'),
+        'Freelance',
+      );
+      expect(
+        CategoryService.detectIncomeCategory('Stock Dividend Payout'),
+        'Investment',
+      );
+      expect(
+        CategoryService.detectIncomeCategory('Annual Performance Bonus'),
+        'Bonus',
+      );
     });
   });
 
@@ -82,21 +112,24 @@ void main() {
   });
 
   group('GoalModel Tests', () {
-    test('Calculates progress, remaining amount, and monthly required correctly', () {
-      final goal = GoalModel(
-        id: 'g1',
-        title: 'MacBook',
-        targetAmount: 100000,
-        currentAmount: 40000,
-        deadline: DateTime.now().add(const Duration(days: 180)), // ~6 months
-        category: 'Gadgets',
-        createdAt: DateTime.now(),
-      );
+    test(
+      'Calculates progress, remaining amount, and monthly required correctly',
+      () {
+        final goal = GoalModel(
+          id: 'g1',
+          title: 'MacBook',
+          targetAmount: 100000,
+          currentAmount: 40000,
+          deadline: DateTime.now().add(const Duration(days: 180)), // ~6 months
+          category: 'Gadgets',
+          createdAt: DateTime.now(),
+        );
 
-      expect(goal.progressPercentage, 0.4);
-      expect(goal.remainingAmount, 60000);
-      expect(goal.daysRemaining, greaterThan(170));
-      expect(goal.monthlyAmountRequired, closeTo(10000, 1500));
-    });
+        expect(goal.progressPercentage, 0.4);
+        expect(goal.remainingAmount, 60000);
+        expect(goal.daysRemaining, greaterThan(170));
+        expect(goal.monthlyAmountRequired, closeTo(10000, 1500));
+      },
+    );
   });
 }

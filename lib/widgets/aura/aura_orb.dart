@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
+
 import '../../utils/constants.dart';
 
-enum AuraOrbState {
-  idle,
-  thinking,
-  speaking,
-  alert,
-  success,
-}
+enum AuraOrbState { idle, thinking, speaking, alert, success }
 
 class FinPilotAuraOrb extends StatefulWidget {
   final double size;
@@ -143,15 +138,35 @@ class _FinPilotAuraOrbState extends State<FinPilotAuraOrb>
   List<Color> _colorsForState(AuraOrbState state) {
     switch (state) {
       case AuraOrbState.idle:
-        return const [AppColors.auroraViolet, AppColors.auroraCyan, AppColors.softBlue];
+        return const [
+          AppColors.auroraViolet,
+          AppColors.auroraCyan,
+          AppColors.softBlue,
+        ];
       case AuraOrbState.thinking:
-        return const [AppColors.auroraCyan, AppColors.auroraViolet, AppColors.softBlue];
+        return const [
+          AppColors.auroraCyan,
+          AppColors.auroraViolet,
+          AppColors.softBlue,
+        ];
       case AuraOrbState.speaking:
-        return const [AppColors.auroraCyan, AppColors.success, AppColors.auroraViolet];
+        return const [
+          AppColors.auroraCyan,
+          AppColors.success,
+          AppColors.auroraViolet,
+        ];
       case AuraOrbState.alert:
-        return const [AppColors.warning, AppColors.danger, AppColors.auroraViolet];
+        return const [
+          AppColors.warning,
+          AppColors.danger,
+          AppColors.auroraViolet,
+        ];
       case AuraOrbState.success:
-        return const [AppColors.luxuryChampagne, AppColors.success, AppColors.auroraViolet];
+        return const [
+          AppColors.luxuryChampagne,
+          AppColors.success,
+          AppColors.auroraViolet,
+        ];
     }
   }
 }

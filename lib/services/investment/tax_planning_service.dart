@@ -20,12 +20,18 @@ class TaxPlanningService {
     final double clampedHomeLoan = homeLoanInterest.clamp(0.0, 200000.0);
 
     final double totalOldDeductions =
-        oldStdDeduction + clamped80C + clamped80D + clampedNps + clampedHomeLoan;
+        oldStdDeduction +
+        clamped80C +
+        clamped80D +
+        clampedNps +
+        clampedHomeLoan;
 
-    final double oldTaxableIncome =
-        (annualGrossIncome - totalOldDeductions).clamp(0.0, double.infinity);
-    final double newTaxableIncome =
-        (annualGrossIncome - newStdDeduction).clamp(0.0, double.infinity);
+    final double oldTaxableIncome = (annualGrossIncome - totalOldDeductions)
+        .clamp(0.0, double.infinity);
+    final double newTaxableIncome = (annualGrossIncome - newStdDeduction).clamp(
+      0.0,
+      double.infinity,
+    );
 
     // 3. Tax Liability Calculations
     final double oldTax = _calculateOldRegimeTax(oldTaxableIncome);
@@ -48,8 +54,7 @@ class TaxPlanningService {
     } else {
       recommended = TaxRegime.newRegime;
       taxSavings = 0.0;
-      advice =
-          'Both regimes result in equal tax liability. The New Regime is generally preferred for simpler compliance without mandatory lock-ins.';
+      advice = 'Both regimes result in equal tax liability. The New Regime is generally preferred for simpler compliance without mandatory lock-ins.';
     }
 
     final deductionBreakdown = [
@@ -58,7 +63,13 @@ class TaxPlanningService {
         title: 'Life Insurance, ELSS & Provident Funds',
         maxAllowedLimit: 150000.0,
         currentUtilized: clamped80C,
-        eligibleInstruments: const ['ELSS Mutual Funds', 'PPF', 'EPF', 'Sukanya Samriddhi', 'Term Insurance'],
+        eligibleInstruments: const [
+          'ELSS Mutual Funds',
+          'PPF',
+          'EPF',
+          'Sukanya Samriddhi',
+          'Term Insurance',
+        ],
         lockInPeriod: '3 Years (ELSS) to 15 Years (PPF)',
         riskLevel: RiskometerLevel.moderatelyHigh,
         taxTreatment: 'EEE (Exempt-Exempt-Exempt) for PPF; LTCG > 1.25L taxed at 12.5% for ELSS',
@@ -68,10 +79,15 @@ class TaxPlanningService {
         title: 'Health Insurance Premium (Self & Parents)',
         maxAllowedLimit: 50000.0,
         currentUtilized: clamped80D,
-        eligibleInstruments: const ['Individual Health Cover', 'Family Floater', 'Senior Citizen Parents Top-up'],
+        eligibleInstruments: const [
+          'Individual Health Cover',
+          'Family Floater',
+          'Senior Citizen Parents Top-up',
+        ],
         lockInPeriod: 'Annual Premium (No lock-in)',
         riskLevel: RiskometerLevel.low,
-        taxTreatment: 'Direct deduction against taxable income under Old Regime',
+        taxTreatment:
+            'Direct deduction against taxable income under Old Regime',
       ),
       TaxDeductionCategory(
         code: '80CCD(1B)',

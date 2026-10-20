@@ -48,7 +48,12 @@ void main() async {
         ChangeNotifierProvider<InvestmentProvider>(
           create: (_) => InvestmentProvider(storageService),
         ),
-        ChangeNotifierProxyProvider3<FinanceProvider, BudgetProvider, GoalProvider, FinancialHealthProvider>(
+        ChangeNotifierProxyProvider3<
+          FinanceProvider,
+          BudgetProvider,
+          GoalProvider,
+          FinancialHealthProvider
+        >(
           create: (context) => FinancialHealthProvider(
             financeProvider: context.read<FinanceProvider>(),
             budgetProvider: context.read<BudgetProvider>(),
@@ -62,7 +67,12 @@ void main() async {
                 goalProvider: goal,
               ),
         ),
-        ChangeNotifierProxyProvider3<FinanceProvider, BudgetProvider, GoalProvider, AIProvider>(
+        ChangeNotifierProxyProvider3<
+          FinanceProvider,
+          BudgetProvider,
+          GoalProvider,
+          AIProvider
+        >(
           create: (context) => AIProvider(
             financeProvider: context.read<FinanceProvider>(),
             budgetProvider: context.read<BudgetProvider>(),

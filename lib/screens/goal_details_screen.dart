@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../models/goal_model.dart';
 import '../providers/goal_provider.dart';
 import '../utils/constants.dart';
@@ -32,26 +33,38 @@ class _GoalDetailsScreenState extends State<GoalDetailsScreen> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppColors.secondaryBackground,
-          title: const Text('Add Goal Savings', style: TextStyle(color: Colors.white)),
+          title: const Text(
+            'Add Goal Savings',
+            style: TextStyle(color: Colors.white),
+          ),
           content: TextField(
             controller: _moneyController,
             keyboardType: TextInputType.number,
             style: const TextStyle(color: Colors.white),
             decoration: const InputDecoration(
               hintText: 'Enter amount to add',
-              prefixIcon: Icon(Icons.currency_rupee, color: AppColors.textMuted),
+              prefixIcon: Icon(
+                Icons.currency_rupee,
+                color: AppColors.textMuted,
+              ),
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
             TextButton(
               onPressed: () async {
                 final amt = double.tryParse(_moneyController.text.trim());
                 if (amt != null && amt > 0) {
-                  await context.read<GoalProvider>().addMoneyToGoal(currentGoal.id, amt);
+                  await context.read<GoalProvider>().addMoneyToGoal(
+                    currentGoal.id,
+                    amt,
+                  );
                   if (mounted) {
                     Navigator.pop(context);
                     // Refresh local view
@@ -59,7 +72,13 @@ class _GoalDetailsScreenState extends State<GoalDetailsScreen> {
                   }
                 }
               },
-              child: const Text('Add', style: TextStyle(color: AppColors.successGreen, fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Add',
+                style: TextStyle(
+                  color: AppColors.successGreen,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         );
@@ -97,7 +116,10 @@ class _GoalDetailsScreenState extends State<GoalDetailsScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete_outline_rounded, color: AppColors.dangerRed),
+            icon: const Icon(
+              Icons.delete_outline_rounded,
+              color: AppColors.dangerRed,
+            ),
             onPressed: () => _deleteGoal(context),
           ),
         ],
@@ -139,7 +161,9 @@ class _GoalDetailsScreenState extends State<GoalDetailsScreen> {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.successGreen.withValues(alpha: 0.06),
+                            color: AppColors.successGreen.withValues(
+                              alpha: 0.06,
+                            ),
                             blurRadius: 32,
                             spreadRadius: 4,
                           ),
@@ -155,7 +179,9 @@ class _GoalDetailsScreenState extends State<GoalDetailsScreen> {
                               value: pct,
                               strokeWidth: 10,
                               backgroundColor: AppColors.secondaryBackground,
-                              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.successGreen),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                AppColors.successGreen,
+                              ),
                             ),
                           ),
                           Column(
@@ -174,7 +200,9 @@ class _GoalDetailsScreenState extends State<GoalDetailsScreen> {
                                 'SAVED',
                                 style: TextStyle(
                                   fontSize: 10,
-                                  color: AppColors.textSecondary.withValues(alpha: 0.6),
+                                  color: AppColors.textSecondary.withValues(
+                                    alpha: 0.6,
+                                  ),
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 1.5,
                                 ),
@@ -217,13 +245,17 @@ class _GoalDetailsScreenState extends State<GoalDetailsScreen> {
                         _buildStatRow(
                           icon: Icons.currency_rupee_rounded,
                           label: 'Target Amount',
-                          value: CurrencyFormatter.format(currentGoal.targetAmount),
+                          value: CurrencyFormatter.format(
+                            currentGoal.targetAmount,
+                          ),
                         ),
                         const Divider(height: 24, color: Colors.white10),
                         _buildStatRow(
                           icon: Icons.savings_rounded,
                           label: 'Amount Saved',
-                          value: CurrencyFormatter.format(currentGoal.currentAmount),
+                          value: CurrencyFormatter.format(
+                            currentGoal.currentAmount,
+                          ),
                           valueColor: AppColors.successGreen,
                         ),
                         const Divider(height: 24, color: Colors.white10),
@@ -236,7 +268,9 @@ class _GoalDetailsScreenState extends State<GoalDetailsScreen> {
                         _buildStatRow(
                           icon: Icons.calendar_month_outlined,
                           label: 'Deadline Date',
-                          value: AppDateUtils.formatFriendly(currentGoal.deadline),
+                          value: AppDateUtils.formatFriendly(
+                            currentGoal.deadline,
+                          ),
                         ),
                         const Divider(height: 24, color: Colors.white10),
                         _buildStatRow(
@@ -267,7 +301,11 @@ class _GoalDetailsScreenState extends State<GoalDetailsScreen> {
                       children: [
                         const Row(
                           children: [
-                            Icon(Icons.auto_awesome_rounded, color: AppColors.cyan, size: 18),
+                            Icon(
+                              Icons.auto_awesome_rounded,
+                              color: AppColors.cyan,
+                              size: 18,
+                            ),
                             SizedBox(width: 8),
                             Text(
                               'FINPILOT AI TARGET ESTIMATION',
@@ -284,17 +322,32 @@ class _GoalDetailsScreenState extends State<GoalDetailsScreen> {
                         if (remaining <= 0)
                           const Text(
                             'Excellent work! You have completed 100% of this goal target. Allocate these funds or archiving the goal.',
-                            style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 13,
+                              height: 1.4,
+                            ),
                           )
                         else ...[
                           RichText(
                             text: TextSpan(
-                              style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 13,
+                                height: 1.4,
+                              ),
                               children: [
-                                const TextSpan(text: 'To reach this goal by the deadline, you need to save approximately '),
+                                const TextSpan(
+                                  text: 'To reach this goal by the deadline, you need to save approximately ',
+                                ),
                                 TextSpan(
-                                  text: CurrencyFormatter.format(monthlyRequired),
-                                  style: const TextStyle(color: AppColors.cyan, fontWeight: FontWeight.bold),
+                                  text: CurrencyFormatter.format(
+                                    monthlyRequired,
+                                  ),
+                                  style: const TextStyle(
+                                    color: AppColors.cyan,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 const TextSpan(text: ' each month.'),
                               ],
@@ -303,9 +356,15 @@ class _GoalDetailsScreenState extends State<GoalDetailsScreen> {
                           const SizedBox(height: 8),
                           Text(
                             'Allocating ₹3,000 more than this target can accelerate completion, reaching the target days ahead of expectation.',
-                            style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8), fontSize: 12, height: 1.4),
+                            style: TextStyle(
+                              color: AppColors.textSecondary.withValues(
+                                alpha: 0.8,
+                              ),
+                              fontSize: 12,
+                              height: 1.4,
+                            ),
                           ),
-                        ]
+                        ],
                       ],
                     ),
                   ),

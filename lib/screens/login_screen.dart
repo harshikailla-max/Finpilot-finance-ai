@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../services/storage_service.dart';
 import '../utils/constants.dart';
 import '../widgets/glass_card.dart';
@@ -36,7 +37,10 @@ class _LoginScreenState extends State<LoginScreen> {
       final storage = context.read<StorageService>();
       await storage.setBool('isLoggedIn', true);
       await storage.setString('user_email', _emailController.text);
-      await storage.setString('user_name', 'Kumar'); // default name for workspace
+      await storage.setString(
+        'user_name',
+        'Kumar',
+      ); // default name for workspace
 
       setState(() {
         _isLoading = false;
@@ -90,7 +94,10 @@ class _LoginScreenState extends State<LoginScreen> {
           // Content Layout
           SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 16.0,
+              ),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -137,13 +144,18 @@ class _LoginScreenState extends State<LoginScreen> {
                             style: const TextStyle(color: Colors.white),
                             decoration: const InputDecoration(
                               hintText: 'name@example.com',
-                              prefixIcon: Icon(Icons.email_outlined, color: AppColors.textMuted),
+                              prefixIcon: Icon(
+                                Icons.email_outlined,
+                                color: AppColors.textMuted,
+                              ),
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Please enter your email';
                               }
-                              final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                              final emailRegex = RegExp(
+                                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                              );
                               if (!emailRegex.hasMatch(value)) {
                                 return 'Please enter a valid email address';
                               }
@@ -169,7 +181,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const ForgotPasswordScreen(),
+                                      builder: (context) =>
+                                          const ForgotPasswordScreen(),
                                     ),
                                   );
                                 },
@@ -191,10 +204,15 @@ class _LoginScreenState extends State<LoginScreen> {
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               hintText: 'Enter your password',
-                              prefixIcon: const Icon(Icons.lock_outlined, color: AppColors.textMuted),
+                              prefixIcon: const Icon(
+                                Icons.lock_outlined,
+                                color: AppColors.textMuted,
+                              ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                  _obscurePassword
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
                                   color: AppColors.textMuted,
                                 ),
                                 onPressed: () {
@@ -206,7 +224,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                  return 'Please enter your password';
+                                return 'Please enter your password';
                               }
                               if (value.length < 6) {
                                 return 'Password must be at least 6 characters';
@@ -245,11 +263,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
-                        side: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+                        side: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.08),
+                        ),
                         backgroundColor: AppColors.cardBackground,
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppConstants.buttonRadius),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.buttonRadius,
+                          ),
                         ),
                       ),
                       onPressed: () {
@@ -261,14 +283,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.g_mobiledata_rounded, size: 28, color: Colors.blue),
+                          const Icon(
+                            Icons.g_mobiledata_rounded,
+                            size: 28,
+                            color: Colors.blue,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             'Continue with Google',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
-                              color: AppColors.textPrimary.withValues(alpha: 0.9),
+                              color: AppColors.textPrimary.withValues(
+                                alpha: 0.9,
+                              ),
                             ),
                           ),
                         ],
@@ -283,13 +311,19 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         Text(
                           "Don't have an account? ",
-                          style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8)),
+                          style: TextStyle(
+                            color: AppColors.textSecondary.withValues(
+                              alpha: 0.8,
+                            ),
+                          ),
                         ),
                         GestureDetector(
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => const SignUpScreen()),
+                              MaterialPageRoute(
+                                builder: (context) => const SignUpScreen(),
+                              ),
                             );
                           },
                           child: const Text(

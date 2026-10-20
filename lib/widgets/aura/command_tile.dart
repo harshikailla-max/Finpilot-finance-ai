@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../utils/constants.dart';
 
 class CommandTile extends StatefulWidget {
@@ -66,11 +67,7 @@ class _CommandTileState extends State<CommandTile> {
                   color: widget.accentColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
-                  widget.icon,
-                  color: widget.accentColor,
-                  size: 18,
-                ),
+                child: Icon(widget.icon, color: widget.accentColor, size: 18),
               ),
               const SizedBox(width: 12),
               Expanded(

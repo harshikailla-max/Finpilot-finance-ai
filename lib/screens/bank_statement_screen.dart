@@ -1,6 +1,8 @@
 import 'dart:typed_data';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
@@ -8,6 +10,7 @@ import 'package:uuid/uuid.dart';
 import '../models/finance_transaction.dart';
 import '../models/statement_analysis_models.dart';
 import '../providers/finance_provider.dart';
+import '../services/receipt_ocr_service.dart';
 import '../services/statement_analysis_service.dart';
 import '../services/storage_service.dart';
 import '../services/transaction_categorization_service.dart';
@@ -32,7 +35,8 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
   static const Color dangerRed = Color(0xFFFF6B81);
   static const Color textMuted = Color(0xFF9AA4B2);
 
-  final UniversalStatementAnalyzer _analyzer = UniversalStatementAnalyzer();
+  late final UniversalStatementAnalyzer _analyzer;
+  final ImagePicker _imagePicker = ImagePicker();
 
   bool _isLoading = false;
   String _loadingMessage = 'Reading Statement...';
@@ -45,6 +49,10 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
   @override
   void initState() {
     super.initState();
+    final storage = Provider.of<StorageService>(context, listen: false);
+    _analyzer = UniversalStatementAnalyzer(
+      ocrService: ReceiptOcrService(storageService: storage),
+    );
     _loadImportHistory();
   }
 
@@ -64,7 +72,10 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
     try {
       final storage = Provider.of<StorageService>(context, listen: false);
       _history.insert(0, item);
-      await storage.setString('statement_import_history', ImportHistoryItem.encodeList(_history));
+      await storage.setString(
+        'statement_import_history',
+        ImportHistoryItem.encodeList(_history),
+      );
       if (mounted) setState(() {});
     } catch (_) {}
   }
@@ -72,10 +83,41 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
   // Pick file across platforms
   Future<void> _pickStatementFile({List<String>? allowedExtensions}) async {
     try {
-      final file = await FilePicker.pickFile(
-        type: FileType.custom,
-        allowedExtensions: allowedExtensions ?? ['pdf', 'xlsx', 'xls', 'csv', 'png', 'jpg', 'jpeg'],
-      );
+      // 1. If user clicked IMAGE, use ImagePicker for optimal Web/Mobile gallery experience
+      final isImageOnly = allowedExtensions != null &&
+          allowedExtensions.isNotEmpty &&
+          allowedExtensions.every((ext) =>
+              ['png', 'jpg', 'jpeg', 'webp'].contains(ext.toLowerCase()));
+
+      if (isImageOnly) {
+        final picked = await _imagePicker.pickImage(
+          source: ImageSource.gallery,
+          imageQuality: 95,
+        );
+        if (picked == null) return;
+        final bytes = await picked.readAsBytes();
+        if (bytes.isEmpty) {
+          _showSnackbar('Could not read image data. Please try another image.');
+          return;
+        }
+        await _processFileBytes(picked.name, bytes);
+        return;
+      }
+
+      // 2. For documents (PDF, Excel, CSV), use FilePicker with fallback to FileType.any
+      PlatformFile? file;
+      try {
+        file = await FilePicker.pickFile(
+          type: FileType.custom,
+          allowedExtensions: allowedExtensions ??
+              ['pdf', 'xlsx', 'xls', 'csv', 'png', 'jpg', 'jpeg', 'webp'],
+        );
+      } catch (e) {
+        debugPrint(
+          'FilePicker custom extension failed, falling back to any: $e',
+        );
+        file = await FilePicker.pickFile(type: FileType.any);
+      }
 
       if (file == null) return;
 
@@ -117,11 +159,17 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
       });
 
       if (analysis.isScannedPdfDetected) {
-        _showSnackbar('Scanned PDF detected. Text extraction produced limited characters.');
+        _showSnackbar(
+          'Scanned PDF detected. Text extraction produced limited characters.',
+        );
       } else if (analysis.transactions.isEmpty) {
-        _showSnackbar(analysis.parsingWarning ?? 'No transactions detected in this file.');
+        _showSnackbar(
+          analysis.parsingWarning ?? 'No transactions detected in this file.',
+        );
       } else {
-        _showSnackbar('${analysis.totalCount} transactions detected from $fileName');
+        _showSnackbar(
+          '${analysis.totalCount} transactions detected from $fileName',
+        );
       }
     } catch (e) {
       if (!mounted) return;
@@ -145,7 +193,12 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
         category: 'Income',
         paymentMethod: 'Bank Transfer',
         source: 'PDF',
-        confidence: const ConfidenceScores(merchant: 99, amount: 99, date: 98, category: 99),
+        confidence: const ConfidenceScores(
+          merchant: 99,
+          amount: 99,
+          date: 98,
+          category: 99,
+        ),
       ),
       ParsedStatementTransaction(
         id: const Uuid().v4(),
@@ -157,7 +210,12 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
         category: 'Food & Dining',
         paymentMethod: 'UPI',
         source: 'PDF',
-        confidence: const ConfidenceScores(merchant: 98, amount: 99, date: 96, category: 96),
+        confidence: const ConfidenceScores(
+          merchant: 98,
+          amount: 99,
+          date: 96,
+          category: 96,
+        ),
       ),
       ParsedStatementTransaction(
         id: const Uuid().v4(),
@@ -169,7 +227,12 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
         category: 'Transport',
         paymentMethod: 'UPI',
         source: 'PDF',
-        confidence: const ConfidenceScores(merchant: 96, amount: 98, date: 95, category: 95),
+        confidence: const ConfidenceScores(
+          merchant: 96,
+          amount: 98,
+          date: 95,
+          category: 95,
+        ),
       ),
       ParsedStatementTransaction(
         id: const Uuid().v4(),
@@ -181,7 +244,12 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
         category: 'Shopping',
         paymentMethod: 'Credit Card',
         source: 'PDF',
-        confidence: const ConfidenceScores(merchant: 95, amount: 97, date: 94, category: 92),
+        confidence: const ConfidenceScores(
+          merchant: 95,
+          amount: 97,
+          date: 94,
+          category: 92,
+        ),
       ),
       ParsedStatementTransaction(
         id: const Uuid().v4(),
@@ -193,7 +261,12 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
         category: 'Groceries',
         paymentMethod: 'UPI',
         source: 'PDF',
-        confidence: const ConfidenceScores(merchant: 97, amount: 98, date: 95, category: 96),
+        confidence: const ConfidenceScores(
+          merchant: 97,
+          amount: 98,
+          date: 95,
+          category: 96,
+        ),
       ),
       ParsedStatementTransaction(
         id: const Uuid().v4(),
@@ -205,7 +278,12 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
         category: 'Bills',
         paymentMethod: 'Bank Transfer',
         source: 'PDF',
-        confidence: const ConfidenceScores(merchant: 94, amount: 98, date: 92, category: 95),
+        confidence: const ConfidenceScores(
+          merchant: 94,
+          amount: 98,
+          date: 92,
+          category: 95,
+        ),
       ),
       ParsedStatementTransaction(
         id: const Uuid().v4(),
@@ -217,7 +295,12 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
         category: 'Entertainment',
         paymentMethod: 'Credit Card',
         source: 'PDF',
-        confidence: const ConfidenceScores(merchant: 98, amount: 99, date: 96, category: 98),
+        confidence: const ConfidenceScores(
+          merchant: 98,
+          amount: 99,
+          date: 96,
+          category: 98,
+        ),
       ),
       ParsedStatementTransaction(
         id: const Uuid().v4(),
@@ -229,7 +312,12 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
         category: 'Health',
         paymentMethod: 'UPI',
         source: 'PDF',
-        confidence: const ConfidenceScores(merchant: 96, amount: 98, date: 95, category: 95),
+        confidence: const ConfidenceScores(
+          merchant: 96,
+          amount: 98,
+          date: 95,
+          category: 95,
+        ),
       ),
       ParsedStatementTransaction(
         id: const Uuid().v4(),
@@ -241,7 +329,12 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
         category: 'Housing',
         paymentMethod: 'Bank Transfer',
         source: 'PDF',
-        confidence: const ConfidenceScores(merchant: 92, amount: 99, date: 94, category: 95),
+        confidence: const ConfidenceScores(
+          merchant: 92,
+          amount: 99,
+          date: 94,
+          category: 95,
+        ),
       ),
       ParsedStatementTransaction(
         id: const Uuid().v4(),
@@ -253,7 +346,12 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
         category: 'Income',
         paymentMethod: 'Bank Transfer',
         source: 'PDF',
-        confidence: const ConfidenceScores(merchant: 95, amount: 98, date: 94, category: 96),
+        confidence: const ConfidenceScores(
+          merchant: 95,
+          amount: 98,
+          date: 94,
+          category: 96,
+        ),
       ),
     ];
 
@@ -287,13 +385,17 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
       _importSuccessful = false;
     });
 
-    _showSnackbar('Loaded demonstration bank statement with 10 structured transactions.');
+    _showSnackbar(
+      'Loaded demonstration bank statement with 10 structured transactions.',
+    );
   }
 
   Future<void> _confirmAndImportTransactions() async {
     if (_currentResult == null) return;
 
-    final selected = _currentResult!.transactions.where((t) => t.selected).toList();
+    final selected = _currentResult!.transactions
+        .where((t) => t.selected)
+        .toList();
 
     if (selected.isEmpty) {
       _showSnackbar('Please select at least one transaction to import.');
@@ -302,7 +404,8 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
 
     setState(() {
       _isLoading = true;
-      _loadingMessage = 'Importing ${selected.length} transactions into FinPilot...';
+      _loadingMessage =
+          'Importing ${selected.length} transactions into FinPilot...';
     });
 
     try {
@@ -338,7 +441,9 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
         _lastImportedCount = selected.length;
       });
 
-      _showSnackbar('${selected.length} transactions imported into FinPilot successfully!');
+      _showSnackbar(
+        '${selected.length} transactions imported into FinPilot successfully!',
+      );
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -352,7 +457,10 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message, style: const TextStyle(color: Colors.white, fontSize: 13)),
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white, fontSize: 13),
+        ),
         backgroundColor: cardLight,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -363,7 +471,9 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
   // Edit transaction modal
   void _editTransaction(ParsedStatementTransaction tx) {
     final merchantCtrl = TextEditingController(text: tx.merchant);
-    final amountCtrl = TextEditingController(text: tx.amount.toStringAsFixed(2));
+    final amountCtrl = TextEditingController(
+      text: tx.amount.toStringAsFixed(2),
+    );
     String cat = tx.category;
     TransactionType type = tx.type;
 
@@ -393,7 +503,11 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                     children: [
                       const Text(
                         'Edit Transaction',
-                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(ctx),
@@ -410,20 +524,26 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                       labelStyle: const TextStyle(color: textMuted),
                       filled: true,
                       fillColor: cardLight,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
                   TextField(
                     controller: amountCtrl,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       labelText: 'Amount (\u20B9)',
                       labelStyle: const TextStyle(color: textMuted),
                       filled: true,
                       fillColor: cardLight,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -438,11 +558,25 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                             labelStyle: const TextStyle(color: textMuted),
                             filled: true,
                             fillColor: cardLight,
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
                           items: const [
-                            DropdownMenuItem(value: TransactionType.expense, child: Text('Expense', style: TextStyle(color: dangerRed))),
-                            DropdownMenuItem(value: TransactionType.income, child: Text('Income', style: TextStyle(color: successGreen))),
+                            DropdownMenuItem(
+                              value: TransactionType.expense,
+                              child: Text(
+                                'Expense',
+                                style: TextStyle(color: dangerRed),
+                              ),
+                            ),
+                            DropdownMenuItem(
+                              value: TransactionType.income,
+                              child: Text(
+                                'Income',
+                                style: TextStyle(color: successGreen),
+                              ),
+                            ),
                           ],
                           onChanged: (val) {
                             if (val != null) setModalState(() => type = val);
@@ -452,18 +586,35 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: TransactionCategorizationService.allCategories.contains(cat) ? cat : 'Other',
+                          value:
+                              TransactionCategorizationService.allCategories
+                                  .contains(cat)
+                              ? cat
+                              : 'Other',
                           dropdownColor: cardLight,
                           decoration: InputDecoration(
                             labelText: 'Category',
                             labelStyle: const TextStyle(color: textMuted),
                             filled: true,
                             fillColor: cardLight,
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
-                          items: TransactionCategorizationService.allCategories.map((c) {
-                            return DropdownMenuItem(value: c, child: Text(c, style: const TextStyle(color: Colors.white, fontSize: 13)));
-                          }).toList(),
+                          items: TransactionCategorizationService.allCategories
+                              .map((c) {
+                                return DropdownMenuItem(
+                                  value: c,
+                                  child: Text(
+                                    c,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                );
+                              })
+                              .toList(),
                           onChanged: (val) {
                             if (val != null) setModalState(() => cat = val);
                           },
@@ -477,7 +628,9 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                     height: 48,
                     child: ElevatedButton(
                       onPressed: () {
-                        final parsedAmt = double.tryParse(amountCtrl.text.trim()) ?? tx.amount;
+                        final parsedAmt =
+                            double.tryParse(amountCtrl.text.trim()) ??
+                            tx.amount;
                         setState(() {
                           tx.merchant = merchantCtrl.text.trim();
                           tx.amount = parsedAmt;
@@ -488,9 +641,17 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryPurple,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
-                      child: const Text('Save Changes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        'Save Changes',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -511,14 +672,22 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
         elevation: 0,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white,
+            size: 20,
+          ),
         ),
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Statement Intelligence',
-              style: TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w800),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 19,
+                fontWeight: FontWeight.w800,
+              ),
             ),
             Text(
               'Universal bank statement parser & analyzer',
@@ -541,9 +710,10 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                 padding: const EdgeInsets.fromLTRB(18, 10, 18, 32),
                 child: _importSuccessful
                     ? _buildImportSuccessView()
-                    : _currentResult != null && _currentResult!.transactions.isNotEmpty
-                        ? _buildPreviewSection()
-                        : _buildUploadSection(),
+                    : _currentResult != null &&
+                          _currentResult!.transactions.isNotEmpty
+                    ? _buildPreviewSection()
+                    : _buildUploadSection(),
               ),
             ),
     );
@@ -585,7 +755,11 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
           Text(
             _loadingMessage,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 17,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 8),
           const Text(
@@ -629,9 +803,15 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                     height: 52,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      gradient: const LinearGradient(colors: [primaryPurple, cyanAccent]),
+                      gradient: const LinearGradient(
+                        colors: [primaryPurple, cyanAccent],
+                      ),
                     ),
-                    child: const Icon(Icons.account_balance_rounded, color: Colors.white, size: 28),
+                    child: const Icon(
+                      Icons.account_balance_rounded,
+                      color: Colors.white,
+                      size: 28,
+                    ),
                   ),
                   const SizedBox(width: 14),
                   const Expanded(
@@ -640,12 +820,20 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                       children: [
                         Text(
                           'Import Bank Statement',
-                          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                         SizedBox(height: 4),
                         Text(
                           'Upload a statement in almost any format. FinPilot will organize your transactions automatically.',
-                          style: TextStyle(color: textMuted, fontSize: 11, height: 1.35),
+                          style: TextStyle(
+                            color: textMuted,
+                            fontSize: 11,
+                            height: 1.35,
+                          ),
                         ),
                       ],
                     ),
@@ -657,7 +845,10 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
               // Supported formats badge strip
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(14),
@@ -665,7 +856,11 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                 ),
                 child: const Row(
                   children: [
-                    Icon(Icons.auto_awesome_rounded, color: cyanAccent, size: 16),
+                    Icon(
+                      Icons.auto_awesome_rounded,
+                      color: cyanAccent,
+                      size: 16,
+                    ),
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -689,7 +884,11 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
         // 4 Format Cards Grid
         const Text(
           'Select Format or Upload Directly',
-          style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 12),
         Row(
@@ -710,7 +909,9 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                 title: 'IMAGE',
                 subtitle: 'Screenshot / JPG / PNG',
                 color: cyanAccent,
-                onTap: () => _pickStatementFile(allowedExtensions: ['png', 'jpg', 'jpeg']),
+                onTap: () => _pickStatementFile(
+                  allowedExtensions: ['png', 'jpg', 'jpeg'],
+                ),
               ),
             ),
           ],
@@ -724,7 +925,8 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                 title: 'EXCEL',
                 subtitle: 'XLSX / XLS',
                 color: successGreen,
-                onTap: () => _pickStatementFile(allowedExtensions: ['xlsx', 'xls']),
+                onTap: () =>
+                    _pickStatementFile(allowedExtensions: ['xlsx', 'xls']),
               ),
             ),
             const SizedBox(width: 12),
@@ -749,20 +951,28 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
             onPressed: () => _pickStatementFile(),
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.zero,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
               elevation: 6,
               shadowColor: primaryPurple.withValues(alpha: 0.4),
             ),
             child: Ink(
               decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [primaryPurple, cyanAccent]),
+                gradient: const LinearGradient(
+                  colors: [primaryPurple, cyanAccent],
+                ),
                 borderRadius: BorderRadius.circular(18),
               ),
               child: const Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.cloud_upload_rounded, color: Colors.white, size: 22),
+                    Icon(
+                      Icons.cloud_upload_rounded,
+                      color: Colors.white,
+                      size: 22,
+                    ),
                     SizedBox(width: 10),
                     Text(
                       'Upload Statement',
@@ -785,10 +995,18 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
         Center(
           child: TextButton.icon(
             onPressed: _loadDemoData,
-            icon: const Icon(Icons.science_rounded, color: cyanAccent, size: 16),
+            icon: const Icon(
+              Icons.science_rounded,
+              color: cyanAccent,
+              size: 16,
+            ),
             label: const Text(
               'Load Sample Statement Demo Data',
-              style: TextStyle(color: cyanAccent, fontSize: 13, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: cyanAccent,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
@@ -837,7 +1055,11 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
             const SizedBox(height: 12),
             Text(
               title,
-              style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
@@ -876,20 +1098,32 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: primaryPurple.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text(
                       'STATEMENT ANALYSIS',
-                      style: TextStyle(color: cyanAccent, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                      style: TextStyle(
+                        color: cyanAccent,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ),
                   const Spacer(),
                   IconButton(
                     onPressed: () => setState(() => _currentResult = null),
-                    icon: const Icon(Icons.close_rounded, color: textMuted, size: 20),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: textMuted,
+                      size: 20,
+                    ),
                     tooltip: 'Cancel & Re-upload',
                   ),
                 ],
@@ -899,7 +1133,11 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                 result.fileName,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 16),
 
@@ -933,7 +1171,10 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
               ),
               const SizedBox(height: 10),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: cardLight,
                   borderRadius: BorderRadius.circular(12),
@@ -941,11 +1182,16 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Net Cash Flow:', style: TextStyle(color: textMuted, fontSize: 12)),
+                    const Text(
+                      'Net Cash Flow:',
+                      style: TextStyle(color: textMuted, fontSize: 12),
+                    ),
                     Text(
                       '${result.netCashFlow >= 0 ? '+' : ''}${CurrencyFormatter.format(result.netCashFlow)}',
                       style: TextStyle(
-                        color: result.netCashFlow >= 0 ? successGreen : warningOrange,
+                        color: result.netCashFlow >= 0
+                            ? successGreen
+                            : warningOrange,
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
                       ),
@@ -972,11 +1218,19 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.warning_amber_rounded, color: warningOrange, size: 18),
+                    const Icon(
+                      Icons.warning_amber_rounded,
+                      color: warningOrange,
+                      size: 18,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       '${duplicates.length} possible duplicate transactions found',
-                      style: const TextStyle(color: warningOrange, fontSize: 13, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: warningOrange,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -996,7 +1250,10 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                           }
                         });
                       },
-                      child: const Text('Skip All Duplicates', style: TextStyle(color: cyanAccent, fontSize: 12)),
+                      child: const Text(
+                        'Skip All Duplicates',
+                        style: TextStyle(color: cyanAccent, fontSize: 12),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     TextButton(
@@ -1007,7 +1264,10 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                           }
                         });
                       },
-                      child: const Text('Include Anyway', style: TextStyle(color: textMuted, fontSize: 12)),
+                      child: const Text(
+                        'Include Anyway',
+                        style: TextStyle(color: textMuted, fontSize: 12),
+                      ),
                     ),
                   ],
                 ),
@@ -1023,13 +1283,19 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
           children: [
             Text(
               'Transactions (${result.totalCount})',
-              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             Row(
               children: [
                 TextButton(
                   onPressed: () {
-                    final allSelected = result.transactions.every((t) => t.selected);
+                    final allSelected = result.transactions.every(
+                      (t) => t.selected,
+                    );
                     setState(() {
                       for (final t in result.transactions) {
                         t.selected = !allSelected;
@@ -1037,7 +1303,9 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                     });
                   },
                   child: Text(
-                    result.transactions.every((t) => t.selected) ? 'Deselect All' : 'Select All',
+                    result.transactions.every((t) => t.selected)
+                        ? 'Deselect All'
+                        : 'Select All',
                     style: const TextStyle(color: cyanAccent, fontSize: 12),
                   ),
                 ),
@@ -1075,7 +1343,11 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                 children: [
                   Text(
                     '$selectedCount transactions ready to import',
-                    style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Text(
                     '${result.totalCount - selectedCount} skipped',
@@ -1088,14 +1360,22 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: selectedCount > 0 ? _confirmAndImportTransactions : null,
+                  onPressed: selectedCount > 0
+                      ? _confirmAndImportTransactions
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryPurple,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   child: Text(
                     'Import $selectedCount Transactions',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
                   ),
                 ),
               ),
@@ -1115,12 +1395,23 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
       ),
       child: Column(
         children: [
-          Text(label, style: const TextStyle(color: textMuted, fontSize: 10, fontWeight: FontWeight.w600)),
+          Text(
+            label,
+            style: const TextStyle(
+              color: textMuted,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 4),
           FittedBox(
             child: Text(
               value,
-              style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: color,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -1139,7 +1430,9 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
         border: Border.all(
           color: tx.isDuplicate
               ? warningOrange.withValues(alpha: 0.4)
-              : (tx.selected ? Colors.white.withValues(alpha: 0.08) : Colors.transparent),
+              : (tx.selected
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.transparent),
         ),
       ),
       child: Row(
@@ -1148,7 +1441,9 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
             value: tx.selected,
             activeColor: cyanAccent,
             checkColor: Colors.black,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5),
+            ),
             onChanged: (val) {
               setState(() {
                 tx.selected = val ?? false;
@@ -1194,22 +1489,35 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                         DateFormat('dd MMM yyyy').format(tx.date),
                         style: const TextStyle(color: textMuted, fontSize: 11),
                       ),
-                      const Text(' \u2022 ', style: TextStyle(color: textMuted, fontSize: 10)),
+                      const Text(
+                        ' \u2022 ',
+                        style: TextStyle(color: textMuted, fontSize: 10),
+                      ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: cardLight,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           tx.category,
-                          style: const TextStyle(color: cyanAccent, fontSize: 10, fontWeight: FontWeight.w600),
+                          style: const TextStyle(
+                            color: cyanAccent,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                       const Spacer(),
                       // Confidence pill
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: tx.confidence.hasLowConfidence
                               ? warningOrange.withValues(alpha: 0.15)
@@ -1217,9 +1525,13 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          tx.confidence.hasLowConfidence ? 'Review' : '${tx.confidence.amount}% conf',
+                          tx.confidence.hasLowConfidence
+                              ? 'Review'
+                              : '${tx.confidence.amount}% conf',
                           style: TextStyle(
-                            color: tx.confidence.hasLowConfidence ? warningOrange : successGreen,
+                            color: tx.confidence.hasLowConfidence
+                                ? warningOrange
+                                : successGreen,
                             fontSize: 9,
                             fontWeight: FontWeight.bold,
                           ),
@@ -1231,7 +1543,11 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                     const SizedBox(height: 4),
                     Text(
                       tx.duplicateReason,
-                      style: const TextStyle(color: warningOrange, fontSize: 10, fontStyle: FontStyle.italic),
+                      style: const TextStyle(
+                        color: warningOrange,
+                        fontSize: 10,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
                   ],
                 ],
@@ -1262,7 +1578,10 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
           decoration: BoxDecoration(
             color: cardDark,
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: successGreen.withValues(alpha: 0.35), width: 1.5),
+            border: Border.all(
+              color: successGreen.withValues(alpha: 0.35),
+              width: 1.5,
+            ),
             boxShadow: [
               BoxShadow(
                 color: successGreen.withValues(alpha: 0.08),
@@ -1274,20 +1593,33 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
           child: Column(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: successGreen.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: successGreen.withValues(alpha: 0.4)),
+                  border: Border.all(
+                    color: successGreen.withValues(alpha: 0.4),
+                  ),
                 ),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.check_circle_rounded, color: successGreen, size: 16),
+                    Icon(
+                      Icons.check_circle_rounded,
+                      color: successGreen,
+                      size: 16,
+                    ),
                     SizedBox(width: 6),
                     Text(
                       '\u2713 STATEMENT ANALYZED & IMPORTED',
-                      style: TextStyle(color: successGreen, fontSize: 12, fontWeight: FontWeight.w800),
+                      style: TextStyle(
+                        color: successGreen,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ],
                 ),
@@ -1295,7 +1627,11 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
               const SizedBox(height: 18),
               Text(
                 '$_lastImportedCount Transactions',
-                style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
               const SizedBox(height: 6),
               Text(
@@ -1308,33 +1644,54 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                 children: [
                   Column(
                     children: [
-                      const Text('Total Income', style: TextStyle(color: textMuted, fontSize: 11)),
+                      const Text(
+                        'Total Income',
+                        style: TextStyle(color: textMuted, fontSize: 11),
+                      ),
                       const SizedBox(height: 4),
                       Text(
                         CurrencyFormatter.format(result.totalIncome),
-                        style: const TextStyle(color: successGreen, fontSize: 15, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: successGreen,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
                   Container(width: 1, height: 30, color: Colors.white12),
                   Column(
                     children: [
-                      const Text('Total Expenses', style: TextStyle(color: textMuted, fontSize: 11)),
+                      const Text(
+                        'Total Expenses',
+                        style: TextStyle(color: textMuted, fontSize: 11),
+                      ),
                       const SizedBox(height: 4),
                       Text(
                         CurrencyFormatter.format(result.totalExpense),
-                        style: const TextStyle(color: dangerRed, fontSize: 15, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: dangerRed,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
                   Container(width: 1, height: 30, color: Colors.white12),
                   Column(
                     children: [
-                      const Text('Net Cash Flow', style: TextStyle(color: textMuted, fontSize: 11)),
+                      const Text(
+                        'Net Cash Flow',
+                        style: TextStyle(color: textMuted, fontSize: 11),
+                      ),
                       const SizedBox(height: 4),
                       Text(
                         CurrencyFormatter.format(result.netCashFlow),
-                        style: const TextStyle(color: cyanAccent, fontSize: 15, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: cyanAccent,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -1364,27 +1721,48 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
             children: [
               const Row(
                 children: [
-                  Icon(Icons.auto_awesome_rounded, color: primaryPurple, size: 18),
+                  Icon(
+                    Icons.auto_awesome_rounded,
+                    color: primaryPurple,
+                    size: 18,
+                  ),
                   SizedBox(width: 8),
                   Text(
                     'STATEMENT INSIGHTS',
-                    style: TextStyle(color: primaryPurple, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 1.0),
+                    style: TextStyle(
+                      color: primaryPurple,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.0,
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
               Text(
                 '"${result.summaryInsight}"',
-                style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.45, fontStyle: FontStyle.italic),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  height: 1.45,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
               const SizedBox(height: 20),
               const Text(
                 'SPENDING BREAKDOWN',
-                style: TextStyle(color: textMuted, fontSize: 10.5, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                style: TextStyle(
+                  color: textMuted,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
+                ),
               ),
               const SizedBox(height: 12),
               ...result.spendingBreakdown.entries.map((entry) {
-                final pct = result.totalExpense > 0 ? (entry.value / result.totalExpense) : 0.0;
+                final pct = result.totalExpense > 0
+                    ? (entry.value / result.totalExpense)
+                    : 0.0;
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Column(
@@ -1392,10 +1770,20 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(entry.key, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                          Text(
+                            entry.key,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
+                          ),
                           Text(
                             '${CurrencyFormatter.format(entry.value)} (${(pct * 100).toStringAsFixed(0)}%)',
-                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -1405,7 +1793,9 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                         child: LinearProgressIndicator(
                           value: pct.clamp(0.0, 1.0),
                           backgroundColor: cardLight,
-                          valueColor: const AlwaysStoppedAnimation<Color>(cyanAccent),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            cyanAccent,
+                          ),
                           minHeight: 5,
                         ),
                       ),
@@ -1432,9 +1822,17 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
-                child: const Text('Import Another', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'Import Another',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -1444,9 +1842,17 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryPurple,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
-                child: const Text('Go to Dashboard', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'Go to Dashboard',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],
@@ -1483,7 +1889,11 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                     children: [
                       const Text(
                         'Import History',
-                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(ctx),
@@ -1521,14 +1931,23 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                                 Row(
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 7,
+                                        vertical: 2,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: primaryPurple.withValues(alpha: 0.25),
+                                        color: primaryPurple.withValues(
+                                          alpha: 0.25,
+                                        ),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
                                         item.format,
-                                        style: const TextStyle(color: cyanAccent, fontSize: 10, fontWeight: FontWeight.bold),
+                                        style: const TextStyle(
+                                          color: cyanAccent,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(width: 8),
@@ -1537,22 +1956,34 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                                         item.fileName,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                   ],
                                 ),
                                 const SizedBox(height: 8),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       '${item.transactionCount} transactions',
-                                      style: const TextStyle(color: textMuted, fontSize: 11),
+                                      style: const TextStyle(
+                                        color: textMuted,
+                                        fontSize: 11,
+                                      ),
                                     ),
                                     Text(
-                                      DateFormat('dd MMM yyyy, HH:mm').format(item.importedAt),
-                                      style: const TextStyle(color: textMuted, fontSize: 10),
+                                      DateFormat('dd MMM yyyy, HH:mm')
+                                          .format(item.importedAt),
+                                      style: const TextStyle(
+                                        color: textMuted,
+                                        fontSize: 10,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -1561,12 +1992,20 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
                                   children: [
                                     Text(
                                       'Income: ${CurrencyFormatter.format(item.totalIncome)}',
-                                      style: const TextStyle(color: successGreen, fontSize: 11, fontWeight: FontWeight.bold),
+                                      style: const TextStyle(
+                                        color: successGreen,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                     const SizedBox(width: 14),
                                     Text(
                                       'Expense: ${CurrencyFormatter.format(item.totalExpense)}',
-                                      style: const TextStyle(color: dangerRed, fontSize: 11, fontWeight: FontWeight.bold),
+                                      style: const TextStyle(
+                                        color: dangerRed,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -1599,24 +2038,48 @@ class _BankStatementScreenState extends State<BankStatementScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.lightbulb_outline_rounded, color: cyanAccent, size: 18),
+              Icon(
+                Icons.lightbulb_outline_rounded,
+                color: cyanAccent,
+                size: 18,
+              ),
               SizedBox(width: 8),
               Text(
                 'HOW THE INTELLIGENCE CENTER WORKS',
-                style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
+                ),
               ),
             ],
           ),
           SizedBox(height: 12),
-          Text('1. Upload PDF, image screenshot, Excel (.xlsx), or CSV bank statement.', style: TextStyle(color: textMuted, fontSize: 11.5)),
+          Text(
+            '1. Upload PDF, image screenshot, Excel (.xlsx), or CSV bank statement.',
+            style: TextStyle(color: textMuted, fontSize: 11.5),
+          ),
           SizedBox(height: 6),
-          Text('2. FinPilot automatically identifies columns, amounts, dates, and Dr/Cr indicators.', style: TextStyle(color: textMuted, fontSize: 11.5)),
+          Text(
+            '2. FinPilot automatically identifies columns, amounts, dates, and Dr/Cr indicators.',
+            style: TextStyle(color: textMuted, fontSize: 11.5),
+          ),
           SizedBox(height: 6),
-          Text('3. Intelligent categorization engine extracts clean merchants and categories.', style: TextStyle(color: textMuted, fontSize: 11.5)),
+          Text(
+            '3. Intelligent categorization engine extracts clean merchants and categories.',
+            style: TextStyle(color: textMuted, fontSize: 11.5),
+          ),
           SizedBox(height: 6),
-          Text('4. Probable duplicates with your existing transactions are detected and highlighted.', style: TextStyle(color: textMuted, fontSize: 11.5)),
+          Text(
+            '4. Probable duplicates with your existing transactions are detected and highlighted.',
+            style: TextStyle(color: textMuted, fontSize: 11.5),
+          ),
           SizedBox(height: 6),
-          Text('5. Review, adjust, and confirm to update your Dashboard, Budgets, and AI Insights.', style: TextStyle(color: textMuted, fontSize: 11.5)),
+          Text(
+            '5. Review, adjust, and confirm to update your Dashboard, Budgets, and AI Insights.',
+            style: TextStyle(color: textMuted, fontSize: 11.5),
+          ),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'finance_transaction.dart';
 
 enum StatementFormat { pdf, image, excel, csv }
@@ -20,11 +21,11 @@ class ConfidenceScores {
       merchant < 80 || amount < 80 || date < 80 || category < 80;
 
   Map<String, dynamic> toJson() => {
-        'merchant': merchant,
-        'amount': amount,
-        'date': date,
-        'category': category,
-      };
+    'merchant': merchant,
+    'amount': amount,
+    'date': date,
+    'category': category,
+  };
 
   factory ConfidenceScores.fromJson(Map<String, dynamic> json) =>
       ConfidenceScores(
@@ -80,7 +81,9 @@ class ParsedStatementTransaction {
       date: date,
       paymentMethod: paymentMethod,
       merchant: merchant,
-      note: notes.isNotEmpty ? notes : (referenceId.isNotEmpty ? 'Ref: $referenceId' : description),
+      note: notes.isNotEmpty
+          ? notes
+          : (referenceId.isNotEmpty ? 'Ref: $referenceId' : description),
       source: source,
       createdAt: DateTime.now(),
     );
@@ -137,14 +140,14 @@ class ImportHistoryItem {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'fileName': fileName,
-        'importedAt': importedAt.toIso8601String(),
-        'transactionCount': transactionCount,
-        'totalIncome': totalIncome,
-        'totalExpense': totalExpense,
-        'format': format,
-      };
+    'id': id,
+    'fileName': fileName,
+    'importedAt': importedAt.toIso8601String(),
+    'transactionCount': transactionCount,
+    'totalIncome': totalIncome,
+    'totalExpense': totalExpense,
+    'format': format,
+  };
 
   factory ImportHistoryItem.fromJson(Map<String, dynamic> json) =>
       ImportHistoryItem(

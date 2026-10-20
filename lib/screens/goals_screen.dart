@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
+
 import '../models/goal_model.dart';
 import '../providers/goal_provider.dart';
 import '../utils/constants.dart';
@@ -23,7 +24,9 @@ class _GoalsScreenState extends State<GoalsScreen> {
   final _addMoneyController = TextEditingController();
 
   String _selectedGoalCategory = 'Emergency Fund';
-  DateTime _selectedGoalDeadline = DateTime.now().add(const Duration(days: 365));
+  DateTime _selectedGoalDeadline = DateTime.now().add(
+    const Duration(days: 365),
+  );
 
   @override
   void dispose() {
@@ -32,7 +35,6 @@ class _GoalsScreenState extends State<GoalsScreen> {
     _addMoneyController.dispose();
     super.dispose();
   }
-
 
   void _showAddGoalDialog() {
     _goalTitleController.clear();
@@ -47,23 +49,47 @@ class _GoalsScreenState extends State<GoalsScreen> {
           builder: (context, setDialogState) {
             return AlertDialog(
               backgroundColor: AppColors.secondaryBackground,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-              title: const Text('New Savings Goal', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+              title: const Text(
+                'New Savings Goal',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Goal Name', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Goal Name',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 6),
                     TextField(
                       controller: _goalTitleController,
                       style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(hintText: 'e.g. Dream House, Macbook Pro'),
+                      decoration: const InputDecoration(
+                        hintText: 'e.g. Dream House, Macbook Pro',
+                      ),
                     ),
                     const SizedBox(height: 16),
 
-                    const Text('Target Amount', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Target Amount',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 6),
                     TextField(
                       controller: _goalTargetController,
@@ -71,17 +97,30 @@ class _GoalsScreenState extends State<GoalsScreen> {
                       style: const TextStyle(color: Colors.white),
                       decoration: const InputDecoration(
                         hintText: '₹0',
-                        prefixIcon: Icon(Icons.currency_rupee, color: AppColors.textMuted, size: 18),
+                        prefixIcon: Icon(
+                          Icons.currency_rupee,
+                          color: AppColors.textMuted,
+                          size: 18,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
 
-                    const Text('Category', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Category',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
                       value: _selectedGoalCategory,
                       dropdownColor: AppColors.cardBackground,
-                      decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 12)),
+                      decoration: const InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                      ),
                       items: AppConstants.goalCategories.map((cat) {
                         return DropdownMenuItem(value: cat, child: Text(cat));
                       }).toList(),
@@ -93,7 +132,14 @@ class _GoalsScreenState extends State<GoalsScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    const Text('Deadline', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Deadline',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 6),
                     InkWell(
                       onTap: () async {
@@ -110,7 +156,10 @@ class _GoalsScreenState extends State<GoalsScreen> {
                         }
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 14,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.secondaryBackground,
                           borderRadius: BorderRadius.circular(12),
@@ -123,7 +172,11 @@ class _GoalsScreenState extends State<GoalsScreen> {
                               '${_selectedGoalDeadline.day}/${_selectedGoalDeadline.month}/${_selectedGoalDeadline.year}',
                               style: const TextStyle(color: Colors.white),
                             ),
-                            const Icon(Icons.calendar_today_rounded, color: AppColors.textMuted, size: 16),
+                            const Icon(
+                              Icons.calendar_today_rounded,
+                              color: AppColors.textMuted,
+                              size: 16,
+                            ),
                           ],
                         ),
                       ),
@@ -134,12 +187,17 @@ class _GoalsScreenState extends State<GoalsScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
                 ),
                 TextButton(
                   onPressed: () async {
                     final title = _goalTitleController.text.trim();
-                    final amt = double.tryParse(_goalTargetController.text.trim());
+                    final amt = double.tryParse(
+                      _goalTargetController.text.trim(),
+                    );
                     if (title.isNotEmpty && amt != null && amt > 0) {
                       final uuid = const Uuid();
                       final goal = GoalModel(
@@ -155,7 +213,13 @@ class _GoalsScreenState extends State<GoalsScreen> {
                       if (mounted) Navigator.pop(context);
                     }
                   },
-                  child: const Text('Create', style: TextStyle(color: AppColors.cyan, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Create',
+                    style: TextStyle(
+                      color: AppColors.cyan,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             );
@@ -172,14 +236,20 @@ class _GoalsScreenState extends State<GoalsScreen> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppColors.secondaryBackground,
-          title: Text('Fund "${goal.title}"', style: const TextStyle(color: Colors.white)),
+          title: Text(
+            'Fund "${goal.title}"',
+            style: const TextStyle(color: Colors.white),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Add savings to this goal. Target remaining: ${CurrencyFormatter.format(goal.remainingAmount)}',
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -188,7 +258,10 @@ class _GoalsScreenState extends State<GoalsScreen> {
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   hintText: 'Enter contribution',
-                  prefixIcon: Icon(Icons.currency_rupee, color: AppColors.textMuted),
+                  prefixIcon: Icon(
+                    Icons.currency_rupee,
+                    color: AppColors.textMuted,
+                  ),
                 ),
               ),
             ],
@@ -196,17 +269,29 @@ class _GoalsScreenState extends State<GoalsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
             TextButton(
               onPressed: () async {
                 final amt = double.tryParse(_addMoneyController.text.trim());
                 if (amt != null && amt > 0) {
-                  await context.read<GoalProvider>().addMoneyToGoal(goal.id, amt);
+                  await context.read<GoalProvider>().addMoneyToGoal(
+                    goal.id,
+                    amt,
+                  );
                   if (mounted) Navigator.pop(context);
                 }
               },
-              child: const Text('Add Money', style: TextStyle(color: AppColors.successGreen, fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Add Money',
+                style: TextStyle(
+                  color: AppColors.successGreen,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         );
@@ -254,7 +339,8 @@ class _GoalsScreenState extends State<GoalsScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => GoalDetailsScreen(goal: goal),
+                                  builder: (context) =>
+                                      GoalDetailsScreen(goal: goal),
                                 ),
                               );
                             },
@@ -265,10 +351,18 @@ class _GoalsScreenState extends State<GoalsScreen> {
                                 alignment: Alignment.centerRight,
                                 padding: const EdgeInsets.only(right: 20),
                                 decoration: BoxDecoration(
-                                  color: AppColors.dangerRed.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+                                  color: AppColors.dangerRed.withValues(
+                                    alpha: 0.15,
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                    AppConstants.cardRadius,
+                                  ),
                                 ),
-                                child: const Icon(Icons.delete_outline_rounded, color: AppColors.dangerRed, size: 28),
+                                child: const Icon(
+                                  Icons.delete_outline_rounded,
+                                  color: AppColors.dangerRed,
+                                  size: 28,
+                                ),
                               ),
                               onDismissed: (direction) async {
                                 await goalProvider.deleteGoal(goal.id);
@@ -278,15 +372,18 @@ class _GoalsScreenState extends State<GoalsScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Row(
                                           children: [
                                             Container(
                                               padding: const EdgeInsets.all(8),
                                               decoration: BoxDecoration(
-                                                color: AppColors.successGreen.withValues(alpha: 0.1),
-                                                borderRadius: BorderRadius.circular(12),
+                                                color: AppColors.successGreen
+                                                    .withValues(alpha: 0.1),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
                                               ),
                                               child: Icon(
                                                 _getGoalIcon(goal.category),
@@ -296,37 +393,60 @@ class _GoalsScreenState extends State<GoalsScreen> {
                                             ),
                                             const SizedBox(width: 12),
                                             Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 Text(
                                                   goal.title,
-                                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16,
+                                                    color: Colors.white,
+                                                  ),
                                                 ),
                                                 Text(
                                                   goal.category,
-                                                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                                  style: const TextStyle(
+                                                    fontSize: 11,
+                                                    color:
+                                                        AppColors.textSecondary,
+                                                  ),
                                                 ),
                                               ],
                                             ),
                                           ],
                                         ),
                                         IconButton(
-                                          icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.cyan, size: 24),
-                                          onPressed: () => _showAddMoneyDialog(goal),
+                                          icon: const Icon(
+                                            Icons.add_circle_outline_rounded,
+                                            color: AppColors.cyan,
+                                            size: 24,
+                                          ),
+                                          onPressed: () =>
+                                              _showAddMoneyDialog(goal),
                                         ),
                                       ],
                                     ),
                                     const SizedBox(height: 20),
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           '${CurrencyFormatter.format(goal.currentAmount)} / ${CurrencyFormatter.format(goal.targetAmount)}',
-                                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
                                         ),
                                         Text(
                                           '${(pct * 100).toStringAsFixed(0)}%',
-                                          style: const TextStyle(color: AppColors.successGreen, fontWeight: FontWeight.bold, fontSize: 14),
+                                          style: const TextStyle(
+                                            color: AppColors.successGreen,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -335,22 +455,37 @@ class _GoalsScreenState extends State<GoalsScreen> {
                                       borderRadius: BorderRadius.circular(4),
                                       child: LinearProgressIndicator(
                                         value: pct,
-                                        backgroundColor: AppColors.secondaryBackground,
-                                        valueColor: const AlwaysStoppedAnimation<Color>(AppColors.successGreen),
+                                        backgroundColor:
+                                            AppColors.secondaryBackground,
+                                        valueColor:
+                                            const AlwaysStoppedAnimation<Color>(
+                                              AppColors.successGreen,
+                                            ),
                                         minHeight: 6,
                                       ),
                                     ),
                                     const SizedBox(height: 12),
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           'Remaining: ${CurrencyFormatter.format(goal.remainingAmount)}',
-                                          style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8), fontSize: 11),
+                                          style: TextStyle(
+                                            color: AppColors.textSecondary
+                                                .withValues(alpha: 0.8),
+                                            fontSize: 11,
+                                          ),
                                         ),
                                         Text(
-                                          days > 0 ? '$days days left' : 'Due today',
-                                          style: const TextStyle(color: AppColors.warningOrange, fontSize: 11, fontWeight: FontWeight.w600),
+                                          days > 0
+                                              ? '$days days left'
+                                              : 'Due today',
+                                          style: const TextStyle(
+                                            color: AppColors.warningOrange,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
                                       ],
                                     ),

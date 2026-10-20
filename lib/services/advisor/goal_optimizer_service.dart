@@ -10,9 +10,14 @@ class GoalOptimizerService {
     required FinanceProvider finance,
   }) {
     final List<GoalModel> rawGoals = goalProvider.goals;
-    final double income = finance.monthlyIncome > 0 ? finance.monthlyIncome : 65000.0;
+    final double income = finance.monthlyIncome > 0
+        ? finance.monthlyIncome
+        : 65000.0;
     final double expense = finance.monthlyExpense;
-    final double availableMonthlySurplus = (income - expense).clamp(0.0, 500000.0);
+    final double availableMonthlySurplus = (income - expense).clamp(
+      0.0,
+      500000.0,
+    );
 
     if (rawGoals.isEmpty) {
       return const GoalOptimizationResult(
@@ -22,7 +27,8 @@ class GoalOptimizerService {
         totalMonthlyRequired: 0,
         availableMonthlySurplus: 0,
         monthlyDeficitOrSurplus: 0,
-        strategicAdvice: 'Navigate to Goals and add your first target milestone.',
+        strategicAdvice:
+            'Navigate to Goals and add your first target milestone.',
       );
     }
 
@@ -39,7 +45,8 @@ class GoalOptimizerService {
       int priorityRank = 3;
       String reason = 'Standard milestone allocation.';
 
-      if (g.category.toLowerCase().contains('emergency') || g.title.toLowerCase().contains('emergency')) {
+      if (g.category.toLowerCase().contains('emergency') ||
+          g.title.toLowerCase().contains('emergency')) {
         priorityRank = 1;
         reason = 'Highest financial security priority (defensive moat).';
       } else if (g.deadline.difference(DateTime.now()).inDays < 180) {
@@ -73,7 +80,8 @@ class GoalOptimizerService {
     });
 
     // Check for funding conflict
-    final double monthlyDeficitOrSurplus = availableMonthlySurplus - totalMonthlyRequired;
+    final double monthlyDeficitOrSurplus =
+        availableMonthlySurplus - totalMonthlyRequired;
     final bool hasConflict = monthlyDeficitOrSurplus < 0;
 
     if (hasConflict) {
@@ -90,9 +98,11 @@ class GoalOptimizerService {
     final bestNext = rankedItems.first;
     String advice;
     if (hasConflict) {
-      advice = 'Your active goals require ${CurrencyFormatter.format(totalMonthlyRequired)}/mo, exceeding your current surplus of ${CurrencyFormatter.format(availableMonthlySurplus)}/mo by ${CurrencyFormatter.format(-monthlyDeficitOrSurplus)}. Focus 70% of surplus on "${bestNext.title}" first to avoid spreading capital too thin.';
+      advice =
+          'Your active goals require ${CurrencyFormatter.format(totalMonthlyRequired)}/mo, exceeding your current surplus of ${CurrencyFormatter.format(availableMonthlySurplus)}/mo by ${CurrencyFormatter.format(-monthlyDeficitOrSurplus)}. Focus 70% of surplus on "${bestNext.title}" first to avoid spreading capital too thin.';
     } else {
-      advice = 'Your available monthly surplus of ${CurrencyFormatter.format(availableMonthlySurplus)} comfortably covers all goal run-rates (${CurrencyFormatter.format(totalMonthlyRequired)}/mo) with ${CurrencyFormatter.format(monthlyDeficitOrSurplus)} extra buffer for accelerated investing.';
+      advice =
+          'Your available monthly surplus of ${CurrencyFormatter.format(availableMonthlySurplus)} comfortably covers all goal run-rates (${CurrencyFormatter.format(totalMonthlyRequired)}/mo) with ${CurrencyFormatter.format(monthlyDeficitOrSurplus)} extra buffer for accelerated investing.';
     }
 
     return GoalOptimizationResult(

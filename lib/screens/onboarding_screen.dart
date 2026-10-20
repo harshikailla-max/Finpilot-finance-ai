@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../services/storage_service.dart';
 import '../utils/constants.dart';
 import '../widgets/gradient_button.dart';
@@ -98,11 +99,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ),
                         ),
                         child: Center(
-                          child: Icon(
-                            page.icon,
-                            size: 80,
-                            color: page.color,
-                          ),
+                          child: Icon(page.icon, size: 80, color: page.color),
                         ),
                       ),
                       const SizedBox(height: 60),
@@ -134,7 +131,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
           // Indicator & Button footer
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 32.0,
+            ),
             child: Column(
               children: [
                 // Indicators

@@ -14,23 +14,33 @@ class ProactiveMoneyMovesService {
   }) {
     final moves = <MoneyMove>[];
 
-    final double income = finance.monthlyIncome > 0 ? finance.monthlyIncome : 65000.0;
+    final double income = finance.monthlyIncome > 0
+        ? finance.monthlyIncome
+        : 65000.0;
     final double expense = finance.monthlyExpense;
     final double surplus = income - expense;
-    final double liquidBalance = finance.balance > 0 ? finance.balance : (surplus * 2.5);
+    final double liquidBalance = finance.balance > 0
+        ? finance.balance
+        : (surplus * 2.5);
     final double monthlyBurn = expense > 0 ? expense : (income * 0.7);
-    final double emergencyMonths = monthlyBurn > 0 ? (liquidBalance / monthlyBurn) : 2.0;
+    final double emergencyMonths = monthlyBurn > 0
+        ? (liquidBalance / monthlyBurn)
+        : 2.0;
 
     // 1. Emergency Fund Move
     if (emergencyMonths < 3.0) {
       final double targetFund = monthlyBurn * 3.0;
-      final double shortfall = (targetFund - liquidBalance).clamp(0.0, 5000000.0);
+      final double shortfall = (targetFund - liquidBalance).clamp(
+        0.0,
+        5000000.0,
+      );
       moves.add(
         MoneyMove(
           id: 'move_emergency_fund',
           title: 'Strengthen Emergency Moat',
           category: 'Safety',
-          reason: 'Your liquid reserves cover only ${emergencyMonths.toStringAsFixed(1)} months of living costs. Recommended minimum is 3 to 6 months.',
+          reason:
+              'Your liquid reserves cover only ${emergencyMonths.toStringAsFixed(1)} months of living costs. Recommended minimum is 3 to 6 months.',
           impact: 'Build ${CurrencyFormatter.format(shortfall)} reserve buffer',
           actionLabel: 'Setup Emergency Goal',
           actionRoute: 'goals',
@@ -47,8 +57,10 @@ class ProactiveMoneyMovesService {
           id: 'move_dining_optimization',
           title: 'Trim Food & Dining Delivery',
           category: 'Expenses',
-          reason: 'Dining expenses reached ${CurrencyFormatter.format(diningSpend)} this month. A 20% cap redirects ${CurrencyFormatter.format(savingsPotential)} straight to your savings.',
-          impact: '+${CurrencyFormatter.format(savingsPotential)} monthly savings',
+          reason:
+              'Dining expenses reached ${CurrencyFormatter.format(diningSpend)} this month. A 20% cap redirects ${CurrencyFormatter.format(savingsPotential)} straight to your savings.',
+          impact:
+              '+${CurrencyFormatter.format(savingsPotential)} monthly savings',
           actionLabel: 'Review Dining Budget',
           actionRoute: 'budget',
         ),
@@ -64,7 +76,8 @@ class ProactiveMoneyMovesService {
           id: 'move_accelerate_goal',
           title: 'Accelerate "${topGoal.title}"',
           category: 'Goals',
-          reason: 'You have an unallocated monthly surplus of ${CurrencyFormatter.format(surplus)}. Channeling ${CurrencyFormatter.format(unallocatedSurplus)}/month completes this milestone faster.',
+          reason:
+              'You have an unallocated monthly surplus of ${CurrencyFormatter.format(surplus)}. Channeling ${CurrencyFormatter.format(unallocatedSurplus)}/month completes this milestone faster.',
           impact: 'Shorten target date by ~2 months',
           actionLabel: 'Add Funds to Goal',
           actionRoute: 'goals',
@@ -80,8 +93,10 @@ class ProactiveMoneyMovesService {
           id: 'move_scale_investments',
           title: 'Scale Automated Monthly SIP',
           category: 'Wealth',
-          reason: 'Your consistent monthly surplus can support an additional ${CurrencyFormatter.format(sipRecommendation)}/month index or mutual fund allocation.',
-          impact: 'Builds ~${CurrencyFormatter.format(sipRecommendation * 12 * 1.12)} over 1 year',
+          reason:
+              'Your consistent monthly surplus can support an additional ${CurrencyFormatter.format(sipRecommendation)}/month index or mutual fund allocation.',
+          impact:
+              'Builds ~${CurrencyFormatter.format(sipRecommendation * 12 * 1.12)} over 1 year',
           actionLabel: 'Open Investment Desk',
           actionRoute: 'investments',
         ),

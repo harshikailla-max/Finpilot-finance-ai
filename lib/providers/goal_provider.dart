@@ -1,6 +1,8 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+
 import '../models/goal_model.dart';
 import '../services/storage_service.dart';
 
@@ -39,7 +41,10 @@ class GoalProvider extends ChangeNotifier {
     final index = _goals.indexWhere((g) => g.id == id);
     if (index != -1) {
       final goal = _goals[index];
-      final newAmount = (goal.currentAmount + amount).clamp(0.0, goal.targetAmount);
+      final newAmount = (goal.currentAmount + amount).clamp(
+        0.0,
+        goal.targetAmount,
+      );
       _goals[index] = goal.copyWith(currentAmount: newAmount);
       notifyListeners();
       await _saveToStorage();

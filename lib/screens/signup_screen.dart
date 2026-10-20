@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../services/storage_service.dart';
 import '../utils/constants.dart';
 import '../widgets/glass_card.dart';
@@ -93,7 +94,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
           // Content
           SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 16.0,
+              ),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -139,7 +143,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             style: const TextStyle(color: Colors.white),
                             decoration: const InputDecoration(
                               hintText: 'John Doe',
-                              prefixIcon: Icon(Icons.person_outline_rounded, color: AppColors.textMuted),
+                              prefixIcon: Icon(
+                                Icons.person_outline_rounded,
+                                color: AppColors.textMuted,
+                              ),
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
@@ -166,13 +173,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             style: const TextStyle(color: Colors.white),
                             decoration: const InputDecoration(
                               hintText: 'name@example.com',
-                              prefixIcon: Icon(Icons.email_outlined, color: AppColors.textMuted),
+                              prefixIcon: Icon(
+                                Icons.email_outlined,
+                                color: AppColors.textMuted,
+                              ),
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Please enter your email';
                               }
-                              final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                              final emailRegex = RegExp(
+                                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                              );
                               if (!emailRegex.hasMatch(value)) {
                                 return 'Please enter a valid email address';
                               }
@@ -197,10 +209,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               hintText: 'At least 6 characters',
-                              prefixIcon: const Icon(Icons.lock_outlined, color: AppColors.textMuted),
+                              prefixIcon: const Icon(
+                                Icons.lock_outlined,
+                                color: AppColors.textMuted,
+                              ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                  _obscurePassword
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
                                   color: AppColors.textMuted,
                                 ),
                                 onPressed: () {
@@ -238,7 +255,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             style: const TextStyle(color: Colors.white),
                             decoration: const InputDecoration(
                               hintText: 'Re-enter your password',
-                              prefixIcon: Icon(Icons.lock_outline_rounded, color: AppColors.textMuted),
+                              prefixIcon: Icon(
+                                Icons.lock_outline_rounded,
+                                color: AppColors.textMuted,
+                              ),
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -270,13 +290,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       children: [
                         Text(
                           'Already have an account? ',
-                          style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.8)),
+                          style: TextStyle(
+                            color: AppColors.textSecondary.withValues(
+                              alpha: 0.8,
+                            ),
+                          ),
                         ),
                         GestureDetector(
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => const LoginScreen()),
+                              MaterialPageRoute(
+                                builder: (context) => const LoginScreen(),
+                              ),
                             );
                           },
                           child: const Text(

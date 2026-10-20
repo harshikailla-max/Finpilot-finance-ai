@@ -42,10 +42,12 @@ class FuturePredictionService {
       final double monthlySavings = currentIncome - currentExpenses;
       runningSavings += monthlySavings;
 
-      points.add(SimulationPoint(
-        month: month,
-        balance: double.parse(runningSavings.toStringAsFixed(0)),
-      ));
+      points.add(
+        SimulationPoint(
+          month: month,
+          balance: double.parse(runningSavings.toStringAsFixed(0)),
+        ),
+      );
     }
 
     return points;

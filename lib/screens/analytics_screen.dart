@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
+
 import '../models/finance_transaction.dart';
 import '../providers/finance_provider.dart';
 import '../utils/constants.dart';
@@ -16,7 +17,8 @@ class AnalyticsScreen extends StatefulWidget {
 }
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
-  int _activeChartIndex = 0; // 0 = Categories Donut, 1 = Income vs Exp Bar, 2 = Spending Line
+  int _activeChartIndex =
+      0; // 0 = Categories Donut, 1 = Income vs Exp Bar, 2 = Spending Line
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +39,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     // Process statistics
     double totalIncome = financeProvider.totalIncome;
     double totalExpense = financeProvider.totalExpense;
-    double savingsRate = totalIncome > 0 ? ((totalIncome - totalExpense) / totalIncome) * 100 : 0.0;
+    double savingsRate = totalIncome > 0
+        ? ((totalIncome - totalExpense) / totalIncome) * 100
+        : 0.0;
 
     // Largest Transaction
     double largestTransactionVal = 0.0;
@@ -51,14 +55,23 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
     // Average Daily Expense (current month)
     final now = DateTime.now();
-    final currentMonthExpenses = transactions.where((t) =>
-        t.type == TransactionType.expense &&
-        t.date.year == now.year &&
-        t.date.month == now.month).toList();
+    final currentMonthExpenses = transactions
+        .where(
+          (t) =>
+              t.type == TransactionType.expense &&
+              t.date.year == now.year &&
+              t.date.month == now.month,
+        )
+        .toList();
 
-    double monthlyExpenseSum = currentMonthExpenses.fold(0.0, (sum, t) => sum + t.amount);
+    double monthlyExpenseSum = currentMonthExpenses.fold(
+      0.0,
+      (sum, t) => sum + t.amount,
+    );
     int daysElapsed = now.day;
-    double avgDailyExpense = daysElapsed > 0 ? monthlyExpenseSum / daysElapsed : 0.0;
+    double avgDailyExpense = daysElapsed > 0
+        ? monthlyExpenseSum / daysElapsed
+        : 0.0;
 
     // Highest Spending Day
     Map<int, double> dailySpending = {};
@@ -111,7 +124,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               GlassCard(
                 height: 280,
                 padding: const EdgeInsets.all(16),
-                child: _buildChart(filteredCategories: sortedCategories, totalIncome: totalIncome, totalExpense: totalExpense, currentMonthExpenses: currentMonthExpenses),
+                child: _buildChart(
+                  filteredCategories: sortedCategories,
+                  totalIncome: totalIncome,
+                  totalExpense: totalExpense,
+                  currentMonthExpenses: currentMonthExpenses,
+                ),
               ),
               const SizedBox(height: 28),
 
@@ -141,12 +159,16 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   ),
                   _buildSummaryItem(
                     title: 'Highest Spend Day',
-                    value: highestSpendDay > 0 ? 'Day $highestSpendDay (${CurrencyFormatter.format(highestSpendDayAmt)})' : 'No Data',
+                    value: highestSpendDay > 0
+                        ? 'Day $highestSpendDay (${CurrencyFormatter.format(highestSpendDayAmt)})'
+                        : 'No Data',
                     accentColor: AppColors.warningOrange,
                   ),
                   _buildSummaryItem(
                     title: 'Largest Transaction',
-                    value: largestTransactionVal > 0 ? '${CurrencyFormatter.format(largestTransactionVal)}\n($largestTransactionTitle)' : 'No Data',
+                    value: largestTransactionVal > 0
+                        ? '${CurrencyFormatter.format(largestTransactionVal)}\n($largestTransactionTitle)'
+                        : 'No Data',
                     accentColor: AppColors.dangerRed,
                   ),
                   _buildSummaryItem(
@@ -173,17 +195,24 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: sortedCategories.length > 5 ? 5 : sortedCategories.length,
+                  itemCount: sortedCategories.length > 5
+                      ? 5
+                      : sortedCategories.length,
                   itemBuilder: (context, index) {
                     final item = sortedCategories[index];
                     final String cat = item.key;
                     final double amt = item.value;
-                    final double pct = totalExpense > 0 ? (amt / totalExpense) : 0.0;
+                    final double pct = totalExpense > 0
+                        ? (amt / totalExpense)
+                        : 0.0;
 
                     return Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       child: GlassCard(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -191,12 +220,18 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                               children: [
                                 Text(
                                   '${index + 1}.',
-                                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.cyan),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.cyan,
+                                  ),
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   cat,
-                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ],
                             ),
@@ -205,11 +240,17 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                               children: [
                                 Text(
                                   CurrencyFormatter.format(amt),
-                                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
                                 ),
                                 Text(
                                   '${(pct * 100).toStringAsFixed(0)}% of total spends',
-                                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 10),
+                                  style: const TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 10,
+                                  ),
                                 ),
                               ],
                             ),
@@ -263,7 +304,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     if (_activeChartIndex == 0) {
       // Donut Pie Chart (Category Breakdown)
       if (filteredCategories.isEmpty) {
-        return const Center(child: Text('No Spends to Graph', style: TextStyle(color: AppColors.textSecondary)));
+        return const Center(
+          child: Text(
+            'No Spends to Graph',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
+        );
       }
 
       List<PieChartSectionData> sections = [];
@@ -280,13 +326,19 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
       for (int i = 0; i < filteredCategories.length && i < 6; i++) {
         final item = filteredCategories[i];
-        sections.add(PieChartSectionData(
-          value: item.value,
-          title: item.key,
-          color: palette[i % palette.length],
-          radius: 40,
-          titleStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
-        ));
+        sections.add(
+          PieChartSectionData(
+            value: item.value,
+            title: item.key,
+            color: palette[i % palette.length],
+            radius: 40,
+            titleStyle: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        );
       }
 
       return PieChart(
@@ -308,7 +360,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   toY: totalIncome,
                   color: AppColors.successGreen,
                   width: 24,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(6),
+                  ),
                 ),
               ],
             ),
@@ -319,7 +373,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   toY: totalExpense,
                   color: AppColors.dangerRed,
                   width: 24,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(6),
+                  ),
                 ),
               ],
             ),
@@ -332,17 +388,29 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 getTitlesWidget: (value, meta) {
                   switch (value.toInt()) {
                     case 0:
-                      return const Text('Income', style: TextStyle(color: Colors.white, fontSize: 11));
+                      return const Text(
+                        'Income',
+                        style: TextStyle(color: Colors.white, fontSize: 11),
+                      );
                     case 1:
-                      return const Text('Expenses', style: TextStyle(color: Colors.white, fontSize: 11));
+                      return const Text(
+                        'Expenses',
+                        style: TextStyle(color: Colors.white, fontSize: 11),
+                      );
                   }
                   return const Text('');
                 },
               ),
             ),
-            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            leftTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
           ),
           gridData: const FlGridData(show: false),
           borderData: FlBorderData(show: false),
@@ -351,7 +419,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     } else {
       // Daily Expense Line Chart
       if (currentMonthExpenses.isEmpty) {
-        return const Center(child: Text('No daily data', style: TextStyle(color: AppColors.textSecondary)));
+        return const Center(
+          child: Text(
+            'No daily data',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
+        );
       }
 
       // Group by day of month
@@ -398,9 +471,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 },
               ),
             ),
-            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            leftTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
           ),
           gridData: const FlGridData(show: false),
           borderData: FlBorderData(show: false),

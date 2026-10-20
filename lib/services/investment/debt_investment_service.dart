@@ -17,17 +17,20 @@ class DebtInvestmentService {
     final double totalPrepaymentPaid = monthlyCapacity * 12 * periodYears;
     final double debtPaidA = totalPrepaymentPaid.clamp(0.0, outstandingLoan);
     // Approximate interest saved based on amortized balance reduction
-    final double interestSavedA = (debtPaidA * (loanInterestRate / 100.0) * (periodYears / 2.0));
+    final double interestSavedA =
+        (debtPaidA * (loanInterestRate / 100.0) * (periodYears / 2.0));
     final double netBenefitA = interestSavedA;
 
     final scenarioRepay = DebtVsInvestScenario(
       name: 'Scenario A: Aggressive Debt Repayment',
-      description: 'Channel 100% of monthly surplus (${CurrencyFormatter.format(monthlyCapacity)}) into prepaying loan principal.',
+      description:
+          'Channel 100% of monthly surplus (${CurrencyFormatter.format(monthlyCapacity)}) into prepaying loan principal.',
       totalDebtPaidInPeriod: debtPaidA,
       totalInterestSaved: interestSavedA,
       totalWealthAccumulated: 0.0,
       netFinancialBenefit: netBenefitA,
-      tradeOffNote: 'Guaranteed ${loanInterestRate.toStringAsFixed(1)}% risk-free return through interest savings. Boosts peace of mind and frees future cash flow completely.',
+      tradeOffNote:
+          'Guaranteed ${loanInterestRate.toStringAsFixed(1)}% risk-free return through interest savings. Boosts peace of mind and frees future cash flow completely.',
     );
 
     // Scenario B: 100% into Market Investment (Pay minimum EMI)
@@ -45,13 +48,18 @@ class DebtInvestmentService {
       totalInterestSaved: 0.0,
       totalWealthAccumulated: sipResultB.estimatedCorpus,
       netFinancialBenefit: netBenefitB,
-      tradeOffNote: 'Capitalizes on equity compounding (~${expectedInvestmentReturn.toStringAsFixed(1)}% p.a.). However, debt obligation remains and returns are volatile.',
+      tradeOffNote:
+          'Capitalizes on equity compounding (~${expectedInvestmentReturn.toStringAsFixed(1)}% p.a.). However, debt obligation remains and returns are volatile.',
     );
 
     // Scenario C: 50 / 50 Balanced Split
     final double halfCapacity = monthlyCapacity * 0.5;
-    final double debtPaidC = (halfCapacity * 12 * periodYears).clamp(0.0, outstandingLoan);
-    final double interestSavedC = (debtPaidC * (loanInterestRate / 100.0) * (periodYears / 2.0));
+    final double debtPaidC = (halfCapacity * 12 * periodYears).clamp(
+      0.0,
+      outstandingLoan,
+    );
+    final double interestSavedC =
+        (debtPaidC * (loanInterestRate / 100.0) * (periodYears / 2.0));
     final sipResultC = InvestmentCalculationService.calculateSip(
       monthlySip: halfCapacity,
       durationYears: periodYears,
@@ -61,7 +69,8 @@ class DebtInvestmentService {
 
     final scenarioSplit = DebtVsInvestScenario(
       name: 'Scenario C: 50/50 Balanced Split',
-      description: 'Prepay ₹${halfCapacity.toStringAsFixed(0)}/mo against loan while investing ₹${halfCapacity.toStringAsFixed(0)}/mo in market SIP.',
+      description:
+          'Prepay ₹${halfCapacity.toStringAsFixed(0)}/mo against loan while investing ₹${halfCapacity.toStringAsFixed(0)}/mo in market SIP.',
       totalDebtPaidInPeriod: debtPaidC,
       totalInterestSaved: interestSavedC,
       totalWealthAccumulated: sipResultC.estimatedCorpus,
