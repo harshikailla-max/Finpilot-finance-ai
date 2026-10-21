@@ -231,7 +231,7 @@ class ReceiptOcrService {
     // Attempt 2: OCR.space API (Cross-platform OCR engine)
     final ocrSpaceResult = await _callOcrSpace(
       bytes,
-      ocrKey.isNotEmpty ? ocrKey : 'K83315608288957',
+      ocrKey.isNotEmpty ? ocrKey : 'K89815161288957',
       fileName,
       qrPayload: qrPayload,
     );
