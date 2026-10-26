@@ -7,6 +7,14 @@
       "destination": "/api/analyze_receipt.py"
     },
     {
+      "source": "/api/chat",
+      "destination": "/api/chat.py"
+    },
+    {
+      "source": "/api/health",
+      "destination": "/api/health.py"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/index.py"
     },

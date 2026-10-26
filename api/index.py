@@ -1,17 +1,18 @@
 """
-Vercel Serverless Function Entrypoint for FinPilot AI
-Proxies AI Coach and OCR requests securely in the cloud.
+Vercel Serverless Function Fallback Entrypoint
+Delegates requests cleanly to chat and health handlers.
 """
 
-import os
-import sys
-from pathlib import Path
+from .chat import handler as ChatHandler
+from .health import handler as HealthHandler
 
-# Add project root to sys.path so it can import FinPilotHandler
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from server import FinPilotHandler
-
-class handler(FinPilotHandler):
-    """Vercel serverless request handler subclass."""
-    pass
+class handler(ChatHandler):
+    def do_GET(self):
+        # Health check on GET
+        h = HealthHandler(self.request, self.client_address, self.server)
+        h.rfile = self.rfile
+        h.wfile = self.wfile
+        h.headers = self.headers
+        h.path = self.path
+        h.do_GET()
