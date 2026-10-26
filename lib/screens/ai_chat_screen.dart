@@ -32,9 +32,12 @@ class _AIChatScreenState extends State<AIChatScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _scrollToBottom(animated: false),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom(animated: false);
+      context.read<AIProvider>().checkHealth().then((_) {
+        if (mounted) setState(() {});
+      });
+    });
   }
 
   @override

@@ -12,5 +12,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from server import FinPilotHandler
 
-# Vercel looks for 'handler' class inheriting from BaseHTTPRequestHandler
-handler = FinPilotHandler
+class handler(FinPilotHandler):
+    """Vercel serverless request handler subclass."""
+    pass

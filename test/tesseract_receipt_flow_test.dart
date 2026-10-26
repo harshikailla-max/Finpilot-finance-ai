@@ -28,28 +28,22 @@ class MockStorageService implements StorageService {
     return true;
   }
 
-  @override
   int? getInt(String key) => data[key] as int?;
 
-  @override
   Future<bool> setInt(String key, int value) async {
     data[key] = value;
     return true;
   }
 
-  @override
   double? getDouble(String key) => data[key] as double?;
 
-  @override
   Future<bool> setDouble(String key, double value) async {
     data[key] = value;
     return true;
   }
 
-  @override
   List<String>? getStringList(String key) => data[key] as List<String>?;
 
-  @override
   Future<bool> setStringList(String key, List<String> value) async {
     data[key] = value;
     return true;

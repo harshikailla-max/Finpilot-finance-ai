@@ -184,9 +184,10 @@ void main() {
     );
 
     test('AI Provider prevents duplicate submission when already typing', () async {
-      aiProvider.sendMessage('First message'); // triggers async
+      final future = aiProvider.sendMessage('First message'); // triggers async
       // Subsequent immediate send while typing must be rejected
       await aiProvider.sendMessage('Second message while typing');
+      await future;
       expect(aiProvider.isTyping, isFalse);
     });
 

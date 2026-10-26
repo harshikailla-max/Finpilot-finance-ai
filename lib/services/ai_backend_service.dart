@@ -50,22 +50,34 @@ class AICoachResult {
         advisorResponse: advisorResponse,
       );
 
-  factory AICoachResult.failure(String error) =>
-      AICoachResult(isSuccess: false, text: '', errorMessage: error);
+  factory AICoachResult.failure(String error, {bool isLocalFallback = false}) =>
+      AICoachResult(isSuccess: false, text: '', errorMessage: error, isLocalFallback: isLocalFallback);
 }
 
 class AIBackendService {
   final StorageService storageService;
+  bool? _serverConfiguredCache;
 
   AIBackendService({required this.storageService});
 
-  /// Checks if a valid AI API key or backend endpoint is configured
+  /// Checks if a valid AI API key or backend endpoint is configured.
+  /// On Flutter Web, server-side proxy handles GEMINI_API_KEY without exposing it to the client.
   bool get isBackendConfigured {
+    if (_serverConfiguredCache != null) {
+      return _serverConfiguredCache!;
+    }
     final key = storageService.getString('ai_backend_api_key') ??
         const String.fromEnvironment('FINPILOT_AI_API_KEY', defaultValue: '');
     final endpoint = storageService.getString('ai_backend_endpoint') ??
         const String.fromEnvironment('FINPILOT_BACKEND_URL', defaultValue: '');
+    if (kIsWeb) {
+      return true;
+    }
     return key.trim().isNotEmpty || endpoint.trim().isNotEmpty;
+  }
+
+  void updateServerConfigured(bool configured) {
+    _serverConfiguredCache = configured;
   }
 
   String get configuredApiKey {
@@ -97,10 +109,11 @@ class AIBackendService {
       final healthUri = resolvedBaseUri.resolve('/api/health');
       final response = await http
           .get(healthUri)
-          .timeout(const Duration(seconds: 6));
+          .timeout(const Duration(seconds: 8));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         if (data.containsKey('configured')) {
+          _serverConfiguredCache = data['configured'] == true;
           return data;
         }
       }
@@ -281,20 +294,29 @@ class AIBackendService {
       };
       final resp = await http
           .post(chatUri, headers: headers, body: body)
-          .timeout(const Duration(seconds: 30));
+          .timeout(const Duration(seconds: 40));
 
       if (resp.statusCode == 200) {
         final data = jsonDecode(resp.body) as Map<String, dynamic>;
         if (data['isSuccess'] == true &&
             data['text'] != null &&
             (data['text'] as String).trim().isNotEmpty) {
+          _serverConfiguredCache = true;
           return AICoachResult.fromAI(data['text'] as String);
         } else if (data['errorMessage'] != null) {
           return AICoachResult.failure(data['errorMessage'] as String);
         }
+      } else {
+        try {
+          final data = jsonDecode(resp.body) as Map<String, dynamic>;
+          if (data['errorMessage'] != null) {
+            return AICoachResult.failure(data['errorMessage'] as String);
+          }
+        } catch (_) {}
+        return AICoachResult.failure('Server returned HTTP ${resp.statusCode}: ${resp.reasonPhrase ?? "Error"}');
       }
     } catch (_) {
-      // Server proxy not reachable or network error, attempt direct client request if key exists
+      // Server not reachable or network error, fall through to client check or setup guidance
     }
 
     // 2. Direct client query if an API key or custom endpoint is configured in client storage
@@ -333,8 +355,9 @@ class AIBackendService {
       'Google Gemini API key is not configured.\n\n'
       'To enable the AI Coach:\n'
       '1. Get a free Gemini API key from https://aistudio.google.com/app/apikey\n'
-      '2. Add FINPILOT_AI_API_KEY=your_key to .env in your project root and restart the server, '
+      '2. Add GEMINI_API_KEY (or FINPILOT_AI_API_KEY)=your_key to .env in your project root and restart the server, '
       'or configure your key directly in Settings > AI Configuration.',
+      isLocalFallback: true,
     );
   }
 

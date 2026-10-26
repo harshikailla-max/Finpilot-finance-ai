@@ -225,8 +225,20 @@ class AIProvider extends ChangeNotifier {
         _chatMessages.add(aiMessage);
         _lastError = null;
       } else {
-        _lastError =
-            aiResult.errorMessage ?? 'Unable to process query. Please retry.';
+        if (aiResult.isLocalFallback && aiResult.errorMessage != null) {
+          _chatMessages.add(
+            AIMessageModel(
+              id: uuid.v4(),
+              message: aiResult.errorMessage!,
+              isUser: false,
+              timestamp: DateTime.now(),
+            ),
+          );
+          _lastError = null;
+        } else {
+          _lastError =
+              aiResult.errorMessage ?? 'Unable to process query. Please retry.';
+        }
       }
     } catch (e) {
       _lastError = 'An error occurred while analyzing: $e';
@@ -274,9 +286,21 @@ class AIProvider extends ChangeNotifier {
         _chatMessages.add(aiMessage);
         _lastError = null;
       } else {
-        _lastError =
-            aiResult.errorMessage ??
-            'Failed to complete request. Please retry.';
+        if (aiResult.isLocalFallback && aiResult.errorMessage != null) {
+          _chatMessages.add(
+            AIMessageModel(
+              id: const Uuid().v4(),
+              message: aiResult.errorMessage!,
+              isUser: false,
+              timestamp: DateTime.now(),
+            ),
+          );
+          _lastError = null;
+        } else {
+          _lastError =
+              aiResult.errorMessage ??
+              'Failed to complete request. Please retry.';
+        }
       }
     } catch (e) {
       _lastError = 'Retry failed: $e';

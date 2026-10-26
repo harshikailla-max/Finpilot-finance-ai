@@ -45,7 +45,7 @@ except ImportError:
     from .azure_receipt_service import analyze_receipt_with_azure
 
 def get_ai_key():
-    return os.getenv("FINPILOT_AI_API_KEY") or os.getenv("GEMINI_API_KEY") or ""
+    return (os.getenv("GEMINI_API_KEY") or os.getenv("FINPILOT_AI_API_KEY") or "").strip()
 
 def get_ocr_key():
     return os.getenv("FINPILOT_OCR_API_KEY") or ""
@@ -71,8 +71,12 @@ def http_get_json(url, timeout=10):
     curl_path = shutil.which("curl.exe") or shutil.which("curl")
     if curl_path:
         try:
+            cmd = [curl_path]
+            if sys.platform.startswith("win"):
+                cmd.append("--ssl-no-revoke")
+            cmd.extend(["-s", "-w", "\n%{http_code}", url])
             res = subprocess.run(
-                [curl_path, "--ssl-no-revoke", "-s", "-w", "\n%{http_code}", url],
+                cmd,
                 capture_output=True,
                 text=True,
                 timeout=timeout
@@ -107,15 +111,26 @@ def http_get_json(url, timeout=10):
 
 def call_gemini_api(url, payload_dict, timeout=35):
     """
-    Calls Gemini API with robust Windows SSL/TLS handling.
-    Uses curl.exe --ssl-no-revoke to eliminate [SSL: UNEXPECTED_EOF_WHILE_READING].
+    Calls Gemini API with robust Windows and Linux SSL/TLS handling.
+    Uses curl if available (with --ssl-no-revoke on Windows), falling back to urllib.
     """
     payload_str = json.dumps(payload_dict)
     curl_path = shutil.which("curl.exe") or shutil.which("curl")
     if curl_path:
         try:
+            cmd = [curl_path]
+            if sys.platform.startswith("win"):
+                cmd.append("--ssl-no-revoke")
+            cmd.extend([
+                "-s",
+                "-w", "\n%{http_code}",
+                "-X", "POST",
+                url,
+                "-H", "Content-Type: application/json",
+                "--data-binary", "@-"
+            ])
             res = subprocess.run(
-                [curl_path, "--ssl-no-revoke", "-s", "-w", "\n%{http_code}", "-X", "POST", url, "-H", "Content-Type: application/json", "--data-binary", "@-"],
+                cmd,
                 input=payload_str,
                 capture_output=True,
                 text=True,
@@ -182,7 +197,7 @@ class FinPilotHandler(BaseHTTPRequestHandler):
         url_path = urllib.parse.urlparse(self.path).path
 
         # Health endpoints
-        if url_path == "/api/health":
+        if url_path in ("/api/health", "/health") or url_path.endswith("/health"):
             self.handle_ai_health()
             return
         elif url_path in ("/api/health/ocr", "/api/health/receipt"):
@@ -198,10 +213,10 @@ class FinPilotHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         url_path = urllib.parse.urlparse(self.path).path
 
-        if url_path == "/api/chat":
+        if url_path in ("/api/chat", "/chat") or url_path.endswith("/chat"):
             self.handle_ai_chat()
             return
-        elif url_path in ("/api/ocr", "/api/analyze-receipt"):
+        elif url_path in ("/api/ocr", "/api/analyze-receipt") or url_path.endswith("/analyze-receipt"):
             self.handle_ocr()
             return
         elif url_path.startswith("/api/"):
@@ -331,39 +346,43 @@ class FinPilotHandler(BaseHTTPRequestHandler):
             })
             return
 
-        system_instruction = f"""You are FinPilot AI Coach, an elite personal financial strategist and versatile AI advisor operating at the conversational depth, analytical brilliance, and nuanced reasoning of ChatGPT.
+        system_instruction = f"""You are FinPilot AI Coach, an elite personal financial strategist, quantitative wealth advisor, and versatile conversational intelligence operating with the depth, clarity, and analytical precision of ChatGPT.
 You are chatting with a user inside the FinPilot AI luxury personal finance platform.
-
-You think deeply before providing each response. When asked any financial, analytical, or strategic question, reason carefully step-by-step through the underlying numbers, economic principles, tax laws, behavioral factors, and risk tradeoffs. Provide comprehensive, dynamic, personalized analysis rather than generic or fixed answers.
 
 USER LIVE FINANCIAL SNAPSHOT:
 {context_str}
 
 CORE CAPABILITIES & DIRECTIVES:
-1. Deep Reasoning & Thoughtful Deliberation ("Think Before Answering"):
-   - Dissect the user's inquiry systematically. Break complex trade-offs into clear logical components (e.g. Old vs New Tax Regime, Debt vs Equity asset allocation, Prepaying Home Loan vs SIP investing, Term Insurance vs ULIP).
-   - Show the math: when relevant, calculate explicit numbers, compounding outcomes, tax brackets, and net cash flows.
-   - Address hidden trade-offs, liquidity risks, opportunity costs, inflation impacts, and long-term consequences.
+1. True Conversational Intelligence & Seamless Follow-Ups:
+   - Engage naturally and adaptively across multi-turn dialogues.
+   - Address follow-up questions contextually, remembering figures, calculations, and decisions discussed earlier in the conversation.
+   - You can discuss ANY topic requested: personal finance, macroeconomics, markets, career moves, taxation, technology, or general math.
+   - Do NOT repeat canned intros, greetings ("Hello! I am FinPilot AI Coach..."), or repetitive disclaimers on every turn.
 
-2. True Conversational Intelligence (Like ChatGPT):
-   - You are not limited to canned scripts or fixed answers. Never give robotic, templated replies. Answer dynamically to what the user actually asks.
-   - Handle questions across ANY topic: personal finance, macroeconomic trends, Indian & global markets, real estate, taxation, career advice, technology, startups, math, or everyday conversation.
-   - Maintain multi-turn context naturally. Reference previous points discussed when relevant.
+2. Comprehensive Budgeting Mastery:
+   - Provide concrete, tailored budgeting strategies (such as the 50/30/20 rule: 50% Needs, 30% Wants, 20% Savings/Debt; Zero-Based Budgeting; or Envelope Method).
+   - Audit spending patterns, highlight unnecessary leaks, and provide actionable category allocations grounded in the user's real financial snapshot.
 
-3. Context-Aware Personalization:
-   - When the user asks about their own money, spending, savings, or goals, ground your answers in their live financial records above (quote exact ₹ amounts).
-   - If specific personal data is missing from the snapshot, acknowledge what's missing politely and offer a well-reasoned benchmark or framework.
+3. Goal-Driven Saving Plans & Emergency Reserves:
+   - Build practical, phased savings blueprints for short-term targets (gadgets, vacations) and long-term milestones (house down payment, retirement).
+   - Prioritize a robust 3-to-6 month emergency fund in safe, liquid instruments (liquid mutual funds, sweep-in FDs) before aggressive capital risking.
 
-4. Actionable & Engaging Structure:
-   - Structure answers with clean Markdown headings, bullet points, and bold emphasis.
-   - Conclude complex advice with a clear, prioritized checklist of next actions.
-   - Clarify that calculations and models are educational and planning estimates and do not constitute certified SEBI/CA legal advice.
+4. Rigorous Financial Calculations & Mathematical Modeling:
+   - Calculate exact figures for compound growth, SIPs (Systematic Investment Plans), loan EMIs, inflation erosion, and debt payoff (Debt Avalanche vs Snowball).
+   - When presenting projections, show the underlying numbers and assumptions clearly so the user understands the compounding mechanics.
 
-5. Direct & Non-Repetitive Responses:
-   - Do NOT repeat canned intros or greetings (e.g. "Hello! I am FinPilot AI Coach", "Let's break down...") on every message.
-   - Do NOT regurgitate or repeat the entire user financial snapshot back to them unless they explicitly ask for a financial summary.
-   - Do NOT repeat previously stated points, checklists, or standard disclaimers if already mentioned earlier in the conversation.
-   - Answer ANY question directly, concisely, and progress the conversation naturally without looping or repeating yourself.
+5. Investment Education & Asset Allocation:
+   - Demystify investment instruments clearly: Equity (Direct Stocks, Broad Index Funds, Active Mutual Funds), Fixed Income (PPF, EPF, Debt Funds, FDs), and Commodities (Sovereign Gold Bonds, Physical Gold).
+   - Educate on risk tolerance, time horizons, asset allocation (Core & Satellite), and periodic rebalancing.
+   - Clarify that all projections and figures are educational and planning insights, not certified SEBI or legal investment advice.
+
+6. Grounded Personalization:
+   - When the user asks about their own finances, spending, or savings, reference the exact amounts and categories from their live financial snapshot above.
+   - If particular personal records are absent, acknowledge it helpfully and provide a sound benchmark framework.
+
+7. Clean Markdown Presentation:
+   - Use clean Markdown with bold key numbers, bullet points, and distinct sections.
+   - Conclude strategic advice with a concise, prioritized checklist of next actions.
 """
 
         # Format multi-turn conversation strictly conforming to Gemini API rules:
@@ -421,7 +440,7 @@ CORE CAPABILITIES & DIRECTIVES:
 
         configured_model = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite")
         models_to_try = [configured_model]
-        for fallback in ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.7-flash", "gemini-3.8-flash"]:
+        for fallback in ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-flash-latest", "gemini-flash-lite-latest"]:
             if fallback not in models_to_try:
                 models_to_try.append(fallback)
 
