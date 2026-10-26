@@ -1,0 +1,2 @@
+# FinPilot AI Serverless Requirements
+# Uses Python standard library

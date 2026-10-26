@@ -111,10 +111,13 @@ class AIBackendService {
           .get(healthUri)
           .timeout(const Duration(seconds: 8));
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        if (data.containsKey('configured')) {
-          _serverConfiguredCache = data['configured'] == true;
-          return data;
+        final bodyStr = response.body.trim();
+        if (!bodyStr.startsWith('<!DOCTYPE') && !bodyStr.startsWith('<html')) {
+          final data = jsonDecode(response.body) as Map<String, dynamic>;
+          if (data.containsKey('configured')) {
+            _serverConfiguredCache = data['configured'] == true;
+            return data;
+          }
         }
       }
     } catch (_) {
@@ -145,9 +148,9 @@ class AIBackendService {
           'configured': true,
           'status': 'ok',
           'provider': 'gemini',
-          'model': 'gemini-3.1-flash-lite',
+          'model': 'gemini-3.5-flash-lite',
           'message':
-              'Successfully connected to Google Gemini API (gemini-3.1-flash-lite).',
+              'Successfully connected to Google Gemini API (gemini-3.5-flash-lite).',
         };
       }
       final statusCode = resp.statusCode;
@@ -297,14 +300,23 @@ class AIBackendService {
           .timeout(const Duration(seconds: 40));
 
       if (resp.statusCode == 200) {
-        final data = jsonDecode(resp.body) as Map<String, dynamic>;
-        if (data['isSuccess'] == true &&
-            data['text'] != null &&
-            (data['text'] as String).trim().isNotEmpty) {
-          _serverConfiguredCache = true;
-          return AICoachResult.fromAI(data['text'] as String);
-        } else if (data['errorMessage'] != null) {
-          return AICoachResult.failure(data['errorMessage'] as String);
+        final bodyStr = resp.body.trim();
+        if (bodyStr.startsWith('<!DOCTYPE') || bodyStr.startsWith('<html')) {
+          // Response was HTML fallback (e.g. misrouted Vercel SPA), fall through to client direct request if key exists
+        } else {
+          final data = jsonDecode(resp.body) as Map<String, dynamic>;
+          if (data['isSuccess'] == true &&
+              data['text'] != null &&
+              (data['text'] as String).trim().isNotEmpty) {
+            _serverConfiguredCache = true;
+            return AICoachResult.fromAI(data['text'] as String);
+          } else if (data['errorMessage'] != null) {
+            if (data['errorType'] == 'unconfigured' && apiKey.isNotEmpty) {
+              // Server has no key configured, but user has key in client storage -> fall through to direct call
+            } else {
+              return AICoachResult.failure(data['errorMessage'] as String);
+            }
+          }
         }
       } else {
         try {
@@ -379,7 +391,7 @@ class AIBackendService {
       }
     } else {
       targetUrl = Uri.parse(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=$apiKey',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=$apiKey',
       );
     }
 

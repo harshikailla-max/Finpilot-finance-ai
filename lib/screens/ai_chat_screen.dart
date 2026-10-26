@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../models/advisor_models.dart';
 import '../models/ai_message_model.dart';
 import '../providers/ai_provider.dart';
+import '../services/storage_service.dart';
 import '../utils/constants.dart';
 import '../utils/currency_formatter.dart';
 import '../widgets/aura/aura_background.dart';
@@ -794,6 +795,27 @@ class _AIChatScreenState extends State<AIChatScreen> {
             ),
           ),
           ElevatedButton(
+            onPressed: _showConfigureKeyDialog,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.auroraCyan,
+              foregroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              'Set Key',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          ElevatedButton(
             onPressed: () => aiProvider.retryLastMessage(),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.auroraViolet,
@@ -1411,9 +1433,113 @@ class _AIChatScreenState extends State<AIChatScreen> {
           ],
         ),
         actions: [
+          if (!isOk)
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _showConfigureKeyDialog();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.auroraViolet,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text('Configure Key', style: TextStyle(color: Colors.white)),
+            ),
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: const Text('OK', style: TextStyle(color: AppColors.auroraCyan)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showConfigureKeyDialog() {
+    final storage = context.read<StorageService>();
+    final currentKey = storage.getString('ai_backend_api_key') ?? '';
+    final controller = TextEditingController(text: currentKey);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.secondaryBackground,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.key_rounded, color: AppColors.auroraCyan),
+            SizedBox(width: 8),
+            Text(
+              'Gemini API Key',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Enter your Google Gemini API key to activate the AI Coach directly on your browser:',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 12.5),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              style: const TextStyle(color: Colors.white, fontSize: 13),
+              decoration: InputDecoration(
+                hintText: 'AQ.Ab8RN6...',
+                hintStyle: const TextStyle(color: AppColors.textMuted),
+                filled: true,
+                fillColor: AppColors.cardBackground,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.auroraCyan),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final newKey = controller.text.trim();
+              await storage.setString('ai_backend_api_key', newKey);
+              if (mounted) {
+                Navigator.pop(ctx);
+                final ai = context.read<AIProvider>();
+                ai.refreshBackendConfig();
+                await ai.checkHealth();
+                setState(() {});
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      newKey.isEmpty
+                          ? 'API key removed.'
+                          : 'Gemini API key saved & activated!',
+                    ),
+                    backgroundColor: AppColors.successGreen,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.auroraCyan,
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text('Save & Connect', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
