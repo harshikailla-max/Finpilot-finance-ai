@@ -46,6 +46,7 @@ class ReceiptData {
   final String rawText;
   final double confidence;
   final bool isTotalUncertain;
+  final bool isDateDetected;
   final String? invoiceNumber;
   final String? gstin;
   final ReceiptQrPayload? qrPayload;
@@ -63,6 +64,7 @@ class ReceiptData {
     this.rawText = '',
     this.confidence = 0.85,
     this.isTotalUncertain = false,
+    this.isDateDetected = true,
     this.invoiceNumber,
     this.gstin,
     this.qrPayload,
@@ -81,6 +83,7 @@ class ReceiptData {
     String? rawText,
     double? confidence,
     bool? isTotalUncertain,
+    bool? isDateDetected,
     String? invoiceNumber,
     String? gstin,
     ReceiptQrPayload? qrPayload,
@@ -98,6 +101,7 @@ class ReceiptData {
       rawText: rawText ?? this.rawText,
       confidence: confidence ?? this.confidence,
       isTotalUncertain: isTotalUncertain ?? this.isTotalUncertain,
+      isDateDetected: isDateDetected ?? this.isDateDetected,
       invoiceNumber: invoiceNumber ?? this.invoiceNumber,
       gstin: gstin ?? this.gstin,
       qrPayload: qrPayload ?? this.qrPayload,

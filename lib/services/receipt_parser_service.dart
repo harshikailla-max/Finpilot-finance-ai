@@ -35,15 +35,17 @@ class ReceiptParserService {
     // 1. Extract Merchant Name
     var merchant = _extractMerchant(lines);
     // If merchant wasn't clearly identified in OCR but QR has payee name
-    if ((merchant.isEmpty || merchant == 'Receipt Merchant') &&
+    if (merchant.isEmpty &&
         qrPayload != null &&
         qrPayload.upiPayeeName != null &&
         qrPayload.upiPayeeName!.isNotEmpty) {
       merchant = qrPayload.upiPayeeName!;
     }
 
-    // 2. Extract Date
-    final date = _extractDate(lines) ?? DateTime.now();
+    // 2. Extract Date (never invent missing dates)
+    final extractedDate = _extractDate(lines);
+    final date = extractedDate ?? DateTime.now();
+    final isDateDetected = extractedDate != null;
 
     // 3. Extract Invoice / Bill Number & GSTIN
     final invoiceNumber = _extractInvoiceNumber(lines) ?? qrPayload?.invoiceNumber;
@@ -99,6 +101,7 @@ class ReceiptParserService {
       rawText: rawText,
       confidence: conf.clamp(0.0, 1.0),
       isTotalUncertain: isTotalUncertain,
+      isDateDetected: isDateDetected,
       invoiceNumber: invoiceNumber,
       gstin: gstin,
       qrPayload: qrPayload,
@@ -131,6 +134,8 @@ class ReceiptParserService {
       'token',
       'order no',
       'customer copy',
+      'customer receipt',
+      'customer',
       'original for recipient',
       'store #',
       'duplicate',
@@ -149,6 +154,18 @@ class ReceiptParserService {
       'pune',
       'hyderabad',
       'chennai',
+      'have a',
+      'great day',
+      'nice day',
+      'visit',
+      'no:',
+      'no.',
+      'bill no',
+      'inv no',
+      'doc no',
+      'terminal',
+      'pos',
+      'cashier',
     ];
 
     final recognizedMerchants = [
@@ -215,12 +232,14 @@ class ReceiptParserService {
       }
     }
 
-    for (int i = 0; i < lines.length && i < 7; i++) {
+    // Only look in top 4 header lines for merchant name
+    for (int i = 0; i < lines.length && i < 4; i++) {
       final line = lines[i];
       final lower = line.toLowerCase();
 
       if (RegExp(r'^\d+$').hasMatch(line)) continue;
       if (RegExp(r'\d{1,2}[/-]\d{1,2}[/-]\d{2,4}').hasMatch(line)) continue;
+      if (line.contains(':')) continue; // Skip key-value lines like "No: 123", "Date: ..."
 
       bool isIgnored = false;
       for (final ign in ignoredPatterns) {
@@ -234,13 +253,15 @@ class ReceiptParserService {
         final cleaned = line
             .replaceAll(RegExp(r"^[^a-zA-Z0-9]+|[^a-zA-Z0-9\.\&\s\-']+$"), '')
             .trim();
-        if (cleaned.length >= 3) {
+        // Require at least 3 alphabetic characters to prevent pure numbers or codes
+        if (cleaned.length >= 3 && RegExp(r'[a-zA-Z]{3,}').hasMatch(cleaned)) {
           return cleaned;
         }
       }
     }
 
-    return lines.isNotEmpty ? lines.first : 'Receipt Merchant';
+    // Never invent a missing merchant value. Return empty so user can fill or edit.
+    return '';
   }
 
   // -------------------------------------------------------------
@@ -467,11 +488,23 @@ class ReceiptParserService {
   // TAX EXTRACTION
   // -------------------------------------------------------------
   static double? _extractTax(List<String> lines) {
+    // Priority 1: Check for explicit "total tax" line to avoid double-counting breakdown
+    for (final line in lines) {
+      final lower = line.toLowerCase();
+      if (lower.contains('total tax') || lower.contains('tax total')) {
+        final amt = _extractLastAmountFromLine(line);
+        if (amt != null && amt > 0) return amt;
+      }
+    }
+
+    // Priority 2: Sum individual tax lines (CGST, SGST, IGST, VAT)
     double totalTax = 0.0;
     bool foundTax = false;
 
     for (final line in lines) {
       final lower = line.toLowerCase();
+      if (lower.contains('total tax') || lower.contains('tax total')) continue;
+
       if (lower.contains('gst') ||
           lower.contains('cgst') ||
           lower.contains('sgst') ||

@@ -54,12 +54,12 @@ class handler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
             content_length = int(self.headers.get("Content-Length", 0))
-            if content_length > 4 * 1024 * 1024:
+            if content_length > 15 * 1024 * 1024:
                 resp_data = {
                     "isSuccess": False,
                     "statusCode": 413,
                     "errorType": "payloadTooLarge",
-                    "errorMessage": "Payload exceeds 4 MB Document Intelligence limit (HTTP 413)."
+                    "errorMessage": "Payload exceeds 15 MB limit (HTTP 413). Please select a compressed image."
                 }
                 payload = json.dumps(resp_data).encode("utf-8")
                 self.send_response(413)

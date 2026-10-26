@@ -10,6 +10,8 @@ import os
 import sys
 import json
 import mimetypes
+import shutil
+import subprocess
 import urllib.request
 import urllib.error
 import urllib.parse
@@ -63,6 +65,93 @@ def get_azure_key():
         or os.getenv("AZURE_FORM_RECOGNIZER_KEY")
         or ""
     ).strip()
+
+def http_get_json(url, timeout=10):
+    """Performs HTTP GET with Windows SSL bypass via curl if needed."""
+    curl_path = shutil.which("curl.exe") or shutil.which("curl")
+    if curl_path:
+        try:
+            res = subprocess.run(
+                [curl_path, "--ssl-no-revoke", "-s", "-w", "\n%{http_code}", url],
+                capture_output=True,
+                text=True,
+                timeout=timeout
+            )
+            out = res.stdout
+            lines = out.rsplit("\n", 1)
+            code = 200
+            if len(lines) > 1 and lines[1].strip().isdigit():
+                code = int(lines[1].strip())
+            body = lines[0]
+            try:
+                data = json.loads(body)
+            except Exception:
+                data = {}
+            return code, data
+        except Exception:
+            pass
+
+    req = urllib.request.Request(url, headers={"User-Agent": "FinPilot-AI/1.0"})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            return resp.status, data
+    except urllib.error.HTTPError as e:
+        try:
+            data = json.loads(e.read().decode("utf-8"))
+        except Exception:
+            data = {}
+        return e.code, data
+    except Exception as e:
+        return 500, {"error": {"message": str(e)}}
+
+def call_gemini_api(url, payload_dict, timeout=35):
+    """
+    Calls Gemini API with robust Windows SSL/TLS handling.
+    Uses curl.exe --ssl-no-revoke to eliminate [SSL: UNEXPECTED_EOF_WHILE_READING].
+    """
+    payload_str = json.dumps(payload_dict)
+    curl_path = shutil.which("curl.exe") or shutil.which("curl")
+    if curl_path:
+        try:
+            res = subprocess.run(
+                [curl_path, "--ssl-no-revoke", "-s", "-w", "\n%{http_code}", "-X", "POST", url, "-H", "Content-Type: application/json", "--data-binary", "@-"],
+                input=payload_str,
+                capture_output=True,
+                text=True,
+                timeout=timeout
+            )
+            out = res.stdout
+            lines = out.rsplit("\n", 1)
+            code = 200
+            if len(lines) > 1 and lines[1].strip().isdigit():
+                code = int(lines[1].strip())
+            body = lines[0]
+            try:
+                data = json.loads(body)
+            except Exception:
+                data = {"raw": body}
+            return code, data
+        except Exception:
+            pass
+
+    req = urllib.request.Request(
+        url,
+        data=payload_str.encode("utf-8"),
+        headers={"Content-Type": "application/json", "User-Agent": "FinPilot-AI/1.0"}
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            return resp.status, data
+    except urllib.error.HTTPError as e:
+        try:
+            err_data = json.loads(e.read().decode("utf-8"))
+        except Exception:
+            err_data = {"error": {"message": str(e)}}
+        return e.code, err_data
+    except Exception as e:
+        return 500, {"error": {"message": str(e)}}
 
 WEB_DIR = Path(__file__).parent / "build" / "web"
 
@@ -136,72 +225,49 @@ class FinPilotHandler(BaseHTTPRequestHandler):
 
         # Safe diagnostic request to official Gemini list models endpoint
         health_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={urllib.parse.quote(api_key)}"
-        req = urllib.request.Request(health_url, headers={"User-Agent": "FinPilot-AI/1.0"})
+        status_code, resp_data = http_get_json(health_url, timeout=10)
 
-        try:
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                if resp.status == 200:
-                    self._send_json(200, {
-                        "configured": True,
-                        "status": "ok",
-                        "provider": "gemini",
-                        "model": default_model,
-                        "message": f"Successfully connected to Google Gemini API ({default_model})."
-                    })
-                    return
-        except urllib.error.HTTPError as e:
-            code = e.code
-            safe_msg = f"HTTP {code}"
-            status = "error"
-            try:
-                err_body = json.loads(e.read().decode("utf-8"))
-                if "error" in err_body and "message" in err_body["error"]:
-                    msg = err_body["error"]["message"]
-                    # Clean out any accidental key reflection
-                    if api_key in msg:
-                        msg = msg.replace(api_key, "[REDACTED_KEY]")
-                    safe_msg = msg
-            except Exception:
-                pass
-
-            if code in (401, 403):
-                status = "auth_failed"
-                safe_msg = f"Authentication failure ({code}): API key invalid, unauthorized, or Gemini API not enabled in Google Cloud Console."
-            elif code == 429:
-                status = "rate_limited"
-                safe_msg = "Rate limit or quota exceeded (HTTP 429). Check your Google AI Studio plan."
-            elif code == 400:
-                status = "invalid_argument"
-            elif code == 404:
-                status = "not_found"
-            elif code >= 500:
-                status = "server_error"
-                safe_msg = f"Google Gemini server error ({code}). Please retry shortly."
-
+        if status_code == 200:
             self._send_json(200, {
                 "configured": True,
-                "status": status,
-                "statusCode": code,
+                "status": "ok",
                 "provider": "gemini",
-                "model": "gemini-1.5-flash",
-                "message": safe_msg
+                "model": default_model,
+                "message": f"Successfully connected to Google Gemini API ({default_model})."
             })
-        except urllib.error.URLError as e:
-            self._send_json(200, {
-                "configured": True,
-                "status": "network_error",
-                "provider": "gemini",
-                "model": "gemini-1.5-flash",
-                "message": f"Network error reaching Google Gemini API: {e.reason}"
-            })
-        except Exception as e:
-            self._send_json(200, {
-                "configured": True,
-                "status": "error",
-                "provider": "gemini",
-                "model": "gemini-1.5-flash",
-                "message": f"Connection check error: {str(e)}"
-            })
+            return
+
+        code = status_code
+        safe_msg = f"HTTP {code}"
+        status = "error"
+        if isinstance(resp_data, dict) and "error" in resp_data and "message" in resp_data["error"]:
+            msg = resp_data["error"]["message"]
+            if api_key in msg:
+                msg = msg.replace(api_key, "[REDACTED_KEY]")
+            safe_msg = msg
+
+        if code in (401, 403):
+            status = "auth_failed"
+            safe_msg = f"Authentication failure ({code}): API key invalid, unauthorized, or Gemini API not enabled."
+        elif code == 429:
+            status = "rate_limited"
+            safe_msg = "Rate limit or quota exceeded (HTTP 429). Check your Google AI Studio plan."
+        elif code == 400:
+            status = "invalid_argument"
+        elif code == 404:
+            status = "not_found"
+        elif code >= 500:
+            status = "server_error"
+            safe_msg = f"Google Gemini server error ({code}). Please retry shortly."
+
+        self._send_json(200, {
+            "configured": True,
+            "status": status,
+            "statusCode": code,
+            "provider": "gemini",
+            "model": default_model,
+            "message": safe_msg
+        })
 
     def handle_ocr_health(self):
         azure_endpoint = get_azure_endpoint()
@@ -353,104 +419,77 @@ CORE CAPABILITIES & DIRECTIVES:
             "generationConfig": {"temperature": 0.7, "maxOutputTokens": 3072}
         }
 
-        configured_model = os.environ.get("GEMINI_MODEL", "gemini-3.1-flash-lite")
+        configured_model = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite")
         models_to_try = [configured_model]
-        for fallback in ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.8-flash"]:
+        for fallback in ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.7-flash", "gemini-3.8-flash"]:
             if fallback not in models_to_try:
                 models_to_try.append(fallback)
 
-        last_error = None
+        last_code = 500
+        last_resp_data = None
         for model_name in models_to_try:
             target_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={urllib.parse.quote(api_key)}"
-            req = urllib.request.Request(
-                target_url,
-                data=json.dumps(gemini_payload).encode("utf-8"),
-                headers={"Content-Type": "application/json", "User-Agent": "FinPilot-AI/1.0"}
-            )
+            status_code, resp_json = call_gemini_api(target_url, gemini_payload, timeout=35)
+            last_code = status_code
+            last_resp_data = resp_json
 
-            try:
-                with urllib.request.urlopen(req, timeout=30) as resp:
-                    resp_json = json.loads(resp.read().decode("utf-8"))
-                    candidates = resp_json.get("candidates", [])
-                    if candidates:
-                        parts = candidates[0].get("content", {}).get("parts", [])
-                        text_chunks = [p.get("text", "") for p in parts if "text" in p and not p.get("thought", False)]
-                        if not text_chunks:
-                            text_chunks = [p.get("text", "") for p in parts if "text" in p]
-                        answer_text = "".join(text_chunks).strip()
-                        if answer_text:
-                            self._send_json(200, {
-                                "isSuccess": True,
-                                "text": answer_text,
-                                "model": model_name
-                            })
-                            return
+            if status_code == 200:
+                candidates = resp_json.get("candidates", [])
+                if candidates:
+                    parts = candidates[0].get("content", {}).get("parts", [])
+                    text_chunks = [p.get("text", "") for p in parts if "text" in p and not p.get("thought", False)]
+                    if not text_chunks:
+                        text_chunks = [p.get("text", "") for p in parts if "text" in p]
+                    answer_text = "".join(text_chunks).strip()
+                    if answer_text:
+                        self._send_json(200, {
+                            "isSuccess": True,
+                            "text": answer_text,
+                            "model": model_name
+                        })
+                        return
 
-                    self._send_json(200, {
-                        "isSuccess": False,
-                        "errorType": "empty_response",
-                        "errorMessage": "Gemini returned an empty response (possibly blocked by safety filters)."
-                    })
-                    return
-            except urllib.error.HTTPError as e:
-                if e.code == 404:
-                    # Model not found on this API tier; try next model in list
-                    last_error = e
-                    continue
-                else:
-                    last_error = e
-                    break
-            except Exception as e:
-                last_error = e
+                self._send_json(200, {
+                    "isSuccess": False,
+                    "errorType": "empty_response",
+                    "errorMessage": "Gemini returned an empty response (possibly blocked by safety filters)."
+                })
+                return
+            elif status_code == 404:
+                continue
+            else:
                 break
 
-        if isinstance(last_error, urllib.error.HTTPError):
-            code = last_error.code
-            safe_err = f"Gemini error HTTP {code}"
-            error_type = "api_error"
-            try:
-                err_data = json.loads(last_error.read().decode("utf-8"))
-                if "error" in err_data and "message" in err_data["error"]:
-                    msg = err_data["error"]["message"]
-                    if api_key in msg:
-                        msg = msg.replace(api_key, "[REDACTED_KEY]")
-                    safe_err = f"{msg} (HTTP {code})"
-            except Exception:
-                pass
+        code = last_code
+        safe_err = f"Gemini error HTTP {code}"
+        error_type = "api_error"
+        if isinstance(last_resp_data, dict) and "error" in last_resp_data and "message" in last_resp_data["error"]:
+            msg = last_resp_data["error"]["message"]
+            if api_key in msg:
+                msg = msg.replace(api_key, "[REDACTED_KEY]")
+            safe_err = f"{msg} (HTTP {code})"
 
-            if code in (401, 403):
-                error_type = "auth_error"
-                safe_err = f"Authentication failure (HTTP {code}): Gemini API key is invalid or Generative Language API is disabled in Google Cloud Console."
-            elif code == 429:
-                error_type = "quota_exceeded"
-                safe_err = "Gemini API quota or rate limit exceeded (HTTP 429). Please wait a moment or check your Google AI account."
-            elif code == 400:
-                error_type = "invalid_request"
-                safe_err = f"Invalid request to Gemini API (HTTP 400): {safe_err}"
+        if code in (401, 403):
+            error_type = "auth_error"
+            safe_err = f"Authentication failure (HTTP {code}): Gemini API key is invalid or Generative Language API is disabled."
+        elif code == 429:
+            error_type = "quota_exceeded"
+            safe_err = "Gemini API quota or rate limit exceeded (HTTP 429). Please wait a moment or check your Google AI account."
+        elif code == 400:
+            error_type = "invalid_request"
+            safe_err = f"Invalid request to Gemini API (HTTP 400): {safe_err}"
 
-            self._send_json(200, {
-                "isSuccess": False,
-                "statusCode": code,
-                "errorType": error_type,
-                "errorMessage": safe_err
-            })
-        elif isinstance(last_error, urllib.error.URLError):
-            self._send_json(200, {
-                "isSuccess": False,
-                "errorType": "network_timeout",
-                "errorMessage": f"Network error reaching Google Gemini API: {last_error.reason}"
-            })
-        elif last_error is not None:
-            self._send_json(200, {
-                "isSuccess": False,
-                "errorType": "server_error",
-                "errorMessage": f"Connection error: {str(last_error)}"
-            })
+        self._send_json(200, {
+            "isSuccess": False,
+            "statusCode": code,
+            "errorType": error_type,
+            "errorMessage": safe_err
+        })
 
     def handle_ocr(self):
         try:
             content_length = int(self.headers.get("Content-Length", 0))
-            if content_length > 4 * 1024 * 1024:
+            if content_length > 15 * 1024 * 1024:
                 # Discard remaining incoming bytes so socket doesn't abort on Windows
                 remaining = content_length
                 while remaining > 0:
@@ -463,7 +502,7 @@ CORE CAPABILITIES & DIRECTIVES:
                     "isSuccess": False,
                     "statusCode": 413,
                     "errorType": "payloadTooLarge",
-                    "errorMessage": "Image payload exceeds 4 MB Document Intelligence limit (HTTP 413). Please optimize before uploading."
+                    "errorMessage": "Image payload exceeds 15 MB limit (HTTP 413). Please optimize before uploading."
                 })
                 return
 
@@ -506,7 +545,7 @@ CORE CAPABILITIES & DIRECTIVES:
             return
 
         # 2. Fallback: OCR.space API if configured or default key
-        ocr_key = get_ocr_key().strip() or "K89815161288957"
+        ocr_key = get_ocr_key().strip() or "K86892930388957"
 
         post_data = urllib.parse.urlencode({
             "apikey": ocr_key,

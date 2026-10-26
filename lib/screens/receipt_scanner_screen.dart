@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 import '../models/finance_transaction.dart';
 import '../models/receipt_model.dart';
 import '../providers/finance_provider.dart';
+import '../services/image_optimization_service.dart';
 import '../services/receipt_ocr_service.dart';
 import '../services/receipt_qr_service.dart';
 import '../services/receipt_suggestion_service.dart';
@@ -39,6 +40,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen>
   // Scanner state
   ReceiptScanStatus _scanStatus = ReceiptScanStatus.idle;
   String _statusMessage = '';
+  double _ocrProgress = 0.0;
   String? _scanErrorMessage;
   OcrErrorType _ocrErrorType = OcrErrorType.none;
   int? _ocrStatusCode;
@@ -158,11 +160,16 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen>
   // OCR & RECEIPT PARSING PIPELINE
   // ============================================================
   Future<void> _processFileBytes(Uint8List bytes, String fileName) async {
+    // 1. Immediately resize/optimize large images to eliminate HTTP 413 and memory lag
+    final optimized = ImageOptimizationService.optimizeForOcr(bytes);
+    final displayBytes = optimized.bytes;
+
     setState(() {
-      _receiptBytes = bytes;
+      _receiptBytes = displayBytes;
       _receiptFileName = fileName;
       _scanStatus = ReceiptScanStatus.recognizingText;
-      _statusMessage = 'Analyzing receipt layout, barcodes & text...';
+      _statusMessage = 'Optimizing image for browser OCR...';
+      _ocrProgress = 0.05;
       _scanErrorMessage = null;
       _showSavedResult = false;
       _detectedQrPayload = null;
@@ -174,8 +181,26 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen>
 
     try {
       final result = await _ocrService.processReceiptBytes(
-        bytes: bytes,
+        bytes: displayBytes,
         fileName: fileName,
+        onProgress: (status, progress) {
+          if (!mounted) return;
+          setState(() {
+            _ocrProgress = progress.clamp(0.0, 1.0);
+            final pct = (_ocrProgress * 100).toInt();
+            String label = status;
+            if (status.contains('tesseract') || status.contains('worker')) {
+              label = 'Initializing OCR engine';
+            } else if (status.contains('recogniz')) {
+              label = 'Recognizing text';
+            } else if (status.contains('optimiz') || status.contains('prepar')) {
+              label = 'Optimizing image';
+            } else if (status.contains('complete')) {
+              label = 'Extracting details';
+            }
+            _statusMessage = '$label ($pct%)';
+          });
+        },
       );
 
       if (!mounted) return;
@@ -197,7 +222,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen>
         setState(() {
           _scanStatus = ReceiptScanStatus.emptyOrError;
           _scanErrorMessage = result.errorMessage ??
-              'No readable text could be detected from this receipt. Ensure the receipt is well-lit and legible, or enter details manually.';
+              'No readable text could be detected from this receipt. Ensure the receipt is well-lit and legible, or enter details in the editable preview below.';
           _ocrErrorType = result.errorType;
           _ocrStatusCode = result.httpStatusCode;
         });
@@ -214,6 +239,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen>
   }
 
   void _populateFieldsFromReceipt(ReceiptData data) {
+    // Never invent missing values. Only populate if detected.
     _merchantController.text = data.merchant;
     _amountController.text =
         data.total > 0 ? data.total.toStringAsFixed(2) : '';
@@ -238,6 +264,8 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen>
       _notesController.text = summary.length > 80
           ? '${summary.substring(0, 77)}...'
           : summary;
+    } else {
+      _notesController.clear();
     }
   }
 
@@ -357,7 +385,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen>
   // EXPENSE CONFIRMATION & SAVE
   // ============================================================
   Future<void> _confirmAndAddExpense() async {
-    if (_isSaving) return; // Idempotency: prevent double submissions
+    if (_isSaving || _showSavedResult) return; // Strict idempotency: prevent double submissions
 
     if (!_formKey.currentState!.validate()) {
       return;
@@ -930,6 +958,21 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen>
             _statusMessage,
             style: const TextStyle(color: AppColors.auroraCyan, fontSize: 12.5),
           ),
+          if (_ocrProgress > 0) ...[
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: SizedBox(
+                width: 220,
+                child: LinearProgressIndicator(
+                  value: _ocrProgress,
+                  backgroundColor: Colors.white12,
+                  valueColor: const AlwaysStoppedAnimation<Color>(AppColors.auroraCyan),
+                  minHeight: 5,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -2194,7 +2237,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen>
           width: double.infinity,
           height: 52,
           child: ElevatedButton(
-            onPressed: _isSaving ? null : _confirmAndAddExpense,
+            onPressed: (_isSaving || _showSavedResult) ? null : _confirmAndAddExpense,
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.zero,
               shape: RoundedRectangleBorder(
@@ -2204,9 +2247,13 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen>
             ),
             child: Ink(
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.auroraViolet, AppColors.auroraCyan],
-                ),
+                gradient: _showSavedResult
+                    ? const LinearGradient(
+                        colors: [Color(0xFF2E7D32), Color(0xFF4CAF50)],
+                      )
+                    : const LinearGradient(
+                        colors: [AppColors.auroraViolet, AppColors.auroraCyan],
+                      ),
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Center(
@@ -2219,18 +2266,18 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen>
                           strokeWidth: 2.5,
                         ),
                       )
-                    : const Row(
+                    : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            Icons.check_circle_rounded,
+                            _showSavedResult ? Icons.done_all_rounded : Icons.check_circle_rounded,
                             color: Colors.white,
                             size: 18,
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Text(
-                            'Confirm & Add Expense',
-                            style: TextStyle(
+                            _showSavedResult ? 'Expense Saved to Transactions' : 'Confirm & Add Expense',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
